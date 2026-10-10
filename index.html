@@ -180,6 +180,7 @@ footer a{color:inherit}
       <option value="f">DM Finale – 4 Boulder, 4 min max</option>
       <option value="c">Eigene Einstellung</option>
     </select>
+    <div id="bFixSettings">
     <div class="row">
       <div><label for="bN">Anzahl Boulder</label>
         <div class="stepper">
@@ -202,9 +203,10 @@ footer a{color:inherit}
       <label for="bChange">Wechselpause nach jedem Intervall (Sekunden)</label>
       <input id="bChange" type="number" inputmode="numeric" min="0" max="120" value="15">
     </details>
+    </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="bTiCard">
     <h2>Wo war der TI?</h2>
     <label>Boulder</label>
     <div class="seg" id="bBoulder"></div>
@@ -421,6 +423,8 @@ function calcBoulder(){
   store.set('boulderInputs',{preset:$('bPreset').value,n:N,rot:$('bRot').value,change,p,remain:$('bRemain').value});
 
   $('bFixOnly').classList.toggle('hidden', !fix);
+  $('bFixSettings').classList.toggle('hidden', !fix);
+  $('bTiCard').classList.toggle('hidden', !fix);
   $('bB1Wrap').classList.toggle('hidden', B!==1);
   $('bB1Hint').classList.toggle('hidden', B!==1);
   $('bTimelineCard').classList.toggle('hidden', !fix);
@@ -431,12 +435,13 @@ function calcBoulder(){
   const badRemain = remainOk ? '' : '<div class="note warn">Restzeit im Format m:ss eingeben (z. B. 2:30).</div>';
 
   if(!fix){
-    $('bResult').innerHTML=`<div class="sub">Zusätzliche Kletterzeit an Boulder ${B}</div>
-      <div class="big">${awardTxt}</div>
+    // World Series / Classic: nichts zu berechnen – nur Hinweis
+    $('bResult').innerHTML=`<div class="sub">World Series / Classic</div>
+      <div class="big" style="font-size:24px">Wiedereinstieg nach Ende der laufenden Rotation</div>
       <dl class="kv">
-        <dt>Wiedereinstieg</dt><dd>so bald wie möglich (Zeitpunkt legt der JP fest) – als einziger Athlet, die Gruppe wartet</dd>
-      </dl>${badRemain}`;
-    bSummary=`TI Boulder (World Series / Classic)\nBoulder ${B}\nGutschrift: ${awardTxt}\nWiedereinstieg: so bald wie möglich (JP), als einziger Athlet`;
+        <dt>Ablauf</dt><dd>als einziger Athlet auf dem Field of Play, die Gruppe wartet</dd>
+        <dt>Gutschrift</dt><dd>ca. Restzeit bei Beginn des betroffenen Versuchs</dd>
+      </dl>`;
     return;
   }
 

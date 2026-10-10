@@ -160,7 +160,7 @@ nach dem TI-Intervall ein Platz frei. In der Call Zone B1 wird dafür vor dem k-
 Uhrzeit: Ein Intervall dauert Kletterzeit + 15 s Wechselpause. Beispiel: 5:00 + 0:15 = 5:15.
 
 ### World-Series- / Classic-Format (z. B. DM Finale 4 min max)
-Der Athlet bekommt seine zusätzlichen Versuche **so bald wie möglich**. Er klettert dann als **einziger Athlet**, während die Gruppe wartet (Judge Guide §5.2).
+Der Athlet bekommt seine zusätzlichen Versuche **so bald wie möglich** (Judge Guide §5.2). In der Praxis heißt das: **immer nach Ende der laufenden Rotation**. Er klettert dann als **einziger Athlet**, während die Gruppe wartet.
 
 ### 2-Kurs-Runden (z. B. DJC Flash 2×3)
 Die Verschiebung passiert **nur auf dem betroffenen Kurs**. Der Slot wird in die Startliste dieses Kurses eingefügt, der andere Kurs läuft unverändert weiter. Für die Berechnung ist N die Anzahl der Boulder des betroffenen Kurses.
@@ -184,4 +184,5 @@ Der Judge Guide (§5.2) erwähnt als Alternative, den ganzen Kurs zu stoppen.
 | Boulder: Höhe der Gutschrift | Restzeit bei Beginn des betroffenen Versuchs, als ca.-Wert |
 | Boulder 1, Szenario 1 | Nächstes Intervall: Restzeit an B1, dann 1 Intervall Pause, dann B2 |
 | Runden mit 2 Kursen | Verschiebung nur auf dem betroffenen Kurs |
-| Lead-Quali mit 2 Routen | Kein Einfluss auf die Berechnung, aber Hinweis auf 50 min Pause bis Route 2 |
+| Lead-Quali mit 2 Routen | Kein Einfluss auf die Berechnung. Mindestens 50 min zwischen dem Ende des Neustarts an Route 1 und Route 2 (Anhang A §4.4) |
+| World Series / Classic | Wiedereinstieg immer nach Ende der laufenden Rotation, als einziger Athlet |
