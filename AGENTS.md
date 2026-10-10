@@ -26,7 +26,7 @@ Dazu gehört [TI-Ablauf.md](TI-Ablauf.md): eine Doku, wie ein TI abläuft und wa
 | `TI-Ablauf.md` | Regeln und Ablauf, mit Abschnitt „Geklärte Auslegungsfragen“ |
 | `TI-Procedure.md` | Englische Fassung von `TI-Ablauf.md`. **Beide Dateien immer gemeinsam pflegen** |
 | `impressum.html`, `datenschutz.html` | Rechtliche Seiten, im Footer verlinkt |
-| `manifest.webmanifest`, `sw.js`, `icons/` | PWA: App auf dem Homescreen und offline nutzbar |
+| `manifest.webmanifest`, `manifest-en.webmanifest`, `sw.js`, `icons/` | PWA: App auf dem Homescreen (Name DE/EN) und offline nutzbar |
 | `Grundlagen Regelwerk/` | Quell-PDFs, nur lokal |
 
 ## Quellen (in `Grundlagen Regelwerk/`)
@@ -105,13 +105,13 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 ## Zweisprachigkeit (DE/EN)
 
 - **Standard:** Gerätesprache Deutsch (`de`, `de-DE`, `de-AT` …) ergibt Deutsch, **jede andere Sprache Englisch**. Maßgeblich ist der erste Eintrag in `navigator.languages`.
-- Der Umschalter oben rechts („EN“/„DE“) überschreibt das. Die Wahl wird in `ti.lang` gespeichert und gilt auch für Impressum und Datenschutz.
+- Der Umschalter oben rechts („EN“/„DE“) überschreibt das. Die Wahl wird in `ti.lang` gespeichert.
 - Texte stehen im Wörterbuch `I18N` (index.html) mit den Teilen `de` und `en`. Texte mit Zahlen sind Funktionen (`t('plusK', 8)`). Statische Elemente werden über `data-i18n`, `data-i18n-html` (nur feste Texte), `data-i18n-ph` und `data-i18n-aria` übersetzt.
 - **Hinweise im Boulder-Ergebnis werden als Code gespeichert** (`{k:'pushed', n, l}`, `{k:'late', g}`, `{k:'sc1Blocked', no}`, `{k:'sc1Late'}`, `{k:'inSlot', no}`) und erst bei der Anzeige übersetzt. So bleiben fixe Ergebnisse in beiden Sprachen lesbar. Ältere Hinweise als deutscher Text werden unverändert angezeigt.
 - Der gestoppte Lead-Countdown wird als Sekunden gespeichert (`cdFrozen`), nicht als Text. Alte Text-Werte („6:58“, „Bereit ✓“) werden beim Laden umgerechnet.
 - Englische Begriffe: Intervall → **rotation**, Erholungszeit → **recovery period**, Gutschrift → **time credit**, Lücke → **gap**, Sek. Isolation → **secondary isolation**, Startposition → **start position** (Spalte „Order“, nicht Bib), Jury-Präsident → **Jury President**.
-- Impressum/Datenschutz: deutscher und englischer Text in einer Datei (`data-lang`). Die englische Fassung hat den Hinweis „German version is legally binding“.
-- Das Manifest (App-Name auf dem Homescreen) bleibt „TI-Rechner“.
+- **Impressum und Datenschutz gibt es nur auf Deutsch** (auf Wunsch). Auch in der englischen Ansicht heißen die Footer-Links „Impressum“ und „Datenschutz“.
+- **App-Name je Sprache:** Deutsch „TI-Rechner“ (`manifest.webmanifest`), Englisch „TI Calculator“ (`manifest-en.webmanifest`). `applyStatic()` setzt den Manifest-Link und `apple-mobile-web-app-title` passend zur Sprache. Der Name wird **beim Hinzufügen zum Homescreen** übernommen. Ein späterer Sprachwechsel ändert den Namen einer schon installierten App nicht.
 
 ## UI-Entscheidungen
 

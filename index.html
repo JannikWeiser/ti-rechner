@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f97316">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="TI-Rechner">
+<meta name="apple-mobile-web-app-title" id="appTitle" content="TI-Rechner">
 <title>TI-Rechner Klettern</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" id="manifestLink" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f97316'/><text x='50' y='68' font-size='52' text-anchor='middle' font-family='Arial' font-weight='700' fill='white'>TI</text></svg>">
 <style>
@@ -464,7 +464,7 @@ en:{
   tlHint:'Bottom row: gap at boulder 1 – nobody is called to B1 in this rotation. Green border: the rotation running right now (based on the start time of the TI rotation).',
   lgIso:'Secondary isolation', lgCZ:'Call zone (next boulder)', lgSlot:'TI slot', lgGap:'Gap B1',
   footer:'This calculator is an aid – the decision is made by the Jury President.', docLink:'TI procedure (docs)',
-  docHref:'https://github.com/JannikWeiser/ti-rechner/blob/main/TI-Procedure.md', imprint:'Legal notice', privacy:'Privacy',
+  docHref:'https://github.com/JannikWeiser/ti-rechner/blob/main/TI-Procedure.md', imprint:'Impressum', privacy:'Datenschutz',
   recTitle:'Recovery period', holds:n=>`${n} ${pl(n,'hold','holds')} × 1 min`, capped:' → capped at 20 min',
   earliest:'Earliest restart', clock:t=>t, enterTime:'Enter time', insert:'Insert',
   whenFixed:'as soon as the TI is fixed', afterN:n=>`after approx. ${n} following ${pl(n,'athlete','athletes')}`,
@@ -508,6 +508,9 @@ function applyStatic(){
   document.querySelectorAll('[data-step]').forEach(b=>b.setAttribute('aria-label', t(+b.dataset.d<0?'less':'more')));
   $('langBtn').textContent=LANG==='de'?'EN':'DE';
   $('docLink').href=t('docHref');
+  // App-Name auf dem Homescreen: wird beim Installieren aus Manifest bzw. Apple-Titel übernommen
+  $('manifestLink').href = LANG==='de' ? 'manifest.webmanifest' : 'manifest-en.webmanifest';
+  $('appTitle').content = LANG==='de' ? 'TI-Rechner' : 'TI Calculator';
 }
 function setLang(l){ LANG=l; store.set('lang',l); applyStatic(); calcLead(); renderBoulder(); }
 
