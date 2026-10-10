@@ -75,6 +75,11 @@ summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
 .tl b{display:block;font-size:13px}
 .tl.climb{background:var(--climb)} .tl.rest{background:var(--rest);color:var(--text)} .tl.iso{background:var(--iso)}
 .tl.call{background:var(--call)} .tl.slot{background:var(--slot)} .tl.ti{background:var(--bad)} .tl.empty{background:var(--empty);color:var(--muted)}
+.tcol{display:flex;flex-direction:column;gap:3px;flex:0 0 auto}
+.tcol .idx{font-size:11px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.tl.b1{background:var(--empty);color:var(--muted)}
+.tl.gap{background:transparent;color:var(--bad);border:2px dashed var(--bad);font-weight:700}
+.tl.b1ti{background:var(--slot)}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-top:8px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
@@ -145,9 +150,9 @@ footer a{color:inherit}
 
   <div class="card">
     <h2>Countdown Erholungszeit</h2>
+    <div class="hint" style="text-align:center">läuft ab der eingegebenen Uhrzeit des Sturzes</div>
     <div class="countdown" id="lCountdown">--:--</div>
     <div class="btns">
-      <button class="btn" id="lStart">Countdown starten</button>
       <button class="btn secondary" id="lCopy">Zusammenfassung kopieren</button>
     </div>
   </div>
@@ -159,26 +164,25 @@ footer a{color:inherit}
     <h2>Runde</h2>
     <label>Format</label>
     <div class="seg" id="bFormat">
-      <button type="button" data-v="fix" aria-pressed="true">Intervall fix</button>
-      <button type="button" data-v="max">Max-Rotation (Finale)</button>
+      <button type="button" data-v="fix" aria-pressed="true">Intervall</button>
+      <button type="button" data-v="max">World Series / Classic</button>
     </div>
     <label for="bPreset">Vorlage</label>
     <select id="bPreset">
       <option value="q">DM Qualifikation – 5 Boulder, 5 min</option>
       <option value="s">DM Semifinale – 4 Boulder, 5 min</option>
-      <option value="jf">DJC Finale – 4 Boulder, 4 min fix</option>
-      <option value="jq">DJC Qualifikation – Flash 2×3, 4 min</option>
+      <option value="jf">DJC Finale – 4 Boulder, 4 min</option>
+      <option value="jq">DJC Qualifikation – Flash 2×3, 4 min (je Kurs)</option>
       <option value="f">DM Finale – 4 Boulder, 4 min max</option>
       <option value="c">Eigene Einstellung</option>
     </select>
-    <div class="switch"><span>Runde mit 2 Kursen</span><input type="checkbox" id="bTwoCourse"></div>
-    <div class="hint" id="bTwoCourseHint">Anzahl Boulder = Boulder des betroffenen Kurses. Die Verschiebung passiert nur auf diesem Kurs.</div>
     <div class="row">
       <div><label for="bN">Anzahl Boulder</label>
         <input id="bN" type="number" inputmode="numeric" min="1" max="8" value="5"></div>
       <div><label for="bRot">Intervall (min)</label>
         <input id="bRot" type="number" inputmode="decimal" min="1" max="10" step="0.5" value="5"></div>
     </div>
+    <div class="hint">Bei 2 Kursen: Anzahl Boulder des betroffenen Kurses – Lücke und Verschiebung betreffen nur diesen Kurs.</div>
     <details>
       <summary>Weitere Einstellungen</summary>
       <div class="switch"><span>Ruhe-Intervall zwischen zwei Bouldern</span><input type="checkbox" id="bRestRot" checked></div>
@@ -192,12 +196,8 @@ footer a{color:inherit}
     <h2>Wo war der TI?</h2>
     <label>Boulder</label>
     <div class="seg" id="bBoulder"></div>
-    <div class="row">
-      <div><label for="bAttempt">Versuch Nr.</label>
-        <input id="bAttempt" type="number" inputmode="numeric" min="1" value="1"></div>
-      <div><label for="bRemain">Restzeit bei Versuchsbeginn</label>
-        <input id="bRemain" type="text" inputmode="numeric" placeholder="m:ss" value="3:00"></div>
-    </div>
+    <label for="bRemain">Restzeit bei Versuchsbeginn</label>
+    <input id="bRemain" type="text" inputmode="numeric" placeholder="m:ss" value="3:00">
     <div class="hint">Restzeit auf der Uhr, als der vom TI betroffene Versuch begonnen hat – daraus ergibt sich die ungefähre Gutschrift (§8.5).</div>
     <div id="bFixOnly">
       <div class="switch" id="bB1Wrap"><span>TI vor Ende des laufenden Intervalls behoben?</span><input type="checkbox" id="bResolved"></div>
@@ -217,6 +217,7 @@ footer a{color:inherit}
   <div class="card" id="bTimelineCard">
     <h2>Ablauf des Athleten</h2>
     <div class="timeline" id="bTimeline"></div>
+    <div class="hint">Obere Reihe: TI-Athlet · untere Reihe: Boulder 1 bzw. Call Zone B1 (Lücke = dort niemanden aufrufen).</div>
     <div class="legend">
       <span><i style="background:var(--bad)"></i>TI</span>
       <span><i style="background:var(--climb)"></i>Boulder</span>
@@ -224,6 +225,7 @@ footer a{color:inherit}
       <span><i style="background:var(--iso)"></i>Sek. Isolation</span>
       <span><i style="background:var(--call)"></i>Call Zone</span>
       <span><i style="background:var(--slot)"></i>TI-Slot</span>
+      <span><i style="background:var(--bad);outline:2px dashed var(--bad);outline-offset:1px;background:transparent"></i>Lücke B1</span>
     </div>
     <div class="btns"><button class="btn secondary" id="bCopy">Zusammenfassung kopieren</button></div>
   </div>
@@ -306,24 +308,15 @@ function calcLead(){
   const route2Earliest = earliest!==null ? earliest + 6*60 + 50*60 : null; // Neustart + max. 6 min Kletterzeit + 50 min
   const route2Note = leadRoute==='q1'
     ? `<div class="note warn"><b>50 min Pause bis Route 2:</b> Zwischen dem Ende des Neustart-Versuchs an Route 1 und dem Start an Route 2 müssen mindestens 50 Minuten liegen (Anhang A §4.4).${route2Earliest!==null?` Route 2 frühestens ca. <b>${secToClock(route2Earliest)} Uhr</b> (Neustart + max. 6 min Kletterzeit + 50 min) – Startzeit in Route 2 prüfen und ggf. verschieben.`:''}</div>`
-    : leadRoute==='q2' ? `<div class="note ok">TI an Route 2: Der 50-min-Abstand zu Route 1 ist bereits erfüllt, es ist nichts weiter zu beachten.</div>` : '';
+    : '';
   let html=`<div class="sub">Erholungszeit</div>
     <div class="big">${recMin} min</div>
     <div class="sub">${holds} Griff${holds===1?'':'e'} × 1 min${holds>20?' → auf 20 min begrenzt':''}</div>
     <dl class="kv">
       <dt>Frühester Neustart</dt><dd>${earliest!==null?secToClock(earliest)+' Uhr':'Uhrzeit eingeben'}</dd>
       <dt>Einsetzen</dt><dd>${recMin===0?'sobald TI behoben ist':`nach ca. ${slotsAhead} nachfolgenden Athlet${slotsAhead===1?'':'en'}`}${pos&&recMin>0?` (vor Startposition ${pos+slotsAhead+1})`:''}</dd>
-      <dt>Wertung</dt><dd>besseres Ergebnis aus Original- und Neustart-Versuch</dd>
     </dl>
     ${route2Note}
-    <div class="note warn">Bis zum Neustart in separatem Bereich mit Aufwärmmöglichkeit – Kontakt nur mit Officials. Verlässt der Athlet den Bereich ohne Erlaubnis, ist der TI abgeschlossen.</div>
-    <ol class="steps">
-      <li>TI melden &amp; durch DAV-Schiedsrichter bestätigen (spätestens bis der nächste Athlet in der Route startet).</li>
-      <li>Athlet in separaten Bereich, Ursache beheben (ggf. Kontrollkletterer).</li>
-      <li>Erholungszeit ${recMin} min ablaufen lassen, Neustart so bald wie möglich danach terminieren.</li>
-      <li>Betroffenen Athleten und alle noch startenden Athleten informieren.</li>
-      <li>Neustart entfällt, wenn er die Platzierung am Rundenende nicht mehr beeinflussen kann.</li>
-    </ol>
     <div class="refs">Event Regulations Annex A §8.1–8.4 · Nat. Regelwerk Anhang A §8 · Judge Guide §2.16</div>`;
   $('lResult').innerHTML=html;
   leadTarget = earliest;
@@ -331,7 +324,7 @@ function calcLead(){
     (ref!==null?`Sturz: ${secToClock(ref)}\nFrühester Neustart: ${secToClock(earliest)}\n`:'')+
     (leadRoute==='q1'?`Route 2: mind. 50 min nach Ende des Neustart-Versuchs${route2Earliest!==null?` (frühestens ca. ${secToClock(route2Earliest)})`:''}\n`:'')+
     (recMin>0?`Einsetzen nach ca. ${slotsAhead} nachfolgenden Athleten (Takt ${gap} min)\n`:'')+
-    `Wertung: besseres Ergebnis aus beiden Versuchen.`;
+    ``;
   tickLead();
 }
 function tickLead(){
@@ -343,17 +336,16 @@ function tickLead(){
   else { el.textContent=fmtMS(diff); el.classList.remove('done'); }
 }
 $('lNow').onclick=()=>{ $('lRef').value=nowClock(); calcLead(); };
-$('lStart').onclick=()=>{
-  $('lRef').value=nowClock(); calcLead();
-  clearInterval(leadTimer); leadTimer=setInterval(tickLead,500);
-  try{ navigator.wakeLock && navigator.wakeLock.request('screen'); }catch(e){}
-};
+// Countdown läuft immer gegen (Uhrzeit des Sturzes + Erholungszeit)
+leadTimer=setInterval(tickLead,500);
+let wakeLock=null;
+document.addEventListener('click',()=>{ if(!wakeLock && navigator.wakeLock) navigator.wakeLock.request('screen').then(w=>{wakeLock=w; w.addEventListener('release',()=>wakeLock=null);}).catch(()=>{}); });
 $('lCopy').onclick=e=>copy(leadSummary,e.target);
 ['lHolds','lRef','lGap','lPos'].forEach(id=>$(id).addEventListener('input',calcLead));
 
 /* =========================================================
    BOULDER
-   Fixe Intervalle: Judge Guide §5.2 (Rotation-Slot-Einfügung).
+   Intervall-Format: Judge Guide §5.2 (Rotation-Slot-Einfügung).
    Allgemeine Form der Tabellen 2/3 (p = Intervalle pro Boulder, mit Pause p=2):
      k = max( p·(N−B) + p ,  2 + p·(B−1) )
    k = Anzahl Intervalle nach dem TI-Intervall bis der Athlet wieder an Boulder B klettert
@@ -366,7 +358,7 @@ let bSummary='';
 
 function setFormat(f){ bState.format=f; document.querySelectorAll('#bFormat button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===f)); }
 document.querySelectorAll('#bFormat button').forEach(b=>b.onclick=()=>{ setFormat(b.dataset.v); $('bPreset').value='c'; calcBoulder(); });
-$('bPreset').onchange=()=>{ const p=presets[$('bPreset').value]; if(p){ setFormat(p.f); $('bN').value=p.n; $('bRot').value=p.r; $('bTwoCourse').checked=p.two; } calcBoulder(); };
+$('bPreset').onchange=()=>{ const p=presets[$('bPreset').value]; if(p){ setFormat(p.f); $('bN').value=p.n; $('bRot').value=p.r; } calcBoulder(); };
 
 function renderBoulderButtons(n){
   const wrap=$('bBoulder');
@@ -386,21 +378,15 @@ function calcBoulder(){
   const rot=Math.max(0.5,+$('bRot').value||5)*60;
   const change=Math.max(0,+$('bChange').value||0);
   const p=$('bRestRot').checked?2:1;
-  const attempt=Math.max(1,Math.floor(+$('bAttempt').value||1));
   let remain=parseMS($('bRemain').value);
   const remainOk=!isNaN(remain);
   if(remainOk) remain=Math.min(remain,rot);
   const resolved=$('bResolved').checked;
   const t0=timeToSec($('bT0').value);
   const pos=+$('bPos').value||null;
-  const twoCourse=$('bTwoCourse').checked;
-  // Ob der TI-Versuch zählt, ist Einzelfallentscheidung des JP → beide Varianten anzeigen
-  const nextAttemptTxt=`Nr. ${attempt+1} – oder Nr. ${attempt}, falls der TI-Versuch nicht gezählt wird (Entscheidung JP)`;
-  const nextAttemptShort=`Nr. ${attempt+1} (bzw. ${attempt}, falls TI-Versuch nicht gezählt)`;
   const fix=bState.format==='fix';
   store.set('boulderState',{format:bState.format,boulder:B});
-  store.set('boulderInputs',{preset:$('bPreset').value,n:N,rot:$('bRot').value,change,p,attempt,remain:$('bRemain').value,twoCourse});
-  $('bTwoCourseHint').classList.toggle('hidden', !twoCourse);
+  store.set('boulderInputs',{preset:$('bPreset').value,n:N,rot:$('bRot').value,change,p,remain:$('bRemain').value});
 
   $('bFixOnly').classList.toggle('hidden', !fix);
   $('bB1Wrap').classList.toggle('hidden', B!==1);
@@ -410,111 +396,88 @@ function calcBoulder(){
 
   const award = remainOk ? fmtMS(remain) : '?';
   const awardTxt = `ca. ${award} min`;
+  const badRemain = remainOk ? '' : '<div class="note warn">Restzeit im Format m:ss eingeben (z. B. 2:30).</div>';
 
   if(!fix){
     $('bResult').innerHTML=`<div class="sub">Zusätzliche Kletterzeit an Boulder ${B}</div>
       <div class="big">${awardTxt}</div>
       <dl class="kv">
-        <dt>Wiedereinstieg</dt><dd>so bald wie möglich – nach Ende der laufenden Rotation, als einziger Athlet auf dem Field of Play, die Gruppe wartet</dd>
-        <dt>Nächster Versuch</dt><dd>${nextAttemptTxt}</dd>
-      </dl>
-      <div class="note warn">Bis dahin im Transitbereich. Wer den Bereich vorher verlässt, darf seine Versuche nicht wieder aufnehmen (§8.4).</div>
-      <ol class="steps">
-        <li>TI bestätigen – spätestens vor Beginn der nächsten planmäßigen Rotation.</li>
-        <li>Behebbar? Athlet wählt: weiterklettern ohne Zusatzzeit <i>oder</i> aussetzen (§8.2).</li>
-        <li>Gutschrift für verlorene/nicht genutzte Zeit – als ca.-Wert die Restzeit bei Beginn des betroffenen Versuchs (§8.5).</li>
-      </ol>
-      <div class="refs">Event Regulations Annex C §8 · Nat. Regelwerk Anhang C §8 · Judge Guide §5.2 (Max-Rotation)</div>`;
-    bSummary=`TI Boulder (Max-Rotation)\nBoulder ${B}, Versuch ${attempt}\nGutschrift: ${awardTxt}\nWiedereinstieg: nach Ende der laufenden Rotation, als einziger Athlet\nNächster Versuch: ${nextAttemptShort}`;
+        <dt>Wiedereinstieg</dt><dd>nach Ende der laufenden Rotation, als einziger Athlet auf dem Field of Play</dd>
+      </dl>${badRemain}
+      <div class="refs">Event Regulations Annex C §8 · Nat. Regelwerk Anhang C §8 · Judge Guide §5.2</div>`;
+    bSummary=`TI Boulder (World Series / Classic)\nBoulder ${B}\nGutschrift: ${awardTxt}\nWiedereinstieg: nach Ende der laufenden Rotation, als einziger Athlet`;
     return;
   }
 
-  // --- Fixe Intervalle ---
-  const finishLast = p*(N-B);                 // Intervall (relativ zu t=0), in dem der letzte reguläre Boulder geklettert wird
+  // --- Intervall-Format ---
+  // Intervalle relativ zum TI-Intervall (= 0). Der Slot läuft wie ein zusätzlicher Starter
+  // ab Boulder 1 durch die Runde; an Boulder 1 bleibt dafür ein Intervall frei (Lücke).
+  const finishLast = p*(N-B);                 // Intervall des letzten regulären Boulders
   let k, scenario1=false;
   if(B===1 && resolved){ k=1; scenario1=true; }
   else k=Math.max(p*(N-B)+p, 2+p*(B-1));
-  const wait = k - finishLast - 1;            // Intervalle zwischen letztem Boulder und TI-Slot
-  const isoRots = Math.max(0, wait-1);        // davon in sekundärer Isolation (letztes = Call Zone)
+  const gapB1 = k - p*(B-1);                  // Intervall, in dem Boulder 1 frei bleibt (Slot startet dort)
+  const wait = k - finishLast - 1;
+  const isoRots = Math.max(0, wait-1);
   const cycle = rot+change;
-  const slotStart = t0!==null ? t0 + k*cycle : null;
-  const climbStart = (slotStart!==null && remainOk) ? slotStart + (rot-remain) : null;
+  const at = r => t0!==null ? secToClock(t0 + r*cycle) : null;
+  const climbStart = (t0!==null && remainOk) ? secToClock(t0 + k*cycle + (rot-remain)) : null;
+  const gapPos = pos ? pos + k : null;        // dieser Starter rückt ein Intervall nach
 
-  let where;
-  if(scenario1) where=`im <b>nächsten Intervall</b> an Boulder 1`;
-  else where=`<b>${k} Intervalle</b> nach dem TI-Intervall`;
-
-  const steps=[];
-  if(scenario1){
-    steps.push(`Rotation-Slot vor dem <b>nächsten</b> Athleten einfügen${pos?` (vor Startposition ${pos+1})`:''} – alle Folgenden rücken ein Intervall nach.`);
-    steps.push(`Athlet klettert im nächsten Intervall die verbleibende Kletterzeit (ca. ${award}) an Boulder 1.`);
-    steps.push(`Danach 1 Intervall Pause, dann weiter mit Boulder 2 – sein gesamter weiterer Ablauf verschiebt sich um 1 Intervall.`);
-  } else {
-    steps.push(`Rotation-Slot vor dem <b>${k}. nachfolgenden</b> Athleten einfügen${pos?` (vor Startposition ${pos+k})`:''}.`);
-    if(B<N) steps.push(`Athlet klettert regulär weiter bis Boulder ${N}.`);
-    else steps.push(`Boulder ${N} war der letzte – Athlet hat keine regulären Boulder mehr.`);
-    if(isoRots>0) steps.push(`Danach <b>${isoRots} Intervall${isoRots===1?'':'e'} sekundäre Isolation</b> / Aufwärmbereich, anschließend 1 Intervall Call Zone für Boulder ${B}.`);
-    else if(wait===1) steps.push(`Danach 1 Intervall Pause/Call Zone, dann direkt zu Boulder ${B} – keine sekundäre Isolation nötig.`);
-    else steps.push(`Direkt im Anschluss zu Boulder ${B} – keine sekundäre Isolation nötig.`);
-    steps.push(`Im Slot startet der Athlet, wenn noch ${award} auf der Intervalluhr stehen.`);
-  }
+  let isoTxt;
+  if(scenario1) isoTxt='nein – danach 1 Intervall Pause, dann B2 (Ablauf +1 Intervall)';
+  else if(isoRots>0) isoTxt=`${isoRots} Intervall${isoRots===1?'':'e'} nach B${N}, dann Call Zone`;
+  else isoTxt='nicht nötig';
 
   $('bResult').innerHTML=`<div class="sub">Wiedereinstieg an Boulder ${B}</div>
     <div class="big">${scenario1?'Nächstes Intervall':'+'+k+' Intervalle'}</div>
-    <div class="sub">${where}${climbStart!==null?` · Start an der Wand ca. <b>${secToClock(climbStart)} Uhr</b>`:''}</div>
+    ${climbStart?`<div class="sub">Start an der Wand ca. <b>${climbStart} Uhr</b> (bei ${award} Restzeit)</div>`:''}
     <dl class="kv">
       <dt>Gutschrift</dt><dd>${awardTxt}</dd>
-      ${slotStart!==null?`<dt>Slot-Intervall</dt><dd>beginnt ${secToClock(slotStart)} Uhr</dd>`:''}
-      <dt>Nächster Versuch</dt><dd>${nextAttemptTxt}</dd>
-      <dt>Sek. Isolation</dt><dd>${scenario1?'nein':(isoRots>0?isoRots+' Intervall'+(isoRots===1?'':'e'):'nicht nötig')}</dd>
-    </dl>
-    <ol class="steps">${steps.map(s=>`<li>${s}</li>`).join('')}</ol>
-    ${twoCourse?`<div class="note warn"><b>2 Kurse:</b> Der Slot wird nur auf dem betroffenen Kurs eingefügt – nur dort verschiebt sich die Startliste, der andere Kurs läuft unverändert weiter. Startpositionen beziehen sich auf die Startliste dieses Kurses.<br>Flash mit 2 Sets: Zwischen dem Ende des ersten Sets und dem Start im zweiten Set müssen mindestens 3 Versuchsphasen liegen (Anhang C §4.7 C) – prüfen, ob der TI-Slot das verschiebt.</div>`:''}
-    <div class="note warn">Alternative §8.2 A: Ist der TI vor Beginn des nächsten Intervalls behoben, kann der Athlet im laufenden Intervall weiterklettern – dann ohne Zusatzzeit/-versuche.</div>
-    ${remainOk?'':'<div class="note warn">Restzeit im Format m:ss eingeben (z. B. 2:30).</div>'}
-    <div class="refs">Event Regulations Annex C §8.1–8.5 · Nat. Regelwerk Anhang C §8 · Judge Guide §5.2, Tabellen 2/3</div>`;
+      <dt>Lücke Boulder 1</dt><dd>${scenario1?'Intervall +1 – TI-Athlet klettert dort selbst':`Intervall +${gapB1}`}${at(scenario1?1:gapB1)?` (${at(scenario1?1:gapB1)} Uhr)`:''}<br>
+        <span class="hint">Call Zone B1: vor dem ${k}. nachfolgenden Athleten${gapPos?` (Pos. ${gapPos})`:''} niemanden aufrufen – er und alle danach rücken 1 Intervall nach.</span></dd>
+      <dt>Sek. Isolation</dt><dd>${isoTxt}</dd>
+    </dl>${badRemain}
+    <div class="refs">Event Regulations Annex C §8 · Nat. Regelwerk Anhang C §8 · Judge Guide §5.2</div>`;
 
-  // Timeline
-  const tl=[];
-  const startIdx = -p*(B-1);
-  if(scenario1){
-    const end=1+p*(N-1);
-    for(let r=0;r<=end;r++){
-      let cls,top,lab='';
-      if(r===0){ cls='ti'; top='B1'; lab='TI'; }
-      else if(r===1){ cls='slot'; top='B1'; lab='Rest-Zeit'; }
-      else { const rel=r-1; const c=rel%p===0; cls=c?'climb':'rest'; top=c?'B'+(rel/p+1):'–'; lab=c?'':'Pause'; }
-      tl.push(`<div class="tl ${cls}"><b>${top}</b>${r>0?'+'+r:'±0'}${lab?'<br>'+lab:''}</div>`);
+  // --- Grafik: obere Reihe TI-Athlet, untere Reihe Boulder 1 ---
+  const athleteCell = r => {
+    if(scenario1){
+      if(r===0) return ['ti','B1','TI'];
+      if(r===1) return ['slot','B1','Restzeit'];
+      const rel=r-1; return rel%p===0 && rel/p<N ? ['climb','B'+(rel/p+1),''] : (rel/p<N?['rest','–','Pause']:['empty','','']);
     }
+    if(r===0) return ['ti','B'+B,'TI'];
+    if(r===k) return ['slot','B'+B,'Slot'];
+    if(r<=finishLast){ const rel=r+p*(B-1); return rel%p===0?['climb','B'+(rel/p+1),'']:['rest','–','Pause']; }
+    if(r===k-1) return ['call','CZ','Call'];
+    return ['iso','Iso',''];
+  };
+  const b1Cell = r => {
+    if(r<=0) return null;
+    if(scenario1 && r===1) return ['b1ti','B1','TI-Athl.'];
+    if(!scenario1 && r===gapB1) return ['gap','LÜCKE','frei'];
+    return ['b1','B1','belegt'];
+  };
+  const end = scenario1 ? 1+p*(N-1) : Math.max(k,finishLast);
+  const cell = c => c ? `<div class="tl ${c[0]}"><b>${c[1]}</b>${c[2]}</div>` : `<div class="tl" style="visibility:hidden"><b>&nbsp;</b>&nbsp;</div>`;
+  const cols=[];
+  for(let r=0;r<=end;r++){
+    cols.push(`<div class="tcol"><div class="idx">${r===0?'±0':'+'+r}${at(r)?'<br>'+at(r).slice(0,5):''}</div>${cell(athleteCell(r))}${cell(b1Cell(r))}</div>`);
   }
-  else for(let r=startIdx; r<=Math.max(k,finishLast); r++){
-    let cls='empty', top='', lab='';
-    const rel=r-startIdx;
-    const isClimb = rel%p===0 && rel/p < N;
-    const bNo = rel/p+1;
-    if(r===0){ cls='ti'; top='B'+B; lab='TI'; }
-    else if(r===k){ cls='slot'; top='B'+B; lab='Slot'; }
-    else if(r<0){ cls=isClimb?'climb':'rest'; top=isClimb?'B'+bNo:'–'; lab=isClimb?'':'Pause'; }
-    else if(r<=finishLast){ cls=isClimb?'climb':'rest'; top=isClimb?'B'+bNo:'–'; lab=isClimb?'':'Pause'; }
-    else if(r===k-1){ cls='call'; top='CZ'; lab='Call'; }
-    else { cls='iso'; top='Iso'; lab=''; }
-    tl.push(`<div class="tl ${cls}"><b>${top}</b>${r>0?'+'+r:(r===0?'±0':r)}${lab?'<br>'+lab:''}</div>`);
-  }
-  $('bTimeline').innerHTML=tl.join('');
+  $('bTimeline').innerHTML=cols.join('');
 
-  bSummary=`TI Boulder (Intervall fix, ${N} Boulder, ${fmtMS(rot)} min)\n`+
-    `Boulder ${B}, Versuch ${attempt}${pos?`, Startposition ${pos}`:''}\n`+
+  bSummary=`TI Boulder (Intervall, ${N} Boulder, ${fmtMS(rot)} min)\n`+
+    `Boulder ${B}${pos?`, Startposition ${pos}`:''}\n`+
     `Gutschrift: ${awardTxt}\n`+
-    (scenario1?`Wiedereinstieg: nächstes Intervall an B1 (Slot vor nächstem Athleten)\n`
-              :`Wiedereinstieg: +${k} Intervalle (Slot vor dem ${k}. nachfolgenden Athleten${pos?`, Pos. ${pos+k}`:''})\n`)+
-    (slotStart!==null?`Slot-Intervall: ${secToClock(slotStart)} Uhr`+(climbStart!==null?`, Start an der Wand ca. ${secToClock(climbStart)} Uhr`:'')+`\n`:'')+
-    (!scenario1?`Sek. Isolation: ${isoRots>0?isoRots+' Intervalle':'nicht nötig'}\n`:'')+
-    (twoCourse?`2 Kurse: Verschiebung nur auf dem betroffenen Kurs\n`:'')+
-    `Nächster Versuch: ${nextAttemptShort}`;
+    (scenario1?`Wiedereinstieg: nächstes Intervall an B1 (Restzeit), dann 1 Intervall Pause, dann B2\n`
+              :`Wiedereinstieg: +${k} Intervalle an B${B}${climbStart?`, Start an der Wand ca. ${climbStart} Uhr`:''}\n`+
+               `Lücke B1: Intervall +${gapB1}${at(gapB1)?` (${at(gapB1)})`:''} – vor dem ${k}. nachfolgenden Athleten${gapPos?` (Pos. ${gapPos})`:''}\n`)+
+    `Sek. Isolation: ${isoTxt}`;
 }
 $('bCopy').onclick=e=>copy(bSummary,e.target);
-['bN','bRot','bChange','bAttempt','bRemain','bT0','bPos'].forEach(id=>$(id).addEventListener('input',()=>{ if(['bN','bRot'].includes(id)) $('bPreset').value='c'; calcBoulder(); }));
-['bRestRot','bResolved','bTwoCourse'].forEach(id=>$(id).addEventListener('change',calcBoulder));
+['bN','bRot','bChange','bRemain','bT0','bPos'].forEach(id=>$(id).addEventListener('input',()=>{ if(['bN','bRot'].includes(id)) $('bPreset').value='c'; calcBoulder(); }));
+['bRestRot','bResolved'].forEach(id=>$(id).addEventListener('change',calcBoulder));
 
 /* ---------- Init ---------- */
 (function init(){
@@ -522,7 +485,7 @@ $('bCopy').onclick=e=>copy(bSummary,e.target);
   if(l){ $('lHolds').value=l.holds; $('lGap').value=l.gap; $('lPos').value=l.pos||''; }
   const bi=store.get('boulderInputs',null);
   if(bi){ $('bPreset').value=bi.preset; $('bN').value=bi.n; $('bRot').value=bi.rot; $('bChange').value=bi.change;
-    $('bRestRot').checked=bi.p===2; $('bAttempt').value=bi.attempt; $('bRemain').value=bi.remain; $('bTwoCourse').checked=!!bi.twoCourse; }
+    $('bRestRot').checked=bi.p===2; $('bRemain').value=bi.remain; }
   setFormat(bState.format); setLeadRoute(leadRoute);
   $('lRef').value=nowClock();
   calcLead(); calcBoulder();

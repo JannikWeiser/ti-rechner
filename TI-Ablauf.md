@@ -110,9 +110,9 @@ Ein TI kann nur reklamiert werden **bis zum Beginn des nächsten planmäßigen I
 
 Als ungefähre Gutschrift gilt die **Restzeit bei Beginn des betroffenen Versuchs**. Beispiel: Der Versuch beginnt bei 2:40 Restzeit, der Griff bricht bei 2:10. Die Gutschrift beträgt ca. 2:40.
 
-**Zählt der TI-Versuch als Versuch?** Das hängt vom Einzelfall ab, der JP entscheidet. Der Rechner zeigt deshalb beide Varianten an: n+1 oder n.
+**Zählt der TI-Versuch als Versuch?** Das hängt vom Einzelfall ab, der JP entscheidet. Für die Berechnung des Wiedereinstiegs spielt das keine Rolle, deshalb fragt der Rechner die Versuchsnummer nicht ab.
 
-### Wann steigt der Athlet wieder ein? Fixe Intervalle (Judge Guide §5.2)
+### Wann steigt der Athlet wieder ein? Intervall-Format (Judge Guide §5.2)
 Für den Athleten wird ein zusätzlicher **Rotation-Slot** in die Startliste eingefügt. Der Slot läuft wie ein „Geister-Athlet“ durch alle Boulder. Der TI-Athlet nutzt ihn, wenn der Slot am betroffenen Boulder ankommt. Bis dahin klettert der Athlet seine restlichen Boulder ganz normal.
 
 **4 Boulder** (z. B. Semifinale)
@@ -149,9 +149,17 @@ k = max( 2·(N − B) + 2 ,  2·B )
 - Der zweite Term bedeutet: Der Slot kann frühestens 2 Intervalle später an Boulder 1 starten, weil der nächste Athlet schon in der Call Zone steht. Danach braucht er 2·(B−1) Intervalle bis Boulder B.
 - Sekundäre Isolation = Wartezeit nach dem letzten Boulder − 1 Intervall Call Zone.
 
+**Lücke an Boulder 1:** Der Slot beginnt an Boulder 1. Dort bleibt deshalb im Intervall
+
+```
+L = k − 2·(B − 1)
+```
+
+nach dem TI-Intervall ein Platz frei. In der Call Zone B1 wird dafür vor dem k-ten nachfolgenden Athleten niemand aufgerufen. Dieser Athlet und alle nach ihm rücken ein Intervall nach. So ist Boulder B frei, wenn der TI-Athlet dort ankommt. Beispiel: Bei 5 Bouldern und einem TI an B4 ist k = 8 und L = 2, die Lücke an B1 liegt also im übernächsten Intervall.
+
 Uhrzeit: Ein Intervall dauert Kletterzeit + 15 s Wechselpause. Beispiel: 5:00 + 0:15 = 5:15.
 
-### Max-Rotation-Format (z. B. Finale 4 min max)
+### World-Series- / Classic-Format (z. B. DM Finale 4 min max)
 Der Athlet bekommt seine zusätzlichen Versuche **so bald wie möglich**. Er klettert dann als **einziger Athlet**, während die Gruppe wartet (Judge Guide §5.2).
 
 ### 2-Kurs-Runden (z. B. DJC Flash 2×3)
@@ -172,7 +180,7 @@ Der Judge Guide (§5.2) erwähnt als Alternative, den ganzen Kurs zu stoppen.
 | Frage | Festlegung |
 |---|---|
 | Lead: Ab wann läuft die Erholungszeit? | Ab dem Moment, in dem der Athlet rausfällt bzw. am Boden ist |
-| Boulder: Zählt der TI-Versuch als Versuch? | Kommt auf den Einzelfall an, der JP entscheidet (Rechner zeigt n+1 und n) |
+| Boulder: Zählt der TI-Versuch als Versuch? | Kommt auf den Einzelfall an, der JP entscheidet. Für die Berechnung irrelevant |
 | Boulder: Höhe der Gutschrift | Restzeit bei Beginn des betroffenen Versuchs, als ca.-Wert |
 | Boulder 1, Szenario 1 | Nächstes Intervall: Restzeit an B1, dann 1 Intervall Pause, dann B2 |
 | Runden mit 2 Kursen | Verschiebung nur auf dem betroffenen Kurs |
