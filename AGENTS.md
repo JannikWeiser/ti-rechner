@@ -24,6 +24,7 @@ Dazu gehört [TI-Ablauf.md](TI-Ablauf.md): eine Doku, wie ein TI abläuft und wa
 |---|---|
 | `index.html` | Die komplette App: Tabs Lead und Boulder, Berechnungen, Countdown, localStorage (`ti.*`) |
 | `TI-Ablauf.md` | Regeln und Ablauf, mit Abschnitt „Geklärte Auslegungsfragen“ |
+| `TI-Procedure.md` | Englische Fassung von `TI-Ablauf.md`. **Beide Dateien immer gemeinsam pflegen** |
 | `impressum.html`, `datenschutz.html` | Rechtliche Seiten, im Footer verlinkt |
 | `manifest.webmanifest`, `sw.js`, `icons/` | PWA: App auf dem Homescreen und offline nutzbar |
 | `Grundlagen Regelwerk/` | Quell-PDFs, nur lokal |
@@ -100,6 +101,17 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 | Runden mit 2 Kursen (z. B. DJC Flash 2×3) | Die Verschiebung betrifft nur den betroffenen Kurs. Kein eigener Schalter, nur ein Hinweis: „Anzahl Boulder = Boulder des betroffenen Kurses“ |
 | Lead-Quali mit 2 Routen | Kein Einfluss auf die Berechnung. In der Doku steht der Hinweis auf 50 min bis Route 2 (Anhang A §4.4). **Die Routen-Buttons wurden auf Wunsch wieder entfernt** |
 | World Series / Classic | Immer nach Ende der laufenden Rotation, nur als Hinweis |
+
+## Zweisprachigkeit (DE/EN)
+
+- **Standard:** Gerätesprache Deutsch (`de`, `de-DE`, `de-AT` …) ergibt Deutsch, **jede andere Sprache Englisch**. Maßgeblich ist der erste Eintrag in `navigator.languages`.
+- Der Umschalter oben rechts („EN“/„DE“) überschreibt das. Die Wahl wird in `ti.lang` gespeichert und gilt auch für Impressum und Datenschutz.
+- Texte stehen im Wörterbuch `I18N` (index.html) mit den Teilen `de` und `en`. Texte mit Zahlen sind Funktionen (`t('plusK', 8)`). Statische Elemente werden über `data-i18n`, `data-i18n-html` (nur feste Texte), `data-i18n-ph` und `data-i18n-aria` übersetzt.
+- **Hinweise im Boulder-Ergebnis werden als Code gespeichert** (`{k:'pushed', n, l}`, `{k:'late', g}`, `{k:'sc1Blocked', no}`, `{k:'sc1Late'}`, `{k:'inSlot', no}`) und erst bei der Anzeige übersetzt. So bleiben fixe Ergebnisse in beiden Sprachen lesbar. Ältere Hinweise als deutscher Text werden unverändert angezeigt.
+- Der gestoppte Lead-Countdown wird als Sekunden gespeichert (`cdFrozen`), nicht als Text. Alte Text-Werte („6:58“, „Bereit ✓“) werden beim Laden umgerechnet.
+- Englische Begriffe: Intervall → **rotation**, Erholungszeit → **recovery period**, Gutschrift → **time credit**, Lücke → **gap**, Sek. Isolation → **secondary isolation**, Startposition → **start position** (Spalte „Order“, nicht Bib), Jury-Präsident → **Jury President**.
+- Impressum/Datenschutz: deutscher und englischer Text in einer Datei (`data-lang`). Die englische Fassung hat den Hinweis „German version is legally binding“.
+- Das Manifest (App-Name auf dem Homescreen) bleibt „TI-Rechner“.
 
 ## UI-Entscheidungen
 

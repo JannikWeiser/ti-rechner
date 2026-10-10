@@ -21,13 +21,23 @@ main{max-width:640px;margin:0 auto;padding:16px 16px 40px}
 h1{font-size:24px;margin:8px 0 16px} h2{font-size:16px;margin:20px 0 6px}
 p{margin:0 0 10px} a{color:var(--accent)} .back{display:inline-block;margin-bottom:8px;font-weight:600;text-decoration:none}
 .muted{color:var(--muted);font-size:13px}
+[data-lang]{display:none} html[lang="de"] [data-lang="de"], html[lang="en"] [data-lang="en"]{display:block}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.lang{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;padding:6px 10px;font:600 14px inherit;cursor:pointer}
 </style>
 <script>try{const t=localStorage.getItem('ti.theme');if(t)document.documentElement.dataset.theme=JSON.parse(t);}catch(e){}</script>
+<script>
+// Sprache wie auf der Hauptseite: gespeicherte Wahl, sonst Gerätesprache (Deutsch → de, sonst en)
+(function(){ let l=null; try{ l=JSON.parse(localStorage.getItem('ti.lang')); }catch(e){}
+  if(l!=='de'&&l!=='en'){ const n=(navigator.languages&&navigator.languages[0])||navigator.language||'en'; l=/^de\b/i.test(n)?'de':'en'; }
+  document.documentElement.lang=l; })();
+</script>
 </head>
 <body>
 <main>
-<a class="back" href="./">← Zurück zum TI-Rechner</a>
+<div class="top"><a class="back" href="./"><span data-lang="de">← Zurück zum TI-Rechner</span><span data-lang="en">← Back to the TI Calculator</span></a><button class="lang" id="langBtn" type="button"></button></div>
 <div class="card">
+<div data-lang="de">
 <h1>Impressum</h1>
 <h2>Angaben gemäß § 5 DDG</h2>
 <p>Jannik Weiser<br>Ilsungstraße 15b<br>86161 Augsburg</p>
@@ -46,7 +56,35 @@ p{margin:0 0 10px} a{color:var(--accent)} .back{display:inline-block;margin-bott
 <h2>Urheberrecht</h2>
 <p>Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet.</p>
 </div>
+<div data-lang="en">
+<h1>Legal notice</h1>
+<p class="muted">English translation for convenience – the German version is legally binding.</p>
+<h2>Information pursuant to § 5 DDG (German Digital Services Act)</h2>
+<p>Jannik Weiser<br>Ilsungstraße 15b<br>86161 Augsburg<br>Germany</p>
+<h2>Contact</h2>
+<p>Email: <a href="mailto:info@comptools.cloud">info@comptools.cloud</a></p>
+<h2>Responsible for the content pursuant to § 18 (2) MStV</h2>
+<p>Jannik Weiser<br>Ilsungstraße 15b<br>86161 Augsburg<br>Germany</p>
+<h2>Note</h2>
+<p>The TI Calculator is a non-commercial aid for officials at climbing competitions. All calculations are provided without guarantee; only the applicable rules and the decision of the Jury President or DAV judge are binding.</p>
+<h2>Dispute resolution</h2>
+<p>We are neither willing nor obliged to take part in dispute resolution proceedings before a consumer arbitration board.</p>
+<h2>Liability for content</h2>
+<p>As a service provider we are responsible for our own content on these pages under general law. However, we are not obliged to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity. Obligations to remove or block the use of information under general law remain unaffected. Liability in this respect is only possible from the time we become aware of a specific infringement. As soon as we become aware of such infringements, we will remove this content immediately.</p>
+<h2>Liability for links</h2>
+<p>Our website contains links to external third-party websites over whose content we have no influence. We therefore cannot accept any liability for this external content. The respective provider or operator of the linked pages is always responsible for their content. As soon as we become aware of infringements, we will remove such links immediately.</p>
+<h2>Copyright</h2>
+<p>The content and works created by the site operator on these pages are subject to German copyright law. Reproduction, editing, distribution and any kind of use beyond the limits of copyright law require the written consent of the respective author or creator. Where content on this site was not created by the operator, the copyrights of third parties are respected.</p>
+</div>
+</div>
 </main>
 <script>if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+<script>
+(function(){ const b=document.getElementById('langBtn'), h=document.documentElement;
+  const titles={de:'Impressum',en:'Legal notice'};
+  const show=()=>{ b.textContent=h.lang==='de'?'EN':'DE'; document.title=titles[h.lang]+(h.lang==='de'?' – TI-Rechner':' – TI Calculator'); };
+  b.onclick=()=>{ h.lang=h.lang==='de'?'en':'de'; try{ localStorage.setItem('ti.lang',JSON.stringify(h.lang)); }catch(e){} show(); };
+  show(); })();
+</script>
 </body>
 </html>

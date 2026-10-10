@@ -1,5 +1,7 @@
 # Technischer Zwischenfall (TI) – Ablauf & Regeln
 
+*English version: [TI-Procedure.md](TI-Procedure.md).*
+
 Zusammenfassung für Lead und Boulder, auf Basis von:
 
 - **World Climbing Rules 2026** (Competition Rules §6, §11, Definitionen)
@@ -86,7 +88,6 @@ Das ist ein TI. Das Ergebnis wird auf den letzten kontrollierten Griff vor dem V
 ### So rechnet der Rechner
 - Erholungszeit = `min(Griffe, 20)` Minuten
 - Frühester Neustart = Uhrzeit des Sturzes + Erholungszeit
-- Quali Route 1: Route 2 frühestens ca. Neustart + 6 min Kletterzeit + 50 min
 - Einsetzen nach ca. `⌈Erholungszeit / Starttakt⌉` nachfolgenden Athleten
 
 ---

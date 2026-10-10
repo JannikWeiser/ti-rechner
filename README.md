@@ -9,6 +9,8 @@ Mobile Web-App für Officials: berechnet nach einem **Technischen Zwischenfall (
 
 👉 **Live:** https://jannikweiser.github.io/ti-rechner/
 
-Regeln & Ablauf: [TI-Ablauf.md](TI-Ablauf.md)
+Regeln & Ablauf: [TI-Ablauf.md](TI-Ablauf.md) · English: [TI-Procedure.md](TI-Procedure.md)
+
+🌐 Deutsch/English – automatisch nach Gerätesprache, umschaltbar oben rechts.
 
 Hilfsmittel – die Entscheidung trifft der Jury-Präsident.
