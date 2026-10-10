@@ -53,7 +53,9 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .seg button{flex:1 1 auto;min-width:44px;appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--text);font:600 16px/1 inherit;padding:12px 10px;border-radius:10px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.stepper{display:grid;grid-template-columns:52px 1fr 52px;gap:6px}
+.stepper{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;gap:6px}
+.row .stepper{grid-template-columns:40px minmax(0,1fr) 40px;gap:4px}
+.row .stepper input{padding:12px 4px}
 .stepper button{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--text);font:700 22px/1 inherit;border-radius:10px;cursor:pointer}
 .stepper input{text-align:center;font-weight:700;font-size:20px}
 .switch{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-weight:600;font-size:14px}
@@ -129,20 +131,21 @@ footer a{color:inherit}
     </div>
     <div class="hint">Die Erholungszeit läuft ab dem Moment, in dem der Athlet rausfällt.</div>
 
-    <label>Route</label>
-    <div class="seg" id="lRoute">
-      <button type="button" data-v="1" aria-pressed="true">Eine Route</button>
-      <button type="button" data-v="q1">Quali Route 1</button>
-      <button type="button" data-v="q2">Quali Route 2</button>
-    </div>
-
     <details>
       <summary>Startfolge (optional)</summary>
       <label for="lGap">Abstand zwischen zwei Starts (Minuten)</label>
+      <div class="stepper">
+      <button type="button" data-step="lGap" data-d="-0.5" aria-label="weniger">−</button>
       <input id="lGap" type="number" inputmode="decimal" min="1" max="15" step="0.5" value="4">
+      <button type="button" data-step="lGap" data-d="0.5" aria-label="mehr">+</button>
+    </div>
       <div class="hint">Durchschnittlicher Takt der Runde, um die Startposition für den Neustart zu bestimmen.</div>
       <label for="lPos">Startposition des TI-Athleten (optional)</label>
+      <div class="stepper">
+      <button type="button" data-step="lPos" data-d="-1" aria-label="weniger">−</button>
       <input id="lPos" type="number" inputmode="numeric" min="1" placeholder="z. B. 12">
+      <button type="button" data-step="lPos" data-d="1" aria-label="mehr">+</button>
+    </div>
     </details>
   </div>
 
@@ -150,9 +153,10 @@ footer a{color:inherit}
 
   <div class="card">
     <h2>Countdown Erholungszeit</h2>
-    <div class="hint" style="text-align:center">läuft ab der eingegebenen Uhrzeit des Sturzes</div>
     <div class="countdown" id="lCountdown">--:--</div>
+    <div class="hint" style="text-align:center" id="lCdHint">Beim Start wird die seit dem Sturz vergangene Zeit abgezogen.</div>
     <div class="btns">
+      <button class="btn" id="lStart">Countdown starten</button>
       <button class="btn secondary" id="lCopy">Zusammenfassung kopieren</button>
     </div>
   </div>
@@ -178,9 +182,17 @@ footer a{color:inherit}
     </select>
     <div class="row">
       <div><label for="bN">Anzahl Boulder</label>
-        <input id="bN" type="number" inputmode="numeric" min="1" max="8" value="5"></div>
+        <div class="stepper">
+      <button type="button" data-step="bN" data-d="-1" aria-label="weniger">−</button>
+      <input id="bN" type="number" inputmode="numeric" min="1" max="8" value="5">
+      <button type="button" data-step="bN" data-d="1" aria-label="mehr">+</button>
+    </div></div>
       <div><label for="bRot">Intervall (min)</label>
-        <input id="bRot" type="number" inputmode="decimal" min="1" max="10" step="0.5" value="5"></div>
+        <div class="stepper">
+      <button type="button" data-step="bRot" data-d="-0.5" aria-label="weniger">−</button>
+      <input id="bRot" type="number" inputmode="decimal" min="1" max="10" step="0.5" value="5">
+      <button type="button" data-step="bRot" data-d="0.5" aria-label="mehr">+</button>
+    </div></div>
     </div>
     <div class="hint">Bei 2 Kursen: Anzahl Boulder des betroffenen Kurses – Lücke und Verschiebung betreffen nur diesen Kurs.</div>
     <details>
@@ -197,7 +209,11 @@ footer a{color:inherit}
     <label>Boulder</label>
     <div class="seg" id="bBoulder"></div>
     <label for="bRemain">Restzeit bei Versuchsbeginn</label>
-    <input id="bRemain" type="text" inputmode="numeric" placeholder="m:ss" value="3:00">
+    <div class="stepper">
+      <button type="button" data-step="bRemain" data-time="1" data-d="-15" aria-label="weniger">−</button>
+      <input id="bRemain" type="text" inputmode="numeric" placeholder="m:ss" value="3:00">
+      <button type="button" data-step="bRemain" data-time="1" data-d="15" aria-label="mehr">+</button>
+    </div>
     <div class="hint">Restzeit auf der Uhr, als der vom TI betroffene Versuch begonnen hat – daraus ergibt sich die ungefähre Gutschrift (§8.5).</div>
     <div id="bFixOnly">
       <div class="switch" id="bB1Wrap"><span>TI vor Ende des laufenden Intervalls behoben?</span><input type="checkbox" id="bResolved"></div>
@@ -208,7 +224,11 @@ footer a{color:inherit}
       <label for="bT0">Startzeit des TI-Intervalls</label>
       <input id="bT0" type="time" step="1">
       <label for="bPos">Startposition des TI-Athleten</label>
+      <div class="stepper">
+      <button type="button" data-step="bPos" data-d="-1" aria-label="weniger">−</button>
       <input id="bPos" type="number" inputmode="numeric" min="1" placeholder="z. B. 17">
+      <button type="button" data-step="bPos" data-d="1" aria-label="mehr">+</button>
+    </div>
     </details>
   </div>
 
@@ -233,7 +253,8 @@ footer a{color:inherit}
 </main>
 
 <footer>
-  <p>Grundlage: World Climbing Rules 2026, Event Regulations Annex A/C, Judge Guide 2026 (§2.16, §5.2), Nationales Regelwerk Klettern (Entwurf 27.1). Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident. <a href="https://github.com/JannikWeiser/ti-rechner/blob/main/TI-Ablauf.md">Ablauf eines TI (Doku)</a></p>
+  <p>Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident. <a href="https://github.com/JannikWeiser/ti-rechner/blob/main/TI-Ablauf.md">Ablauf eines TI (Doku)</a></p>
+  <p><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
 </footer>
 
 <script>
@@ -284,16 +305,22 @@ $('tabLead').onclick=()=>showTab('lead');
 $('tabBoulder').onclick=()=>showTab('boulder');
 
 document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{
-  const i=$(b.dataset.step); i.value=Math.max(+i.min||0,(+i.value||0)+ +b.dataset.d); i.dispatchEvent(new Event('input'));
+  const i=$(b.dataset.step), d=+b.dataset.d;
+  if(b.dataset.time){ // m:ss-Feld, Schritte in Sekunden
+    const v=parseMS(i.value); i.value=fmtMS(Math.max(0,(isNaN(v)?0:v)+d));
+  } else {
+    const min=i.min!==''?+i.min:0, max=i.max!==''?+i.max:Infinity;
+    const cur=i.value===''?(d>0?min-d:min):+i.value;
+    i.value=Math.round(Math.min(max,Math.max(min,cur+d))*100)/100;
+  }
+  i.dispatchEvent(new Event('input'));
 });
 
 /* =========================================================
    LEAD  – Event Regulations Annex A §8.2 B / Nat. Regelwerk Anhang A §8.2 B
    Erholungszeit = 1 min je gewertetem Griff vor dem TI, max. 20 min
    ========================================================= */
-let leadSummary='', leadTarget=null, leadTimer=null, leadRoute=store.get('leadRoute','1');
-function setLeadRoute(v){ leadRoute=v; store.set('leadRoute',v); document.querySelectorAll('#lRoute button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===v)); }
-document.querySelectorAll('#lRoute button').forEach(b=>b.onclick=()=>{ setLeadRoute(b.dataset.v); calcLead(); });
+let leadSummary='', leadTarget=null, leadRec=0, cdTarget=null, leadTimer=null;
 function calcLead(){
   const holds=Math.max(0, Math.floor(+$('lHolds').value||0));
   const recMin=Math.min(holds,20);
@@ -304,11 +331,6 @@ function calcLead(){
 
   const earliest = ref!==null ? ref+recMin*60 : null;
   const slotsAhead = recMin===0 ? 0 : Math.ceil(recMin/gap); // nachfolgende Athleten, die vorher starten
-  // Quali mit 2 Routen: mind. 50 min zwischen Ende Versuch Route 1 und Start Route 2 (Anhang A §4.4)
-  const route2Earliest = earliest!==null ? earliest + 6*60 + 50*60 : null; // Neustart + max. 6 min Kletterzeit + 50 min
-  const route2Note = leadRoute==='q1'
-    ? `<div class="note warn"><b>50 min Pause bis Route 2:</b> Zwischen dem Ende des Neustart-Versuchs an Route 1 und dem Start an Route 2 müssen mindestens 50 Minuten liegen (Anhang A §4.4).${route2Earliest!==null?` Route 2 frühestens ca. <b>${secToClock(route2Earliest)} Uhr</b> (Neustart + max. 6 min Kletterzeit + 50 min) – Startzeit in Route 2 prüfen und ggf. verschieben.`:''}</div>`
-    : '';
   let html=`<div class="sub">Erholungszeit</div>
     <div class="big">${recMin} min</div>
     <div class="sub">${holds} Griff${holds===1?'':'e'} × 1 min${holds>20?' → auf 20 min begrenzt':''}</div>
@@ -316,30 +338,40 @@ function calcLead(){
       <dt>Frühester Neustart</dt><dd>${earliest!==null?secToClock(earliest)+' Uhr':'Uhrzeit eingeben'}</dd>
       <dt>Einsetzen</dt><dd>${recMin===0?'sobald TI behoben ist':`nach ca. ${slotsAhead} nachfolgenden Athlet${slotsAhead===1?'':'en'}`}${pos&&recMin>0?` (vor Startposition ${pos+slotsAhead+1})`:''}</dd>
     </dl>
-    ${route2Note}
-    <div class="refs">Event Regulations Annex A §8.1–8.4 · Nat. Regelwerk Anhang A §8 · Judge Guide §2.16</div>`;
+`;
   $('lResult').innerHTML=html;
-  leadTarget = earliest;
+  leadTarget = earliest; leadRec = recMin*60;
+  if(cdTarget!==null) cdTarget = (ref!==null ? ref : cdStartedAt) + leadRec;
   leadSummary = `TI Lead\nGewertete Griffe vor TI: ${holds}\nErholungszeit: ${recMin} min\n`+
     (ref!==null?`Sturz: ${secToClock(ref)}\nFrühester Neustart: ${secToClock(earliest)}\n`:'')+
-    (leadRoute==='q1'?`Route 2: mind. 50 min nach Ende des Neustart-Versuchs${route2Earliest!==null?` (frühestens ca. ${secToClock(route2Earliest)})`:''}\n`:'')+
     (recMin>0?`Einsetzen nach ca. ${slotsAhead} nachfolgenden Athleten (Takt ${gap} min)\n`:'')+
     ``;
   tickLead();
 }
+const nowSec=()=>{ const d=new Date(); return d.getHours()*3600+d.getMinutes()*60+d.getSeconds(); };
+let cdStartedAt=null;
 function tickLead(){
   const el=$('lCountdown');
-  if(leadTarget===null){ el.textContent='--:--'; el.classList.remove('done'); return; }
-  const d=new Date(); const now=d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
-  let diff=leadTarget-now; if(diff<-43200) diff+=86400;
+  if(cdTarget===null){ el.textContent=fmtMS(leadRec); el.classList.remove('done'); return; }
+  let diff=cdTarget-nowSec(); if(diff<-43200) diff+=86400;
   if(diff<=0){ el.textContent='Bereit ✓'; el.classList.add('done'); }
   else { el.textContent=fmtMS(diff); el.classList.remove('done'); }
 }
 $('lNow').onclick=()=>{ $('lRef').value=nowClock(); calcLead(); };
-// Countdown läuft immer gegen (Uhrzeit des Sturzes + Erholungszeit)
-leadTimer=setInterval(tickLead,500);
 let wakeLock=null;
-document.addEventListener('click',()=>{ if(!wakeLock && navigator.wakeLock) navigator.wakeLock.request('screen').then(w=>{wakeLock=w; w.addEventListener('release',()=>wakeLock=null);}).catch(()=>{}); });
+$('lStart').onclick=()=>{
+  if(cdTarget!==null){ // Stopp
+    cdTarget=null; clearInterval(leadTimer); $('lStart').textContent='Countdown starten';
+    if(wakeLock){ wakeLock.release(); wakeLock=null; } tickLead(); return;
+  }
+  // Start: Ziel = Uhrzeit des Sturzes + Erholungszeit (ohne die eingegebene Uhrzeit zu verändern)
+  cdStartedAt=nowSec();
+  const ref=timeToSec($('lRef').value);
+  cdTarget=(ref!==null?ref:cdStartedAt)+leadRec;
+  $('lStart').textContent='Countdown stoppen';
+  clearInterval(leadTimer); leadTimer=setInterval(tickLead,500); tickLead();
+  try{ navigator.wakeLock && navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{}); }catch(e){}
+};
 $('lCopy').onclick=e=>copy(leadSummary,e.target);
 ['lHolds','lRef','lGap','lPos'].forEach(id=>$(id).addEventListener('input',calcLead));
 
@@ -402,10 +434,9 @@ function calcBoulder(){
     $('bResult').innerHTML=`<div class="sub">Zusätzliche Kletterzeit an Boulder ${B}</div>
       <div class="big">${awardTxt}</div>
       <dl class="kv">
-        <dt>Wiedereinstieg</dt><dd>nach Ende der laufenden Rotation, als einziger Athlet auf dem Field of Play</dd>
-      </dl>${badRemain}
-      <div class="refs">Event Regulations Annex C §8 · Nat. Regelwerk Anhang C §8 · Judge Guide §5.2</div>`;
-    bSummary=`TI Boulder (World Series / Classic)\nBoulder ${B}\nGutschrift: ${awardTxt}\nWiedereinstieg: nach Ende der laufenden Rotation, als einziger Athlet`;
+        <dt>Wiedereinstieg</dt><dd>so bald wie möglich (Zeitpunkt legt der JP fest) – als einziger Athlet, die Gruppe wartet</dd>
+      </dl>${badRemain}`;
+    bSummary=`TI Boulder (World Series / Classic)\nBoulder ${B}\nGutschrift: ${awardTxt}\nWiedereinstieg: so bald wie möglich (JP), als einziger Athlet`;
     return;
   }
 
@@ -437,8 +468,7 @@ function calcBoulder(){
       <dt>Lücke Boulder 1</dt><dd>${scenario1?'Intervall +1 – TI-Athlet klettert dort selbst':`Intervall +${gapB1}`}${at(scenario1?1:gapB1)?` (${at(scenario1?1:gapB1)} Uhr)`:''}<br>
         <span class="hint">Call Zone B1: vor dem ${k}. nachfolgenden Athleten${gapPos?` (Pos. ${gapPos})`:''} niemanden aufrufen – er und alle danach rücken 1 Intervall nach.</span></dd>
       <dt>Sek. Isolation</dt><dd>${isoTxt}</dd>
-    </dl>${badRemain}
-    <div class="refs">Event Regulations Annex C §8 · Nat. Regelwerk Anhang C §8 · Judge Guide §5.2</div>`;
+    </dl>${badRemain}`;
 
   // --- Grafik: obere Reihe TI-Athlet, untere Reihe Boulder 1 ---
   const athleteCell = r => {
@@ -486,7 +516,7 @@ $('bCopy').onclick=e=>copy(bSummary,e.target);
   const bi=store.get('boulderInputs',null);
   if(bi){ $('bPreset').value=bi.preset; $('bN').value=bi.n; $('bRot').value=bi.rot; $('bChange').value=bi.change;
     $('bRestRot').checked=bi.p===2; $('bRemain').value=bi.remain; }
-  setFormat(bState.format); setLeadRoute(leadRoute);
+  setFormat(bState.format);
   $('lRef').value=nowClock();
   calcLead(); calcBoulder();
   showTab(store.get('tab','lead'));
