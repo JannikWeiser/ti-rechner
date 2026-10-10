@@ -116,7 +116,7 @@ Bei einem einzelnen TI liefert der Algorithmus exakt die heutigen Werte (k = max
 6. World Series: **ja**, nacheinander in TI-Reihenfolge nach Rotationsende
 7. Nebenbefund: **umgesetzt** („CZ B2“ statt „Pause“)
 
-Zusätzlich bei der Umsetzung: Die Erkennung „späte Entscheidung“ gilt nur bis 60 min nach Beginn des TI-Intervalls. So verschiebt eine nachträgliche Eingabe nichts.
+Zusätzlich bei der Umsetzung: Die Erkennung „späte Entscheidung“ gilt bis 3 h nach Beginn des TI-Intervalls (vom Projektinhaber festgelegt). Maßgeblich ist der Moment, in dem die Startzeit eingegeben wird.
 
 ## 8. Nebenbefund
 

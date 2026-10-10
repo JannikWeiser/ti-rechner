@@ -81,7 +81,9 @@ summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
 .tl b{display:block;font-size:13px}
 .tl.climb{background:var(--climb)} .tl.rest{background:var(--rest);color:var(--text)} .tl.iso{background:var(--iso)}
 .tl.call{background:var(--call)} .tl.slot{background:var(--slot)} .tl.ti{background:var(--bad)} .tl.empty{background:var(--empty);color:var(--muted)}
-.tcol{display:flex;flex-direction:column;gap:3px;flex:0 0 auto}
+.tcol{display:flex;flex-direction:column;gap:3px;flex:0 0 auto;border-radius:10px;outline:3px solid transparent;outline-offset:1px}
+.tcol.now{outline-color:var(--ok)}
+.tcol.now .idx{color:var(--ok);font-weight:700}
 .tcol .idx{width:54px;height:28px;font-size:11px;line-height:14px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
 .tl.gap{background:transparent;color:var(--bad);border:2px dashed var(--bad);font-weight:700}
 .cdlist{list-style:none;margin:12px 0 0;padding:0}
@@ -313,7 +315,7 @@ footer a{color:inherit}
   <div class="card" id="bTimelineCard">
     <h2>Ablauf des Athleten</h2>
     <div class="timeline" id="bTimeline"></div>
-    <div class="hint">Untere Reihe: Lücke an Boulder 1 – in diesem Intervall wird an B1 niemand aufgerufen.</div>
+    <div class="hint">Untere Reihe: Lücke an Boulder 1 – in diesem Intervall wird an B1 niemand aufgerufen. Grüner Rand: Intervall, das gerade läuft (aus der Startzeit des TI-Intervalls).</div>
     <div class="legend">
       <span><i style="background:var(--bad)"></i>TI</span>
       <span><i style="background:var(--climb)"></i>Boulder</span>
@@ -550,8 +552,8 @@ function computeTI(ti, all, S, g, now){
   const L = Math.max(t, ...sch.climbs.map(c=>c.r));
   // Späte Entscheidung: welches Intervall läuft gerade?
   let cur=t; const t0=timeToSec(ti.t0);
-  // Nur bis 60 min nach Beginn des TI-Intervalls – sonst ist es eine nachträgliche Eingabe, keine späte Entscheidung
-  if(t0!==null && now!=null){ const el=wrapDiff(now-t0); if(el>0 && el<=3600) cur=t+Math.floor(el/S.cycle); }
+  // Nur bis 3 h nach Beginn des TI-Intervalls – sonst ist es eine nachträgliche Eingabe, keine späte Entscheidung
+  if(t0!==null && now!=null){ const el=wrapDiff(now-t0); if(el>0 && el<=3*3600) cur=t+Math.floor(el/S.cycle); }
   if(B===1 && ti.resolved && !inSlot){
     const G=t+1;
     if(!reserved.has(G) && cur<=t) return {P, t, s0:sch.s0, G, R:G, k:1, L, scen1:true, notes};
@@ -565,8 +567,11 @@ function computeTI(ti, all, S, g, now){
   if(inSlot) notes.push(`TI im Nachhol-Slot von TI ${inSlot.no}.`);
   return {P, t, s0:sch.s0, G, R, k:R-t, L, scen1:false, notes};
 }
-function recomputeOne(i){ const S=bSettings(); bTIs[i].res=computeTI(bTIs[i], bTIs, S, bTIs[i].gap, nowSec()); }
-function recomputeAll(){ const S=bSettings(), now=nowSec(); bTIs.forEach(t=>t.res=null); bTIs.forEach(t=>{ t.res=computeTI(t, bTIs, S, t.gap, now); }); }
+// „Jetzt“ für die späte Entscheidung ist der Moment, in dem die Startzeit eingegeben wurde (decidedAt) –
+// so verschiebt ein späteres Neuberechnen (z. B. geänderte Rundeneinstellungen) nichts nachträglich.
+const decided=t=>t.decidedAt ?? null;
+function recomputeOne(i){ const S=bSettings(); bTIs[i].res=computeTI(bTIs[i], bTIs, S, bTIs[i].gap, decided(bTIs[i])); }
+function recomputeAll(){ const S=bSettings(); bTIs.forEach(t=>t.res=null); bTIs.forEach(t=>{ t.res=computeTI(t, bTIs, S, t.gap, decided(t)); }); }
 // „vor Startposition X“: wer ohne Lücke in Intervall G an B1 gewesen wäre (live aus allen Lücken des Kurses)
 function vorPos(ti, S){ const r=ti.res; const n=bTIs.filter(o=>o.res && o.res.P && (o===ti||onAxis(o,ti,S)) && o.res.G<r.G).length; return r.G-n+1; }
 // Uhrzeit eines Achsen-Intervalls: aus der eigenen Startzeit, sonst aus einem anderen TI auf derselben Achse
@@ -605,7 +610,7 @@ document.querySelectorAll('#bGap button').forEach(b=>b.onclick=()=>{ bCur().gap=
 document.querySelectorAll('#bCourse button').forEach(b=>b.onclick=()=>{ bCur().course=b.dataset.v; tiChanged(); });
 $('bRemain').addEventListener('input',()=>{ bCur().remain=$('bRemain').value; bSave(); renderBoulder(); });
 $('bResolved').addEventListener('change',()=>{ bCur().resolved=$('bResolved').checked; tiChanged(); });
-$('bT0').addEventListener('input',()=>{ bCur().t0=$('bT0').value; bOffset=0; requestWake(); tiChanged(); });
+$('bT0').addEventListener('input',()=>{ bCur().t0=$('bT0').value; bCur().decidedAt=nowSec(); bOffset=0; requestWake(); tiChanged(); });
 $('bPos').addEventListener('input',()=>{ bCur().pos=$('bPos').value; tiChanged(); });
 ['bN','bRot','bChange'].forEach(id=>$(id).addEventListener('input',()=>{ if(id!=='bChange') $('bPreset').value='c'; settingsChanged(); }));
 $('bRestRot').addEventListener('change',settingsChanged);
@@ -662,7 +667,7 @@ function renderBoulder(){
 
   // +1/+2 nur zeigen, wenn die Wahl das Ergebnis ändert
   const now=nowSec();
-  const alt1=computeTI(ti,bTIs,S,1,now), alt2=computeTI(ti,bTIs,S,2,now);
+  const alt1=computeTI(ti,bTIs,S,1,decided(ti)), alt2=computeTI(ti,bTIs,S,2,decided(ti));
   $('bGapWrap').classList.toggle('hidden', r.scen1 || alt1.R===alt2.R);
   document.querySelectorAll('#bGap button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===ti.gap));
 
@@ -712,9 +717,12 @@ function renderBoulder(){
   for(let a=r.t;a<=end;a++){ if(b1Cell(a)) anyGap=true; }
   for(let a=r.t;a<=end;a++){
     const tm=at(a);
-    cols.push(`<div class="tcol"><div class="idx">${a===r.t?'±0':'+'+(a-r.t)}${tm?'<br>'+tm.slice(0,5):''}</div>${cell(athleteCell(a))}${anyGap?cell(b1Cell(a)):''}</div>`);
+    cols.push(`<div class="tcol" data-a="${a}"><div class="idx">${a===r.t?'±0':'+'+(a-r.t)}${tm?'<br>'+tm.slice(0,5):''}</div>${cell(athleteCell(a))}${anyGap?cell(b1Cell(a)):''}</div>`);
   }
   $('bTimeline').innerHTML=cols.join('');
+  // Für die Live-Markierung des laufenden Intervalls
+  const tStart=timeOf(r.t,ti,S);
+  bTl = tStart===null ? null : {start:tStart, t:r.t, cycle:S.cycle};
 
   // Live-Countdown über alle TIs
   bMilestones=[];
@@ -759,7 +767,16 @@ function renderGaps(S){
 }
 
 /* ---------- Boulder Live-Countdown ---------- */
+let bTl=null;
+// Grüner Rand um das Intervall, das laut Startzeit (+ Verschiebung) gerade läuft
+function markNow(){
+  const cols=$('bTimeline').querySelectorAll('.tcol');
+  let a=null;
+  if(bTl){ const el=wrapDiff(nowSec()-(bTl.start+bOffset)); if(el>=0) a=bTl.t+Math.floor(el/bTl.cycle); }
+  cols.forEach(c=>c.classList.toggle('now', a!==null && +c.dataset.a===a));
+}
 function bTick(){
+  markNow();
   const has=bMilestones.length>0;
   $('bCdEmpty').classList.toggle('hidden', has);
   $('bCdBody').classList.toggle('hidden', !has);
