@@ -53,6 +53,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 
 - `k` = Zahl der Intervalle nach dem TI-Intervall bis zum Slot an Boulder B. Gleichzeitig ist der Slot vor dem k-ten nachfolgenden Athleten der Startliste einzufügen.
 - **Lücke an Boulder 1** im Intervall `L = k − p·(B−1)`. Dort ruft die Call Zone B1 niemanden auf, und der k-te Folgende und alle nach ihm rücken ein Intervall nach.
+- **Lücke an B1 wählbar (+1 oder +2):** Der JP entscheidet in der Call Zone, ob B1 schon im nächsten Intervall (+1) frei bleibt oder erst im übernächsten (+2). **Standard ist +2** wie im Judge Guide, weil der nächste Athlet meist schon aufgerufen ist. Die Auswahl wird nicht gespeichert und steht bei jedem Laden wieder auf +2. Allgemein: `k = max(p·(N−B)+p, g + p·(B−1))` mit g = 1 oder 2. Die Auswahl erscheint nur, wenn sie das Ergebnis ändert, also wenn `2 + p·(B−1) > p·(N−B)+p`; sonst liegt die Lücke ohnehin später.
 - Sekundäre Isolation = `k − p·(N−B) − 2` Intervalle (das letzte Wartintervall ist die Call Zone)
 - Uhrzeit: 1 Intervall = Kletterzeit + 15 s Wechselpause. Start an der Wand = Slotbeginn + (Intervall − Gutschrift).
 - **B1, Szenario 1** (TI vor Intervallende behoben): Der Athlet bekommt im **nächsten** Intervall die restliche Kletterzeit an B1, hat dann **1 Intervall Pause** und geht danach an B2. Sein ganzer weiterer Ablauf verschiebt sich um ein Intervall, der Slot kommt vor den nächsten Athleten.

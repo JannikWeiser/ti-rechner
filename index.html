@@ -219,6 +219,14 @@ footer a{color:inherit}
     <div class="hint">Restzeit auf der Uhr, als der vom TI betroffene Versuch begonnen hat.</div>
     <div id="bFixOnly">
       <div class="switch" id="bB1Wrap"><span>TI vor Ende des laufenden Intervalls behoben?</span><input type="checkbox" id="bResolved"></div>
+      <div id="bGapWrap">
+        <label style="margin-top:14px">Boulder 1 frei lassen</label>
+        <div class="seg" id="bGap">
+          <button type="button" data-v="1">nächstes Intervall (+1)</button>
+          <button type="button" data-v="2" aria-pressed="true">übernächstes (+2)</button>
+        </div>
+        <div class="hint">Entscheidung des JP in der Call Zone – ob der bereits aufgerufene nächste Athlet noch zurückgestellt werden kann.</div>
+      </div>
     </div>
     <details id="bClockWrap">
       <summary>Uhrzeit &amp; Startliste (optional)</summary>
@@ -376,6 +384,8 @@ $('lStart').onclick=()=>{
    ========================================================= */
 const presets={ q:{f:'fix',n:5,r:5,two:false}, s:{f:'fix',n:4,r:5,two:false}, jf:{f:'fix',n:4,r:4,two:false}, jq:{f:'fix',n:3,r:4,two:true} };
 let bState=Object.assign({format:'fix', boulder:1}, store.get('boulderState',{}));
+bState.gap=2; // Standard wie Judge Guide: Lücke frühestens im übernächsten Intervall
+document.querySelectorAll('#bGap button').forEach(b=>b.onclick=()=>{ bState.gap=+b.dataset.v; calcBoulder(); });
 
 function setFormat(f){ bState.format=f; document.querySelectorAll('#bFormat button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===f)); }
 document.querySelectorAll('#bFormat button').forEach(b=>b.onclick=()=>{ setFormat(b.dataset.v); calcBoulder(); });
@@ -438,7 +448,11 @@ function calcBoulder(){
   const finishLast = p*(N-B);                 // Intervall des letzten regulären Boulders
   let k, scenario1=false;
   if(B===1 && resolved){ k=1; scenario1=true; }
-  else k=Math.max(p*(N-B)+p, 2+p*(B-1));
+  else k=Math.max(p*(N-B)+p, bState.gap+p*(B-1));
+  // Auswahl +1/+2 nur zeigen, wenn sie das Ergebnis beeinflusst (sonst liegt die Lücke ohnehin später)
+  const gapMatters = !scenario1 && 2+p*(B-1) > p*(N-B)+p;
+  $('bGapWrap').classList.toggle('hidden', !gapMatters);
+  document.querySelectorAll('#bGap button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===bState.gap));
   const gapB1 = k - p*(B-1);                  // Intervall, in dem Boulder 1 frei bleibt (Slot startet dort)
   const wait = k - finishLast - 1;
   const isoRots = Math.max(0, wait-1);

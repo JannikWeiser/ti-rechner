@@ -157,6 +157,8 @@ L = k − 2·(B − 1)
 
 nach dem TI-Intervall ein Platz frei. In der Call Zone B1 wird dafür vor dem k-ten nachfolgenden Athleten niemand aufgerufen. Dieser Athlet und alle nach ihm rücken ein Intervall nach. So ist Boulder B frei, wenn der TI-Athlet dort ankommt. Beispiel: Bei 5 Bouldern und einem TI an B4 ist k = 8 und L = 2, die Lücke an B1 liegt also im übernächsten Intervall.
 
+**+1 oder +2:** Laut Judge Guide bleibt B1 frühestens im **übernächsten** Intervall frei, weil der nächste Athlet meist schon in der Call Zone aufgerufen ist. Der JP kann in der Call Zone aber auch entscheiden, B1 schon im **nächsten** Intervall frei zu lassen. Dann wird in der Formel die 2 durch eine 1 ersetzt (`k = max(2·(N−B)+2, 2·B − 1)`), und der Athlet kommt ein Intervall früher dran. Das wirkt sich nur bei TIs an den hinteren Bouldern aus.
+
 Uhrzeit: Ein Intervall dauert Kletterzeit + 15 s Wechselpause. Beispiel: 5:00 + 0:15 = 5:15.
 
 ### World-Series- / Classic-Format (z. B. DM Finale 4 min max)
