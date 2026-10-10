@@ -25,6 +25,7 @@ Dazu gehört [TI-Ablauf.md](TI-Ablauf.md): eine Doku, wie ein TI abläuft und wa
 | `index.html` | Die komplette App: Tabs Lead und Boulder, Berechnungen, Countdown, localStorage (`ti.*`) |
 | `TI-Ablauf.md` | Regeln und Ablauf, mit Abschnitt „Geklärte Auslegungsfragen“ |
 | `impressum.html`, `datenschutz.html` | Rechtliche Seiten, im Footer verlinkt |
+| `manifest.webmanifest`, `sw.js`, `icons/` | PWA: App auf dem Homescreen und offline nutzbar |
 | `Grundlagen Regelwerk/` | Quell-PDFs, nur lokal |
 
 ## Quellen (in `Grundlagen Regelwerk/`)
@@ -60,6 +61,13 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **Gutschrift** = Restzeit bei Beginn des betroffenen Versuchs, angezeigt als **ca.-Wert** (§8.5).
 - Grafik „Ablauf des Athleten“: Alle Kacheln sind gleich groß (54×44 px). Die obere Reihe zeigt den TI-Athleten. In der unteren Reihe erscheint **nur die Lücke** („Lücke / B1 frei“, rot gestrichelt), kein „B1 belegt“. Bei Szenario 1 gibt es keine untere Reihe. Über jeder Spalte stehen Intervall und Uhrzeit.
 
+### Boulder, Live-Countdown
+- Erscheint nur im Intervall-Format und nur, wenn die **Startzeit des TI-Intervalls** eingegeben ist. Sonst zeigt die Karte einen Button „Startzeit eingeben“.
+- Meilensteine: „Boulder 1 bleibt frei (Lücke)“, „Athlet in die Call Zone für Boulder B“ (nur wenn er dazwischen wartet), „Slot-Intervall beginnt“ und „Athlet an Boulder B (Restzeit)“. Bei Szenario 1: „Intervall mit Restzeit an B1 beginnt“ und „Athlet an Boulder 1“.
+- Der nächste Schritt steht groß oben, erledigte werden durchgestrichen. Der Countdown läuft automatisch.
+- „Zeitplan verschieben“ in ±15-s-Schritten, wenn die Runde hinterherläuft. Das gilt nur für den Countdown und wird bei einer neuen Startzeit zurückgesetzt.
+- **Kein Ton und keine Vibration** (ausdrücklich so entschieden). Der Bildschirm bleibt an (Wake Lock).
+
 ### Boulder, World Series / Classic
 - **Hier wird nichts berechnet, die App zeigt nur einen Hinweis:** Wiedereinstieg **immer nach Ende der laufenden Rotation**, als einziger Athlet, die Gruppe wartet. Gutschrift ca. Restzeit bei Versuchsbeginn.
 - In diesem Format sind die Eingaben (Vorlage, Anzahl Boulder, Intervall, „Wo war der TI?“) und die Grafik ausgeblendet.
@@ -87,6 +95,12 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **Die Funktion „Zusammenfassung kopieren“ wurde auf Wunsch entfernt.**
 - Keine Erklär-Hinweise mit Regelbezug an den Eingabefeldern, z. B. „Szenario 1 im Judge Guide“ oder „daraus ergibt sich die Gutschrift (§8.5)“
 
+## PWA / Offline
+
+- `manifest.webmanifest`: Name „TI-Rechner“, standalone, Farbe #f97316, Icons 192/512 (maskable) und `apple-touch-icon.png` (180). Die Icons sind mit ImageMagick erzeugt (orange Fläche, weißes „TI“ in Arial Bold).
+- `sw.js`: **Network first.** Mit Internet kommt immer die neueste Version, ohne Internet die Version aus dem Cache. Bei neuen Dateien die Liste `FILES` ergänzen. Den Cache-Namen (`ti-rechner-vN`) erhöhen, wenn alte Caches entfernt werden sollen.
+- Registriert in `index.html`, `impressum.html` und `datenschutz.html`.
+
 ## Impressum / Datenschutz
 
 - Daten wie in den anderen Projekten (EYCH-Plakatgenerator): Jannik Weiser, Ilsungstraße 15b, 86161 Augsburg, info@comptools.cloud. Rechtsgrundlagen: § 5 DDG und § 18 Abs. 2 MStV.
@@ -105,8 +119,8 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 | 1 | Lead-Neustart mit Startliste (Namen statt „nach ca. X Athleten“) | Erst wenn es in einem anderen Tool eingebaut ist |
 | 2 | Boulder-Startliste mit Namen („Lücke vor MÜLLER“) | Erst wenn es in einem anderen Tool eingebaut ist |
 | 3 | **Mehrere TIs gleichzeitig** (Slots verschieben sich gegenseitig, Judge Guide §5.2.3) | **Offen, den Projektinhaber aktiv daran erinnern** |
-| 4 | Einsprüche wie TI behandeln | In Diskussion |
-| 5 | Offline-Nutzung als App (PWA) | In Diskussion |
-| 6 | Live-Countdown für Boulder | In Diskussion |
+| 4 | Einsprüche wie TI behandeln | **Abgelehnt**, bleibt so (rechnerisch identisch) |
+| 5 | Offline-Nutzung als App (PWA) | **Umgesetzt** |
+| 6 | Live-Countdown für Boulder | **Umgesetzt**, ohne Ton und Vibration |
 | 7 | Verbindung zu Callzone-Management / Lead-Uhr | Eventuell später |
 | 8 | TI-Protokoll | **Abgelehnt** |

@@ -3,10 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#f97316">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="TI-Rechner">
 <title>TI-Rechner Klettern</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f97316'/><text x='50' y='68' font-size='52' text-anchor='middle' font-family='Arial' font-weight='700' fill='white'>TI</text></svg>">
 <style>
 :root{
@@ -82,6 +84,12 @@ summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
 .tcol{display:flex;flex-direction:column;gap:3px;flex:0 0 auto}
 .tcol .idx{width:54px;height:28px;font-size:11px;line-height:14px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
 .tl.gap{background:transparent;color:var(--bad);border:2px dashed var(--bad);font-weight:700}
+.cdlist{list-style:none;margin:12px 0 0;padding:0}
+.cdlist li{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+.cdlist li .t{font-variant-numeric:tabular-nums;color:var(--muted);text-align:right}
+.cdlist li.done{color:var(--muted);text-decoration:line-through}
+.cdlist li.next{font-weight:700;color:var(--accent)}
+.cdlist li.next .t{color:var(--accent)}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-top:8px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
@@ -243,6 +251,26 @@ footer a{color:inherit}
 
   <div class="card result" id="bResult"></div>
 
+  <div class="card" id="bCdCard">
+    <h2>Live-Countdown</h2>
+    <div id="bCdEmpty">
+      <div class="hint">Für den Countdown die Startzeit des TI-Intervalls eingeben.</div>
+      <div class="btns"><button class="btn secondary" id="bCdSetT0">Startzeit eingeben</button></div>
+    </div>
+    <div id="bCdBody" class="hidden">
+      <div class="sub" id="bCdNextLabel"></div>
+      <div class="countdown" id="bCdNext">--:--</div>
+      <ol class="cdlist" id="bCdList"></ol>
+      <label>Zeitplan verschieben</label>
+      <div class="stepper">
+        <button type="button" id="bCdMinus" aria-label="15 Sekunden früher">−</button>
+        <input id="bCdOffset" type="text" readonly value="±0:00" aria-label="Verschiebung">
+        <button type="button" id="bCdPlus" aria-label="15 Sekunden später">+</button>
+      </div>
+      <div class="hint">Wenn die Runde dem Plan hinterherläuft: in 15-Sekunden-Schritten verschieben (gilt nur für den Countdown).</div>
+    </div>
+  </div>
+
   <div class="card" id="bTimelineCard">
     <h2>Ablauf des Athleten</h2>
     <div class="timeline" id="bTimeline"></div>
@@ -357,6 +385,7 @@ function tickLead(){
 }
 $('lNow').onclick=()=>{ $('lRef').value=nowClock(); if(cdTarget===null) cdFrozen=null; calcLead(); };
 let wakeLock=null;
+function requestWake(){ try{ if(!wakeLock && navigator.wakeLock) navigator.wakeLock.request('screen').then(w=>{ wakeLock=w; w.addEventListener('release',()=>wakeLock=null); }).catch(()=>{}); }catch(e){} }
 $('lStart').onclick=()=>{
   if(cdTarget!==null){ // Stopp
     tickLead(); cdFrozen=$('lCountdown').textContent; // auf aktuellem Stand stehen bleiben
@@ -369,7 +398,7 @@ $('lStart').onclick=()=>{
   cdTarget=(ref!==null?ref:cdStartedAt)+leadRec;
   $('lStart').textContent='Countdown stoppen';
   clearInterval(leadTimer); leadTimer=setInterval(tickLead,500); tickLead();
-  try{ navigator.wakeLock && navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{}); }catch(e){}
+  requestWake();
 };
 ['lHolds','lRef','lGap','lPos'].forEach(id=>$(id).addEventListener('input',()=>{ if(cdTarget===null) cdFrozen=null; calcLead(); }));
 
@@ -425,6 +454,8 @@ function calcBoulder(){
   $('bTiCard').classList.toggle('hidden', !fix);
   $('bB1Wrap').classList.toggle('hidden', B!==1);
   $('bTimelineCard').classList.toggle('hidden', !fix);
+  $('bCdCard').classList.toggle('hidden', !fix);
+  bMilestones=[];
   $('bClockWrap').classList.toggle('hidden', !fix);
 
   const award = remainOk ? fmtMS(remain) : '?';
@@ -460,6 +491,21 @@ function calcBoulder(){
   const at = r => t0!==null ? secToClock(t0 + r*cycle) : null;
   const climbStart = (t0!==null && remainOk) ? secToClock(t0 + k*cycle + (rot-remain)) : null;
   const gapPos = pos ? pos + k : null;        // dieser Starter rückt ein Intervall nach
+
+  // Meilensteine für den Live-Countdown (absolute Sekunden seit Mitternacht)
+  if(t0!==null){
+    const rest = remainOk ? rot-remain : 0;
+    if(scenario1){
+      bMilestones.push({t:t0+cycle, label:'Intervall mit Restzeit an Boulder 1 beginnt'});
+      bMilestones.push({t:t0+cycle+rest, label:`Athlet an Boulder 1 (${award} Restzeit)`});
+    } else {
+      bMilestones.push({t:t0+gapB1*cycle, label:'Boulder 1 bleibt frei (Lücke)'});
+      if(wait>=1) bMilestones.push({t:t0+(k-1)*cycle, label:`Athlet in die Call Zone für Boulder ${B}`});
+      bMilestones.push({t:t0+k*cycle, label:'Slot-Intervall beginnt'});
+      bMilestones.push({t:t0+k*cycle+rest, label:`Athlet an Boulder ${B} (${award} Restzeit)`});
+    }
+    bMilestones.sort((a,b)=>a.t-b.t);
+  }
 
   let isoTxt;
   if(scenario1) isoTxt='nein – danach 1 Intervall Pause, dann B2 (Ablauf +1 Intervall)';
@@ -497,8 +543,32 @@ function calcBoulder(){
     cols.push(`<div class="tcol"><div class="idx">${r===0?'±0':'+'+r}${at(r)?'<br>'+at(r).slice(0,5):''}</div>${cell(athleteCell(r))}${scenario1?'':cell(b1Cell(r))}</div>`);
   }
   $('bTimeline').innerHTML=cols.join('');
+  bTick();
 
 }
+/* ---------- Boulder Live-Countdown ---------- */
+let bMilestones=[], bOffset=0;
+function bTick(){
+  const has=bMilestones.length>0;
+  $('bCdEmpty').classList.toggle('hidden', has);
+  $('bCdBody').classList.toggle('hidden', !has);
+  if(!has) return;
+  let now=nowSec();
+  const items=bMilestones.map(m=>{ let d=m.t+bOffset-now; if(d<-43200) d+=86400; return {...m, d}; });
+  const nextIdx=items.findIndex(m=>m.d>0);
+  const el=$('bCdNext');
+  if(nextIdx<0){ $('bCdNextLabel').textContent='Alle Schritte erledigt'; el.textContent='✓'; el.classList.add('done'); }
+  else { $('bCdNextLabel').textContent=items[nextIdx].label; el.textContent=fmtMS(items[nextIdx].d); el.classList.remove('done'); }
+  $('bCdList').innerHTML=items.map((m,i)=>`<li class="${m.d<=0?'done':(i===nextIdx?'next':'')}"><span>${m.label}</span><span class="t">${secToClock(m.t+bOffset).slice(0,8)}${m.d>0?'<br>in '+fmtMS(m.d):''}</span></li>`).join('');
+  $('bCdOffset').value = bOffset===0 ? '±0:00' : (bOffset>0?'+':'−')+fmtMS(Math.abs(bOffset));
+}
+function bShift(d){ bOffset+=d; bTick(); requestWake(); }
+$('bCdMinus').onclick=()=>bShift(-15);
+$('bCdPlus').onclick=()=>bShift(15);
+$('bCdSetT0').onclick=()=>{ $('bClockWrap').open=true; $('bT0').focus(); };
+$('bT0').addEventListener('input',()=>{ bOffset=0; requestWake(); });
+setInterval(bTick,500);
+
 ['bN','bRot','bChange','bRemain','bT0','bPos'].forEach(id=>$(id).addEventListener('input',()=>{ if(['bN','bRot'].includes(id)) $('bPreset').value='c'; calcBoulder(); }));
 ['bRestRot','bResolved'].forEach(id=>$(id).addEventListener('change',calcBoulder));
 
@@ -515,5 +585,6 @@ function calcBoulder(){
   showTab(store.get('tab','lead'));
 })();
 </script>
+<script>if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </body>
 </html>
