@@ -66,7 +66,7 @@ Ein TI kann nur reklamiert werden, **bis der planmäßig nächste Athlet in der 
 | 12 | 12 min |
 | 23 / 23+ | 20 min (Maximum) |
 
-Danach wird der Neustart **so bald wie möglich** angesetzt. Der betroffene Athlet und **alle noch startenden Athleten** müssen informiert werden.
+Die Erholungszeit läuft **ab dem Moment, in dem der Athlet rausfällt**. Danach wird der Neustart **so bald wie möglich** angesetzt. Der betroffene Athlet und **alle noch startenden Athleten** müssen informiert werden.
 
 ### Ablauf
 1. TI melden, Athlet ablassen.
@@ -76,6 +76,7 @@ Danach wird der Neustart **so bald wie möglich** angesetzt. Der betroffene Athl
 5. Ist der TI bestätigt, legt der JP die Erholungszeit fest und fügt den Athleten in die Startfolge ein.
 6. **Neustart entfällt**, wenn er die Platzierung am Ende der Runde nicht mehr beeinflussen kann (§8.3).
 7. Gewertet wird das bessere Ergebnis aus beiden Versuchen (§8.4).
+8. **Quali mit 2 Routen, TI an Route 1:** Zwischen dem Ende des Neustart-Versuchs an Route 1 und dem Start an Route 2 müssen mindestens **50 Minuten** liegen (Anhang A §4.4). Die Startzeit an Route 2 muss also geprüft und gegebenenfalls verschoben werden.
 
 Das gilt sowohl für On-sight- als auch für Flash-Runden (Judge Guide §2.16).
 
@@ -84,7 +85,8 @@ Das ist ein TI. Das Ergebnis wird auf den letzten kontrollierten Griff vor dem V
 
 ### So rechnet der Rechner
 - Erholungszeit = `min(Griffe, 20)` Minuten
-- Frühester Neustart = Uhrzeit Beginn der Erholung + Erholungszeit
+- Frühester Neustart = Uhrzeit des Sturzes + Erholungszeit
+- Quali Route 1: Route 2 frühestens ca. Neustart + 6 min Kletterzeit + 50 min
 - Einsetzen nach ca. `⌈Erholungszeit / Starttakt⌉` nachfolgenden Athleten
 
 ---
@@ -106,7 +108,9 @@ Ein TI kann nur reklamiert werden **bis zum Beginn des nächsten planmäßigen I
 ### Gutschrift (§8.5)
 > Ausgeglichen wird **nur die verlorene bzw. nicht genutzte Zeit**, höchstens die **Restzeit im unterbrochenen Intervall zu dem Moment, als der betroffene Versuch begonnen hat**.
 
-Beispiel: Der Versuch beginnt bei 2:40 Restzeit, der Griff bricht bei 2:10. Die Gutschrift beträgt höchstens 2:40.
+Als ungefähre Gutschrift gilt die **Restzeit bei Beginn des betroffenen Versuchs**. Beispiel: Der Versuch beginnt bei 2:40 Restzeit, der Griff bricht bei 2:10. Die Gutschrift beträgt ca. 2:40.
+
+**Zählt der TI-Versuch als Versuch?** Das hängt vom Einzelfall ab, der JP entscheidet. Der Rechner zeigt deshalb beide Varianten an: n+1 oder n.
 
 ### Wann steigt der Athlet wieder ein? Fixe Intervalle (Judge Guide §5.2)
 Für den Athleten wird ein zusätzlicher **Rotation-Slot** in die Startliste eingefügt. Der Slot läuft wie ein „Geister-Athlet“ durch alle Boulder. Der TI-Athlet nutzt ihn, wenn der Slot am betroffenen Boulder ankommt. Bis dahin klettert der Athlet seine restlichen Boulder ganz normal.
@@ -130,6 +134,8 @@ Für den Athleten wird ein zusätzlicher **Rotation-Slot** in die Startliste ein
 | B4 | **8.** (sofort) | 4 Intervalle nach B5, dann Call Zone |
 | B5 | **10.** (sofort) | 8 Intervalle, dann Call Zone |
 
+**Boulder 1, Szenario 1 im Detail:** Der Athlet hat den TI in seinem geplanten Startintervall an B1. Im **nächsten Intervall** bekommt er die verbleibende Kletterzeit an B1. Danach hat er **ein Intervall Pause** und geht dann an B2. Der Slot wird vor dem nächsten Athleten eingefügt. Damit verschieben sich sein weiterer Ablauf und alle nachfolgenden Athleten um 1 Intervall.
+
 Im Slot startet der Athlet, wenn auf der Intervalluhr noch die **gutgeschriebene Zeit** steht. Beispiel: Bei 1:30 Gutschrift startet er, wenn noch 1:30 übrig sind.
 
 **Allgemeine Formel** (daraus ergeben sich alle Tabellenwerte; N = Anzahl Boulder, B = TI-Boulder):
@@ -148,8 +154,12 @@ Uhrzeit: Ein Intervall dauert Kletterzeit + 15 s Wechselpause. Beispiel: 5:00 + 
 ### Max-Rotation-Format (z. B. Finale 4 min max)
 Der Athlet bekommt seine zusätzlichen Versuche **so bald wie möglich**. Er klettert dann als **einziger Athlet**, während die Gruppe wartet (Judge Guide §5.2).
 
-### 2-Kurs-Runden (z. B. 2×2, 2×3 Flash)
-Empfehlung im Judge Guide: Den ganzen Kurs der betroffenen Kategorie stoppen, den TI bzw. Einspruch behandeln und danach mit den aktuellen Athleten weitermachen. Das entspricht dem Vorgehen im Max-Rotation-Format.
+### 2-Kurs-Runden (z. B. DJC Flash 2×3)
+Die Verschiebung passiert **nur auf dem betroffenen Kurs**. Der Slot wird in die Startliste dieses Kurses eingefügt, der andere Kurs läuft unverändert weiter. Für die Berechnung ist N die Anzahl der Boulder des betroffenen Kurses.
+
+Bei Flash mit 2 Sets müssen zwischen dem Ende des ersten Sets und dem Start im zweiten Set mindestens **3 Versuchsphasen** liegen (Anhang C §4.7 C). Es ist zu prüfen, ob der TI-Slot diesen Abstand verkürzt.
+
+Der Judge Guide (§5.2) erwähnt als Alternative, den ganzen Kurs zu stoppen.
 
 ### Blut am Griff (Judge Guide §4.10)
 - Ziehen sich die Reinigungsarbeiten bis ins nächste Intervall (nach den 15 s Wechselpause), können der folgende Athlet oder der JU einen TI ausrufen. Auch der Athlet oder sein Teamoffizieller kann einen TI verlangen.
@@ -157,11 +167,13 @@ Empfehlung im Judge Guide: Den ganzen Kurs der betroffenen Kategorie stoppen, de
 
 ---
 
-## 5. Offene Auslegungsfragen
+## 5. Geklärte Auslegungsfragen
 
-Die folgenden Punkte stehen nicht eindeutig im Regelwerk. Der Rechner nutzt bis zur Klärung den genannten Standard:
-
-1. **Lead: Ab wann läuft die Erholungszeit?** Ab dem TI, ab dem Moment am Boden oder ab der Bestätigung? *Standard: ab dem Moment am Boden (frei einstellbar).*
-2. **Boulder: Zählt der Versuch mit dem TI als Versuch?** §11.4 A sagt „als nicht erfolgreich gewertet“. *Standard: Er zählt, der nächste Versuch ist n+1 (Schalter in den Einstellungen).*
-3. **Boulder: Wie hoch ist die Gutschrift genau?** Die Restzeit bei Versuchsbeginn ist die Obergrenze. Ist sie auch der Normalwert? *Standard: ja.*
-4. **Formate mit 2 Sets (DJC Flash 2×3) und Formate ohne Pause-Intervall:** Die Tabellen im Judge Guide gelten nur für 4 oder 5 Boulder mit abwechselnden Kletter- und Pause-Intervallen.
+| Frage | Festlegung |
+|---|---|
+| Lead: Ab wann läuft die Erholungszeit? | Ab dem Moment, in dem der Athlet rausfällt bzw. am Boden ist |
+| Boulder: Zählt der TI-Versuch als Versuch? | Kommt auf den Einzelfall an, der JP entscheidet (Rechner zeigt n+1 und n) |
+| Boulder: Höhe der Gutschrift | Restzeit bei Beginn des betroffenen Versuchs, als ca.-Wert |
+| Boulder 1, Szenario 1 | Nächstes Intervall: Restzeit an B1, dann 1 Intervall Pause, dann B2 |
+| Runden mit 2 Kursen | Verschiebung nur auf dem betroffenen Kurs |
+| Lead-Quali mit 2 Routen | Kein Einfluss auf die Berechnung, aber Hinweis auf 50 min Pause bis Route 2 |
