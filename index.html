@@ -58,6 +58,8 @@ input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
 .row .stepper input{padding:12px 4px}
 .stepper button{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--text);font:700 22px/1 inherit;border-radius:10px;cursor:pointer}
 .stepper input{text-align:center;font-weight:700;font-size:20px}
+.stepper input::-webkit-inner-spin-button,.stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.stepper input[type=number]{-moz-appearance:textfield;appearance:textfield}
 .switch{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-weight:600;font-size:14px}
 .switch input{width:auto;transform:scale(1.4);accent-color:var(--accent)}
 details{margin-top:12px}
