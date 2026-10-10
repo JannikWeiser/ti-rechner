@@ -73,15 +73,13 @@ summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
 .steps{margin:8px 0 0;padding-left:20px}
 .steps li{margin:4px 0}
 .timeline{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px}
-.tl{flex:0 0 auto;min-width:46px;border-radius:8px;padding:6px 4px;text-align:center;font-size:11px;line-height:1.2;color:#fff}
+.tl{flex:0 0 auto;width:54px;height:44px;border-radius:8px;padding:4px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:11px;line-height:1.15;color:#fff;overflow:hidden}
 .tl b{display:block;font-size:13px}
 .tl.climb{background:var(--climb)} .tl.rest{background:var(--rest);color:var(--text)} .tl.iso{background:var(--iso)}
 .tl.call{background:var(--call)} .tl.slot{background:var(--slot)} .tl.ti{background:var(--bad)} .tl.empty{background:var(--empty);color:var(--muted)}
 .tcol{display:flex;flex-direction:column;gap:3px;flex:0 0 auto}
-.tcol .idx{font-size:11px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
-.tl.b1{background:var(--empty);color:var(--muted)}
+.tcol .idx{width:54px;height:28px;font-size:11px;line-height:14px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
 .tl.gap{background:transparent;color:var(--bad);border:2px dashed var(--bad);font-weight:700}
-.tl.b1ti{background:var(--slot)}
 .legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-top:8px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
@@ -157,7 +155,6 @@ footer a{color:inherit}
     <div class="hint" style="text-align:center" id="lCdHint">Beim Start wird die seit dem Sturz vergangene Zeit abgezogen.</div>
     <div class="btns">
       <button class="btn" id="lStart">Countdown starten</button>
-      <button class="btn secondary" id="lCopy">Zusammenfassung kopieren</button>
     </div>
   </div>
 </section>
@@ -171,15 +168,16 @@ footer a{color:inherit}
       <button type="button" data-v="fix" aria-pressed="true">Intervall</button>
       <button type="button" data-v="max">World Series / Classic</button>
     </div>
+    <div id="bPresetWrap">
     <label for="bPreset">Vorlage</label>
     <select id="bPreset">
       <option value="q">DM Qualifikation – 5 Boulder, 5 min</option>
       <option value="s">DM Semifinale – 4 Boulder, 5 min</option>
       <option value="jf">DJC Finale – 4 Boulder, 4 min</option>
       <option value="jq">DJC Qualifikation – Flash 2×3, 4 min (je Kurs)</option>
-      <option value="f">DM Finale – 4 Boulder, 4 min max</option>
       <option value="c">Eigene Einstellung</option>
     </select>
+    </div>
     <div id="bFixSettings">
     <div class="row">
       <div><label for="bN">Anzahl Boulder</label>
@@ -216,10 +214,9 @@ footer a{color:inherit}
       <input id="bRemain" type="text" inputmode="numeric" placeholder="m:ss" value="3:00">
       <button type="button" data-step="bRemain" data-time="1" data-d="15" aria-label="mehr">+</button>
     </div>
-    <div class="hint">Restzeit auf der Uhr, als der vom TI betroffene Versuch begonnen hat – daraus ergibt sich die ungefähre Gutschrift (§8.5).</div>
+    <div class="hint">Restzeit auf der Uhr, als der vom TI betroffene Versuch begonnen hat.</div>
     <div id="bFixOnly">
       <div class="switch" id="bB1Wrap"><span>TI vor Ende des laufenden Intervalls behoben?</span><input type="checkbox" id="bResolved"></div>
-      <div class="hint" id="bB1Hint">Nur relevant für Boulder 1 (Szenario 1 im Judge Guide).</div>
     </div>
     <details id="bClockWrap">
       <summary>Uhrzeit &amp; Startliste (optional)</summary>
@@ -239,7 +236,7 @@ footer a{color:inherit}
   <div class="card" id="bTimelineCard">
     <h2>Ablauf des Athleten</h2>
     <div class="timeline" id="bTimeline"></div>
-    <div class="hint">Obere Reihe: TI-Athlet · untere Reihe: Boulder 1 bzw. Call Zone B1 (Lücke = dort niemanden aufrufen).</div>
+    <div class="hint">Untere Reihe: Lücke an Boulder 1 – in diesem Intervall wird an B1 niemand aufgerufen.</div>
     <div class="legend">
       <span><i style="background:var(--bad)"></i>TI</span>
       <span><i style="background:var(--climb)"></i>Boulder</span>
@@ -249,7 +246,6 @@ footer a{color:inherit}
       <span><i style="background:var(--slot)"></i>TI-Slot</span>
       <span><i style="background:var(--bad);outline:2px dashed var(--bad);outline-offset:1px;background:transparent"></i>Lücke B1</span>
     </div>
-    <div class="btns"><button class="btn secondary" id="bCopy">Zusammenfassung kopieren</button></div>
   </div>
 </section>
 </main>
@@ -279,12 +275,6 @@ function parseMS(s){
 function timeToSec(t){ if(!t) return null; const p=t.split(':').map(Number); return p[0]*3600+p[1]*60+(p[2]||0); }
 function secToClock(s){ s=((Math.round(s)%86400)+86400)%86400; return pad(Math.floor(s/3600))+':'+pad(Math.floor(s/60)%60)+':'+pad(s%60); }
 function nowClock(){ const d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
-function copy(text, btn){
-  const done=()=>{ const o=btn.textContent; btn.textContent='Kopiert ✓'; setTimeout(()=>btn.textContent=o,1500); };
-  if(navigator.clipboard) navigator.clipboard.writeText(text).then(done,()=>fallback());
-  else fallback();
-  function fallback(){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');done();}catch(e){} ta.remove(); }
-}
 
 /* ---------- Theme ---------- */
 const theme = store.get('theme', null);
@@ -322,7 +312,7 @@ document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{
    LEAD  – Event Regulations Annex A §8.2 B / Nat. Regelwerk Anhang A §8.2 B
    Erholungszeit = 1 min je gewertetem Griff vor dem TI, max. 20 min
    ========================================================= */
-let leadSummary='', leadTarget=null, leadRec=0, cdTarget=null, leadTimer=null;
+let leadTarget=null, leadRec=0, cdTarget=null, leadTimer=null;
 function calcLead(){
   const holds=Math.max(0, Math.floor(+$('lHolds').value||0));
   const recMin=Math.min(holds,20);
@@ -344,38 +334,34 @@ function calcLead(){
   $('lResult').innerHTML=html;
   leadTarget = earliest; leadRec = recMin*60;
   if(cdTarget!==null) cdTarget = (ref!==null ? ref : cdStartedAt) + leadRec;
-  leadSummary = `TI Lead\nGewertete Griffe vor TI: ${holds}\nErholungszeit: ${recMin} min\n`+
-    (ref!==null?`Sturz: ${secToClock(ref)}\nFrühester Neustart: ${secToClock(earliest)}\n`:'')+
-    (recMin>0?`Einsetzen nach ca. ${slotsAhead} nachfolgenden Athleten (Takt ${gap} min)\n`:'')+
-    ``;
   tickLead();
 }
 const nowSec=()=>{ const d=new Date(); return d.getHours()*3600+d.getMinutes()*60+d.getSeconds(); };
-let cdStartedAt=null;
+let cdStartedAt=null, cdFrozen=null;
 function tickLead(){
   const el=$('lCountdown');
-  if(cdTarget===null){ el.textContent=fmtMS(leadRec); el.classList.remove('done'); return; }
+  if(cdTarget===null){ if(cdFrozen===null){ el.textContent=fmtMS(leadRec); el.classList.remove('done'); } return; }
   let diff=cdTarget-nowSec(); if(diff<-43200) diff+=86400;
   if(diff<=0){ el.textContent='Bereit ✓'; el.classList.add('done'); }
   else { el.textContent=fmtMS(diff); el.classList.remove('done'); }
 }
-$('lNow').onclick=()=>{ $('lRef').value=nowClock(); calcLead(); };
+$('lNow').onclick=()=>{ $('lRef').value=nowClock(); if(cdTarget===null) cdFrozen=null; calcLead(); };
 let wakeLock=null;
 $('lStart').onclick=()=>{
   if(cdTarget!==null){ // Stopp
+    tickLead(); cdFrozen=$('lCountdown').textContent; // auf aktuellem Stand stehen bleiben
     cdTarget=null; clearInterval(leadTimer); $('lStart').textContent='Countdown starten';
-    if(wakeLock){ wakeLock.release(); wakeLock=null; } tickLead(); return;
+    if(wakeLock){ wakeLock.release(); wakeLock=null; } return;
   }
   // Start: Ziel = Uhrzeit des Sturzes + Erholungszeit (ohne die eingegebene Uhrzeit zu verändern)
-  cdStartedAt=nowSec();
+  cdStartedAt=nowSec(); cdFrozen=null;
   const ref=timeToSec($('lRef').value);
   cdTarget=(ref!==null?ref:cdStartedAt)+leadRec;
   $('lStart').textContent='Countdown stoppen';
   clearInterval(leadTimer); leadTimer=setInterval(tickLead,500); tickLead();
   try{ navigator.wakeLock && navigator.wakeLock.request('screen').then(w=>wakeLock=w).catch(()=>{}); }catch(e){}
 };
-$('lCopy').onclick=e=>copy(leadSummary,e.target);
-['lHolds','lRef','lGap','lPos'].forEach(id=>$(id).addEventListener('input',calcLead));
+['lHolds','lRef','lGap','lPos'].forEach(id=>$(id).addEventListener('input',()=>{ if(cdTarget===null) cdFrozen=null; calcLead(); }));
 
 /* =========================================================
    BOULDER
@@ -386,12 +372,11 @@ $('lCopy').onclick=e=>copy(leadSummary,e.target);
      = Slot vor dem k-ten nachfolgenden Athleten der Startliste.
    Ergibt exakt: 4 Boulder → B1:8 B2:6 B3:6 B4:8 · 5 Boulder → B1:10 B2:8 B3:6 B4:8 B5:10
    ========================================================= */
-const presets={ q:{f:'fix',n:5,r:5,two:false}, s:{f:'fix',n:4,r:5,two:false}, jf:{f:'fix',n:4,r:4,two:false}, jq:{f:'fix',n:3,r:4,two:true}, f:{f:'max',n:4,r:4,two:false} };
+const presets={ q:{f:'fix',n:5,r:5,two:false}, s:{f:'fix',n:4,r:5,two:false}, jf:{f:'fix',n:4,r:4,two:false}, jq:{f:'fix',n:3,r:4,two:true} };
 let bState=Object.assign({format:'fix', boulder:1}, store.get('boulderState',{}));
-let bSummary='';
 
 function setFormat(f){ bState.format=f; document.querySelectorAll('#bFormat button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===f)); }
-document.querySelectorAll('#bFormat button').forEach(b=>b.onclick=()=>{ setFormat(b.dataset.v); $('bPreset').value='c'; calcBoulder(); });
+document.querySelectorAll('#bFormat button').forEach(b=>b.onclick=()=>{ setFormat(b.dataset.v); calcBoulder(); });
 $('bPreset').onchange=()=>{ const p=presets[$('bPreset').value]; if(p){ setFormat(p.f); $('bN').value=p.n; $('bRot').value=p.r; } calcBoulder(); };
 
 function renderBoulderButtons(n){
@@ -424,9 +409,9 @@ function calcBoulder(){
 
   $('bFixOnly').classList.toggle('hidden', !fix);
   $('bFixSettings').classList.toggle('hidden', !fix);
+  $('bPresetWrap').classList.toggle('hidden', !fix);
   $('bTiCard').classList.toggle('hidden', !fix);
   $('bB1Wrap').classList.toggle('hidden', B!==1);
-  $('bB1Hint').classList.toggle('hidden', B!==1);
   $('bTimelineCard').classList.toggle('hidden', !fix);
   $('bClockWrap').classList.toggle('hidden', !fix);
 
@@ -488,29 +473,16 @@ function calcBoulder(){
     if(r===k-1) return ['call','CZ','Call'];
     return ['iso','Iso',''];
   };
-  const b1Cell = r => {
-    if(r<=0) return null;
-    if(scenario1 && r===1) return ['b1ti','B1','TI-Athl.'];
-    if(!scenario1 && r===gapB1) return ['gap','LÜCKE','frei'];
-    return ['b1','B1','belegt'];
-  };
+  const b1Cell = r => (!scenario1 && r===gapB1) ? ['gap','Lücke','B1 frei'] : null;
   const end = scenario1 ? 1+p*(N-1) : Math.max(k,finishLast);
   const cell = c => c ? `<div class="tl ${c[0]}"><b>${c[1]}</b>${c[2]}</div>` : `<div class="tl" style="visibility:hidden"><b>&nbsp;</b>&nbsp;</div>`;
   const cols=[];
   for(let r=0;r<=end;r++){
-    cols.push(`<div class="tcol"><div class="idx">${r===0?'±0':'+'+r}${at(r)?'<br>'+at(r).slice(0,5):''}</div>${cell(athleteCell(r))}${cell(b1Cell(r))}</div>`);
+    cols.push(`<div class="tcol"><div class="idx">${r===0?'±0':'+'+r}${at(r)?'<br>'+at(r).slice(0,5):''}</div>${cell(athleteCell(r))}${scenario1?'':cell(b1Cell(r))}</div>`);
   }
   $('bTimeline').innerHTML=cols.join('');
 
-  bSummary=`TI Boulder (Intervall, ${N} Boulder, ${fmtMS(rot)} min)\n`+
-    `Boulder ${B}${pos?`, Startposition ${pos}`:''}\n`+
-    `Gutschrift: ${awardTxt}\n`+
-    (scenario1?`Wiedereinstieg: nächstes Intervall an B1 (Restzeit), dann 1 Intervall Pause, dann B2\n`
-              :`Wiedereinstieg: +${k} Intervalle an B${B}${climbStart?`, Start an der Wand ca. ${climbStart} Uhr`:''}\n`+
-               `Lücke B1: Intervall +${gapB1}${at(gapB1)?` (${at(gapB1)})`:''} – vor dem ${k}. nachfolgenden Athleten${gapPos?` (Pos. ${gapPos})`:''}\n`)+
-    `Sek. Isolation: ${isoTxt}`;
 }
-$('bCopy').onclick=e=>copy(bSummary,e.target);
 ['bN','bRot','bChange','bRemain','bT0','bPos'].forEach(id=>$(id).addEventListener('input',()=>{ if(['bN','bRot'].includes(id)) $('bPreset').value='c'; calcBoulder(); }));
 ['bRestRot','bResolved'].forEach(id=>$(id).addEventListener('change',calcBoulder));
 
@@ -519,7 +491,7 @@ $('bCopy').onclick=e=>copy(bSummary,e.target);
   const l=store.get('lead',null);
   if(l){ $('lHolds').value=l.holds; $('lGap').value=l.gap; $('lPos').value=l.pos||''; }
   const bi=store.get('boulderInputs',null);
-  if(bi){ $('bPreset').value=bi.preset; $('bN').value=bi.n; $('bRot').value=bi.rot; $('bChange').value=bi.change;
+  if(bi){ $('bPreset').value=presets[bi.preset]||bi.preset==='c'?bi.preset:'c'; $('bN').value=bi.n; $('bRot').value=bi.rot; $('bChange').value=bi.change;
     $('bRestRot').checked=bi.p===2; $('bRemain').value=bi.remain; }
   setFormat(bState.format);
   $('lRef').value=nowClock();

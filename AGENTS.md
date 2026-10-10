@@ -42,7 +42,7 @@ Dazu gehört [TI-Ablauf.md](TI-Ablauf.md): eine Doku, wie ein TI abläuft und wa
 - **Die Erholungszeit läuft ab dem Moment, in dem der Athlet rausfällt.** Das Eingabefeld heißt deshalb „Uhrzeit des Sturzes“ und ist beim Laden mit der aktuellen Uhrzeit vorbelegt.
 - Frühester Neustart = Uhrzeit des Sturzes + Erholungszeit
 - Einsetzen nach ca. `⌈Erholungszeit / Starttakt⌉` nachfolgenden Athleten (optional mit Startposition)
-- **Countdown:** Startet nur per Button. Er überschreibt die Uhrzeit des Sturzes **nicht**. Beim Start zieht er die seit dem Sturz vergangene Zeit ab. Er lässt sich stoppen.
+- **Countdown:** Startet nur per Button. Er überschreibt die Uhrzeit des Sturzes **nicht**. Beim Start zieht er die seit dem Sturz vergangene Zeit ab. **Beim Stoppen bleibt die aktuelle Zeit stehen** und springt nicht auf die volle Erholungszeit zurück. Erst wenn eine Eingabe geändert wird, zeigt er wieder die volle Erholungszeit.
 
 ### Boulder, Intervall-Format
 Die Tabellen 2 und 3 im Judge Guide §5.2 lassen sich auf eine Formel bringen (geprüft an allen Zeilen für 4 und 5 Boulder):
@@ -57,11 +57,11 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - Uhrzeit: 1 Intervall = Kletterzeit + 15 s Wechselpause. Start an der Wand = Slotbeginn + (Intervall − Gutschrift).
 - **B1, Szenario 1** (TI vor Intervallende behoben): Der Athlet bekommt im **nächsten** Intervall die restliche Kletterzeit an B1, hat dann **1 Intervall Pause** und geht danach an B2. Sein ganzer weiterer Ablauf verschiebt sich um ein Intervall, der Slot kommt vor den nächsten Athleten.
 - **Gutschrift** = Restzeit bei Beginn des betroffenen Versuchs, angezeigt als **ca.-Wert** (§8.5).
-- Grafik „Ablauf des Athleten“: Die obere Reihe zeigt den TI-Athleten, die untere Boulder 1 mit der rot gestrichelten Lücke. Über jeder Spalte stehen Intervall und Uhrzeit.
+- Grafik „Ablauf des Athleten“: Alle Kacheln sind gleich groß (54×44 px). Die obere Reihe zeigt den TI-Athleten. In der unteren Reihe erscheint **nur die Lücke** („Lücke / B1 frei“, rot gestrichelt), kein „B1 belegt“. Bei Szenario 1 gibt es keine untere Reihe. Über jeder Spalte stehen Intervall und Uhrzeit.
 
 ### Boulder, World Series / Classic
 - **Hier wird nichts berechnet, die App zeigt nur einen Hinweis:** Wiedereinstieg **immer nach Ende der laufenden Rotation**, als einziger Athlet, die Gruppe wartet. Gutschrift ca. Restzeit bei Versuchsbeginn.
-- In diesem Format sind die Eingaben (Anzahl Boulder, Intervall, „Wo war der TI?“) und die Grafik ausgeblendet.
+- In diesem Format sind die Eingaben (Vorlage, Anzahl Boulder, Intervall, „Wo war der TI?“) und die Grafik ausgeblendet.
 
 ## Geklärte Regelauslegungen (vom Projektinhaber entschieden)
 
@@ -81,9 +81,10 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **Orange Ergebniskästen zeigen nur berechnete Werte.** Keine To-Do-Listen, keine Angaben zur Wertung, keine Paragraphen-Verweise. Der Schiedsrichter kennt die Regeln und soll nicht verwirrt werden.
 - Formatnamen wie im Regelwerk: **„Intervall“** (nicht „Intervall fix“) und **„World Series / Classic“** (nicht „Max-Rotation“)
 - **±-Stepper einheitlich** an allen Zahlenfeldern: Griffe, Starttakt, Startpositionen, Anzahl Boulder, Intervall (0,5er-Schritte), Restzeit (15-s-Schritte). Uhrzeitfelder haben keine Stepper.
-- Vorlagen: DM Quali 5×5 min, DM Semi 4×5 min, DJC Finale 4×4 min, DJC Quali Flash 2×3 4 min (je Kurs), DM Finale 4 min max (World Series), Eigene
+- Vorlagen (nur im Intervall-Format): DM Quali 5×5 min, DM Semi 4×5 min, DJC Finale 4×4 min, DJC Quali Flash 2×3 4 min (je Kurs), Eigene. Für World Series gibt es keine Vorlage, weil immer dasselbe herauskommt.
 - Footer: nur der Hinweis „Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident“, der Link zur TI-Doku (GitHub-Ansicht der `TI-Ablauf.md`), Impressum und Datenschutz. **Keine Quellenliste.**
-- Button „Zusammenfassung kopieren“ für Messenger oder JP
+- **Die Funktion „Zusammenfassung kopieren“ wurde auf Wunsch entfernt.**
+- Keine Erklär-Hinweise mit Regelbezug an den Eingabefeldern, z. B. „Szenario 1 im Judge Guide“ oder „daraus ergibt sich die Gutschrift (§8.5)“
 
 ## Impressum / Datenschutz
 
