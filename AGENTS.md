@@ -62,7 +62,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - Grafik „Ablauf des Athleten“: Alle Kacheln sind gleich groß (54×44 px). Die obere Reihe zeigt den TI-Athleten. In der unteren Reihe erscheint **nur die Lücke** („Lücke / B1 frei“, rot gestrichelt), kein „B1 belegt“. Bei Szenario 1 gibt es keine untere Reihe. Über jeder Spalte stehen Intervall und Uhrzeit.
 
 ### Mehrere TIs (Lead & Boulder)
-- Button **„+ weiterer TI“**. Ab 2 TIs erscheinen Chips („TI 2 · B3 · Pos 7“) zum Umschalten und „Diesen TI löschen“. Bei 1 TI sieht alles aus wie früher.
+- Button **„+ weiterer TI“**. Ab 2 TIs erscheinen Chips („TI 2 · B3 · Pos 7“) zum Umschalten. **„Diesen TI löschen“ ist immer sichtbar.** Beim letzten TI wird das Formular geleert und ein neuer, leerer TI 1 begonnen. Ein laufender Countdown stoppt dabei, Lead setzt die Sturzzeit auf „jetzt“.
 - Die TI-Nummern sind stabil. Nach dem Löschen wird nicht neu nummeriert.
 - **Boulder, Rechenkern** (`computeTI`): gemeinsame Achse = Intervalle an B1 ab Rundenbeginn (0 = Startposition 1). Jeder Slot reserviert ein B1-Intervall G. Reguläre Athleten füllen die übrigen der Reihe nach (`b1Start`). Details und Formeln in [PLAN-mehrere-TIs.md](PLAN-mehrere-TIs.md). Geprüft gegen Judge Guide §5.2.3 (JENFT → vor Pos. 9, PEINADO → vor Pos. 12).
 - **Startposition** = Platz in der Startliste (Spalte „Order“), **nicht** die Startnummer. Ab 2 TIs ist sie Pflicht und rutscht aus „Uhrzeit & Startliste“ nach oben ins Formular. Ohne Startposition wird ein TI ohne Wechselwirkung gerechnet, mit Hinweis.

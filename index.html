@@ -171,7 +171,7 @@ footer a{color:inherit}
     </details>
     <div class="btns">
       <button type="button" class="btn secondary" id="lAdd">+ weiterer TI</button>
-      <button type="button" class="btn secondary hidden" id="lDel">Diesen TI löschen</button>
+      <button type="button" class="btn secondary" id="lDel">Diesen TI löschen</button>
     </div>
   </div>
 
@@ -280,7 +280,7 @@ footer a{color:inherit}
     </details>
     <div class="btns">
       <button type="button" class="btn secondary" id="bAdd">+ weiterer TI</button>
-      <button type="button" class="btn secondary hidden" id="bDel">Diesen TI löschen</button>
+      <button type="button" class="btn secondary" id="bDel">Diesen TI löschen</button>
     </div>
   </div>
 
@@ -410,7 +410,6 @@ function lReadForm(){ const ti=lCur(); ti.holds=$('lHolds').value; ti.ref=$('lRe
 function renderLeadChips(){
   const multi=lTIs.length>1;
   $('lChips').classList.toggle('hidden', !multi);
-  $('lDel').classList.toggle('hidden', !multi);
   if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">TI ${t.no} · ${Math.max(0,Math.floor(+t.holds||0))} Gr.${t.pos?' · Pos '+t.pos:''}</button>`).join('');
   $('lChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ lSel=+c.dataset.i; lLoadForm(); calcLead(); });
 }
@@ -475,9 +474,12 @@ $('lAdd').onclick=()=>{
   lSel=lTIs.length-1; lLoadForm(); calcLead(); $('lHolds').focus();
 };
 $('lDel').onclick=()=>{
-  if(lTIs.length<2) return;
   if(!confirm(`TI ${lCur().no} löschen?`)) return;
-  lTIs.splice(lSel,1); lSel=Math.max(0,lSel-1); lLoadForm(); calcLead();
+  // Letzter TI: Formular wird mit einem leeren TI neu begonnen
+  if(lTIs.length<2){ lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', cdTarget:null, cdFrozen:null}]; lNext=2; lSel=0; }
+  else { lTIs.splice(lSel,1); lSel=Math.max(0,lSel-1); }
+  if(wakeLock && !lTIs.some(t=>t.cdTarget!==null)){ wakeLock.release(); wakeLock=null; }
+  lLoadForm(); calcLead();
 };
 ['lHolds','lRef','lPos'].forEach(id=>$(id).addEventListener('input',()=>{ lReadForm(); if(lCur().cdTarget===null) lCur().cdFrozen=null; calcLead(); }));
 $('lGap').addEventListener('input',calcLead);
@@ -621,8 +623,11 @@ $('bAdd').onclick=()=>{
   $('bPosMain').scrollIntoView({block:'center'});
 };
 $('bDel').onclick=()=>{
-  if(bTIs.length<2 || !confirm(`TI ${bCur().no} löschen? Die Slots der anderen TIs bleiben unverändert.`)) return;
-  bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); bSave(); bLoadForm(); renderBoulder();
+  if(!confirm(bTIs.length<2 ? `TI ${bCur().no} löschen?` : `TI ${bCur().no} löschen? Die Slots der anderen TIs bleiben unverändert.`)) return;
+  // Letzter TI: Formular wird mit einem leeren TI neu begonnen
+  if(bTIs.length<2){ bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; recomputeOne(0); }
+  else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
+  bSave(); bLoadForm(); renderBoulder();
 };
 $('bReset').onclick=()=>{
   if(!confirm('Alle TIs dieser Runde löschen?')) return;
@@ -648,7 +653,6 @@ function renderBoulder(){
   $('bPosReq').classList.toggle('hidden', !multi || !!ti.pos);
   // Chips
   $('bChips').classList.toggle('hidden', !multi);
-  $('bDel').classList.toggle('hidden', !multi);
   if(multi){
     $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">TI ${t.no} · B${t.B}${S.two?' · '+t.course:''}${t.pos?' · Pos '+t.pos:''}</button>`).join('');
     $('bChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ bSel=+c.dataset.i; bSave(); bLoadForm(); renderBoulder(); });
