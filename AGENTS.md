@@ -97,3 +97,16 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - Unklare oder widersprüchliche Regelstellen **nachfragen**, nicht raten. Der Projektinhaber klärt die Auslegung.
 - Nach jeder Änderung `TI-Ablauf.md` (Abschnitt 5) und diese Datei aktualisieren.
 - Änderungen im Browser auf Handygröße prüfen, danach committen und auf `main` pushen.
+
+## Ideen / Roadmap (Stand 10.10.2026)
+
+| # | Idee | Status |
+|---|---|---|
+| 1 | Lead-Neustart mit Startliste (Namen statt „nach ca. X Athleten“) | Erst wenn es in einem anderen Tool eingebaut ist |
+| 2 | Boulder-Startliste mit Namen („Lücke vor MÜLLER“) | Erst wenn es in einem anderen Tool eingebaut ist |
+| 3 | **Mehrere TIs gleichzeitig** (Slots verschieben sich gegenseitig, Judge Guide §5.2.3) | **Offen, den Projektinhaber aktiv daran erinnern** |
+| 4 | Einsprüche wie TI behandeln | In Diskussion |
+| 5 | Offline-Nutzung als App (PWA) | In Diskussion |
+| 6 | Live-Countdown für Boulder | In Diskussion |
+| 7 | Verbindung zu Callzone-Management / Lead-Uhr | Eventuell später |
+| 8 | TI-Protokoll | **Abgelehnt** |
