@@ -118,6 +118,17 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - `sw.js`: **Network first.** Mit Internet kommt immer die neueste Version, ohne Internet die Version aus dem Cache. Bei neuen Dateien die Liste `FILES` ergänzen. Den Cache-Namen (`ti-rechner-vN`) erhöhen, wenn alte Caches entfernt werden sollen.
 - Registriert in `index.html`, `impressum.html` und `datenschutz.html`.
 
+## Sicherheit & Robustheit
+
+- **Eingaben normalisieren:** Startposition nur als ganze Zahl von 1 bis 9999 (`posInt`/`posStr`). Uhrzeiten nur im Format `hh:mm(:ss)` (`timeStr`). Negative Restzeiten sind ungültig (`parseMS` → NaN, es erscheint ein Hinweis).
+- **localStorage wird beim Laden geprüft:** Alle TI-Felder werden validiert. Gespeicherte Boulder-Ergebnisse werden **übernommen, nicht neu berechnet** (sonst wären die fixen Slots nach einem Neuladen anders), aber nur, wenn sie strukturell gültig sind. Fehlende Ergebnisse werden einzeln berechnet, nie per `recomputeAll`.
+- Lead-Countdowns vom Vortag laufen nicht weiter (`cdDay`), weil die Zeiten als Sekunden seit Mitternacht gespeichert sind.
+- **Ausgabe escapen:** Alle Texte aus Speicher oder Eingaben gehen durch `esc()`, bevor sie in `innerHTML` landen (Hinweise, Chips, Countdown-Labels).
+- **CSP** per Meta-Tag in allen drei Seiten: nur eigene Quellen, keine externen Skripte, `object-src 'none'`, `base-uri 'none'`, `form-action 'none'`. Dazu `referrer: no-referrer`.
+- `b1Start` läuft ohne feste Obergrenze und endet nach spätestens P + (Anzahl Lücken) Schritten. Früher brach die Schleife nach 5000 Schritten ab und lieferte falsch 0.
+- **Takt:** Der 500-ms-Takt aktualisiert nur den sichtbaren Reiter und pausiert bei verstecktem Browser-Tab. Eingaben aktualisieren die Anzeige **immer sofort** (`tickLead()`/`bTick()` direkt, ohne Sichtbarkeitsprüfung).
+- **Service Worker:** network first mit **3 s Zeitlimit**. Bei schlechtem Hallen-WLAN kommt dann die gespeicherte Version. Gespeichert werden nur eigene, vollständige Antworten (`res.type === 'basic'`). Cache-Name derzeit `ti-rechner-v3`.
+
 ## Impressum / Datenschutz
 
 - Daten wie in den anderen Projekten (EYCH-Plakatgenerator): Jannik Weiser, Ilsungstraße 15b, 86161 Augsburg, info@comptools.cloud. Rechtsgrundlagen: § 5 DDG und § 18 Abs. 2 MStV.

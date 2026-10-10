@@ -2,6 +2,8 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f97316">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -343,14 +345,19 @@ const store = {
 /* ---------- Helpers ---------- */
 const pad = n => String(n).padStart(2,'0');
 function fmtMS(sec){ sec=Math.max(0,Math.round(sec)); return Math.floor(sec/60)+':'+pad(sec%60); }
+// Startposition: nur ganze Zahlen ≥ 1 (z. B. „12.5“, „-3“ oder „1e9“ werden verworfen)
+const posInt=v=>{ const n=Number(v); return Number.isInteger(n) && n>=1 && n<=9999 ? n : null; };
+const posStr=v=>{ const n=posInt(v); return n===null ? '' : String(n); };
+const timeStr=v=>/^\d{2}:\d{2}(:\d{2})?$/.test(String(v||'')) ? String(v) : '';
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function parseMS(s){
   s=String(s).trim().replace(',',':').replace('.',':');
   if(!s) return NaN;
-  if(s.includes(':')){ const [m,x]=s.split(':'); return (+m||0)*60+(+x||0); }
-  const n=+s; if(isNaN(n)) return NaN;
+  if(s.includes(':')){ const [m,x]=s.split(':'); const v=(+m||0)*60+(+x||0); return v<0?NaN:v; }
+  const n=+s; if(isNaN(n)||n<0) return NaN;
   return n<=10 ? n*60 : Math.floor(n/100)*60 + n%100; // "3" = 3 min, "230" = 2:30
 }
-function timeToSec(t){ if(!t) return null; const p=t.split(':').map(Number); return p[0]*3600+p[1]*60+(p[2]||0); }
+function timeToSec(t){ t=timeStr(t); if(!t) return null; const p=t.split(':').map(Number); return p[0]*3600+p[1]*60+(p[2]||0); }
 function secToClock(s){ s=((Math.round(s)%86400)+86400)%86400; return pad(Math.floor(s/3600))+':'+pad(Math.floor(s/60)%60)+':'+pad(s%60); }
 function nowClock(){ const d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
 
@@ -365,6 +372,7 @@ $('themeBtn').onclick = () => {
 
 /* ---------- Tabs ---------- */
 function showTab(t){
+  setTimeout(()=>{ tickLead(); bTick(); },0);
   $('tabLead').setAttribute('aria-selected', t==='lead');
   $('tabBoulder').setAttribute('aria-selected', t==='boulder');
   $('lead').classList.toggle('hidden', t!=='lead');
@@ -374,6 +382,7 @@ function showTab(t){
 $('tabLead').onclick=()=>showTab('lead');
 $('tabBoulder').onclick=()=>showTab('boulder');
 
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ tickLead(); bTick(); } });
 document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{
   const i=$(b.dataset.step), d=+b.dataset.d;
   if(b.dataset.time){ // m:ss-Feld, Schritte in Sekunden
@@ -398,6 +407,14 @@ if(!Array.isArray(lTIs)||!lTIs.length){
   const l=store.get('lead',null);
   lTIs=[{no:1, holds:l?l.holds:10, ref:nowClock(), pos:l?(l.pos||''):'', cdTarget:null, cdFrozen:null}];
 }
+const today=new Date().toDateString();
+lTIs=lTIs.filter(t=>t&&typeof t==='object').map((t,i)=>({no:Number.isInteger(t.no)&&t.no>0?t.no:i+1,
+  holds:Math.max(0,Math.floor(+t.holds||0)), ref:timeStr(t.ref), pos:posStr(t.pos),
+  // Countdowns vom Vortag nicht weiterlaufen lassen (Zeiten sind Sekunden seit Mitternacht)
+  cdTarget: t.cdDay===today && Number.isFinite(t.cdTarget) ? t.cdTarget : null,
+  cdFrozen: t.cdDay===today && typeof t.cdFrozen==='string' ? t.cdFrozen : null,
+  cdStartedAt: Number.isFinite(t.cdStartedAt)?t.cdStartedAt:null, cdDay:t.cdDay}));
+if(!lTIs.length) lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', cdTarget:null, cdFrozen:null}];
 lNext=Math.max(...lTIs.map(t=>t.no))+1;
 lSel=Math.min(store.get('leadSel',0), lTIs.length-1);
 const lCur=()=>lTIs[lSel];
@@ -405,12 +422,12 @@ const lSave=()=>{ store.set('leadTIs',lTIs); store.set('leadSel',lSel); store.se
 const lRec=ti=>Math.min(Math.max(0,Math.floor(+ti.holds||0)),20)*60;
 
 function lLoadForm(){ const ti=lCur(); $('lHolds').value=ti.holds; $('lRef').value=ti.ref||''; $('lPos').value=ti.pos||''; }
-function lReadForm(){ const ti=lCur(); ti.holds=$('lHolds').value; ti.ref=$('lRef').value; ti.pos=$('lPos').value; }
+function lReadForm(){ const ti=lCur(); ti.holds=Math.max(0,Math.floor(+$('lHolds').value||0)); ti.ref=timeStr($('lRef').value); ti.pos=posStr($('lPos').value); }
 
 function renderLeadChips(){
   const multi=lTIs.length>1;
   $('lChips').classList.toggle('hidden', !multi);
-  if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">TI ${t.no} · ${Math.max(0,Math.floor(+t.holds||0))} Gr.${t.pos?' · Pos '+t.pos:''}</button>`).join('');
+  if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">TI ${t.no} · ${Math.max(0,Math.floor(+t.holds||0))} Gr.${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
   $('lChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ lSel=+c.dataset.i; lLoadForm(); calcLead(); });
 }
 
@@ -448,10 +465,11 @@ function tickLead(){
   $('lCdList').classList.toggle('hidden', !multi);
   if(multi) $('lCdList').innerHTML=lTIs.map((t,i)=>{
     const tx=lCdText(t), state=t.cdTarget!==null?(tx==='Bereit ✓'?'':'läuft'):(t.cdFrozen!==null?'gestoppt':'nicht gestartet');
-    return `<li class="${i===lSel?'next':''}"><span>TI ${t.no}${t.pos?' · Pos '+t.pos:''} <span class="hint">${state}</span></span><span class="t">${tx}</span></li>`;
+    return `<li class="${i===lSel?'next':''}"><span>TI ${t.no}${t.pos?' · Pos '+esc(t.pos):''} <span class="hint">${state}</span></span><span class="t">${tx}</span></li>`;
   }).join('');
 }
-setInterval(tickLead,500);
+// Automatischer Takt nur für den sichtbaren Reiter und nur, wenn die Seite angezeigt wird
+setInterval(()=>{ if(!document.hidden && !$('lead').classList.contains('hidden')) tickLead(); },500);
 
 $('lNow').onclick=()=>{ $('lRef').value=nowClock(); lReadForm(); if(lCur().cdTarget===null) lCur().cdFrozen=null; calcLead(); };
 let wakeLock=null;
@@ -459,11 +477,11 @@ function requestWake(){ try{ if(!wakeLock && navigator.wakeLock) navigator.wakeL
 $('lStart').onclick=()=>{
   const ti=lCur();
   if(ti.cdTarget!==null){ // Stopp: auf aktuellem Stand stehen bleiben
-    ti.cdFrozen=lCdText(ti); ti.cdTarget=null; lSave(); tickLead();
+    ti.cdFrozen=lCdText(ti); ti.cdTarget=null; ti.cdDay=new Date().toDateString(); lSave(); tickLead();
     if(wakeLock && !lTIs.some(t=>t.cdTarget!==null)){ wakeLock.release(); wakeLock=null; } return;
   }
   // Start: Ziel = Uhrzeit des Sturzes + Erholungszeit (die eingegebene Uhrzeit bleibt unverändert)
-  ti.cdStartedAt=nowSec(); ti.cdFrozen=null;
+  ti.cdStartedAt=nowSec(); ti.cdFrozen=null; ti.cdDay=new Date().toDateString();
   const ref=timeToSec(ti.ref);
   ti.cdTarget=(ref!==null?ref:ti.cdStartedAt)+lRec(ti);
   lSave(); tickLead(); requestWake();
@@ -508,6 +526,18 @@ if(!Array.isArray(bTIs)||!bTIs.length){
   if(bState.boulder) t.B=bState.boulder;
   bTIs=[t];
 }
+bTIs=bTIs.filter(t=>t&&typeof t==='object').map((t,i)=>{
+  const n=newBTI(Number.isInteger(t.no)&&t.no>0?t.no:i+1);
+  n.B=Math.min(8,Math.max(1,Math.floor(+t.B||1))); n.remain=typeof t.remain==='string'?t.remain.slice(0,8):'3:00';
+  n.resolved=!!t.resolved; n.gap=t.gap===1?1:2; n.t0=timeStr(t.t0); n.pos=posStr(t.pos); n.course=t.course==='B'?'B':'A';
+  n.decidedAt=Number.isFinite(t.decidedAt)?t.decidedAt:null;
+  // Fixe Ergebnisse übernehmen (nicht neu berechnen!), aber nur wenn sie gültig aussehen
+  const r=t.res, int=v=>Number.isInteger(v);
+  n.res = r && int(r.t) && int(r.s0) && int(r.G) && int(r.R) && int(r.k) && int(r.L) && (r.P===null||int(r.P)) && Array.isArray(r.notes)
+    ? {P:r.P, t:r.t, s0:r.s0, G:r.G, R:r.R, k:r.k, L:r.L, scen1:!!r.scen1, notes:r.notes.filter(x=>typeof x==='string')} : null;
+  return n;
+});
+if(!bTIs.length) bTIs=[newBTI(1)];
 let bNext=Math.max(...bTIs.map(t=>t.no))+1;
 let bSel=Math.min(store.get('boulderSel',0), bTIs.length-1);
 const bCur=()=>bTIs[bSel];
@@ -527,7 +557,7 @@ function bSettings(){
    Geprüft gegen Judge Guide §5.2.3 (JENFT Pos 1/B2 → vor Pos 9, PEINADO Pos 7/B3 → vor Pos 12). */
 const onAxis=(o,ti,S)=>o!==ti && o.res && o.res.P && (!S.two || o.course===ti.course);
 function reservedOf(list){ const m=new Map(); list.forEach(o=>{ if(o.res) m.set(o.res.G,o); }); return m; }
-function b1Start(P, reserved){ let n=0; for(let i=0;i<5000;i++){ if(reserved.has(i)) continue; if(++n===P) return i; } return 0; }
+function b1Start(P, reserved){ let n=0; for(let i=0;i<=P+reserved.size;i++){ if(reserved.has(i)) continue; if(++n===P) return i; } return P-1; }
 // Alle Kletter-Intervalle eines Athleten (reguläre Boulder + eigene Slots)
 function athleteSchedule(P, list, S, self){
   const others=list.filter(o=>o!==self);
@@ -613,7 +643,7 @@ document.querySelectorAll('#bCourse button').forEach(b=>b.onclick=()=>{ bCur().c
 $('bRemain').addEventListener('input',()=>{ bCur().remain=$('bRemain').value; bSave(); renderBoulder(); });
 $('bResolved').addEventListener('change',()=>{ bCur().resolved=$('bResolved').checked; tiChanged(); });
 $('bT0').addEventListener('input',()=>{ bCur().t0=$('bT0').value; bCur().decidedAt=nowSec(); bOffset=0; requestWake(); tiChanged(); });
-$('bPos').addEventListener('input',()=>{ bCur().pos=$('bPos').value; tiChanged(); });
+$('bPos').addEventListener('input',()=>{ bCur().pos=posStr($('bPos').value); tiChanged(); });
 ['bN','bRot','bChange'].forEach(id=>$(id).addEventListener('input',()=>{ if(id!=='bChange') $('bPreset').value='c'; settingsChanged(); }));
 $('bRestRot').addEventListener('change',settingsChanged);
 $('bAdd').onclick=()=>{
@@ -654,7 +684,7 @@ function renderBoulder(){
   // Chips
   $('bChips').classList.toggle('hidden', !multi);
   if(multi){
-    $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">TI ${t.no} · B${t.B}${S.two?' · '+t.course:''}${t.pos?' · Pos '+t.pos:''}</button>`).join('');
+    $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">TI ${t.no} · B${t.B}${S.two?' · '+esc(t.course):''}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
     $('bChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ bSel=+c.dataset.i; bSave(); bLoadForm(); renderBoulder(); });
   }
 
@@ -685,7 +715,7 @@ function renderBoulder(){
   const isoTxt = r.scen1 ? 'nein – danach 1 Intervall Call Zone, dann B2 (Ablauf +1 Intervall)' : (iso>0 ? `${iso} Intervall${iso===1?'':'e'} nach ${lastTxt}, dann Call Zone` : 'nicht nötig');
   const gTime=at(r.G), climb=at(r.R);
   const posTxt = r.P ? `vor Startposition ${vorPos(ti,S)}` : `vor dem ${r.k}. nachfolgenden Athleten`;
-  const notes = r.notes.map(n=>`<div class="note warn">${n}</div>`).join('') + (multi && !r.P ? '<div class="note warn">Startposition fehlt – Wechselwirkungen mit anderen TIs werden nicht berücksichtigt.</div>' : '') + (remainOk?'':'<div class="note warn">Restzeit im Format m:ss eingeben (z. B. 2:30).</div>');
+  const notes = r.notes.map(n=>`<div class="note warn">${esc(n)}</div>`).join('') + (multi && !r.P ? '<div class="note warn">Startposition fehlt – Wechselwirkungen mit anderen TIs werden nicht berücksichtigt.</div>' : '') + (remainOk?'':'<div class="note warn">Restzeit im Format m:ss eingeben (z. B. 2:30).</div>');
   $('bResult').innerHTML=`<div class="sub">Wiedereinstieg an Boulder ${B}${multi?' · TI '+ti.no:''}</div>
     <div class="big">${r.scen1?'Nächstes Intervall':'+'+r.k+' Intervalle'}</div>
     ${climb&&remainOk?`<div class="sub">Start an der Wand ca. <b>${secToClock(timeOf(r.R,ti,S)+rest)} Uhr</b> (bei ${award} Restzeit)</div>`:''}
@@ -791,14 +821,14 @@ function bTick(){
   const el=$('bCdNext');
   if(nextIdx<0){ $('bCdNextLabel').textContent='Alle Schritte erledigt'; el.textContent='✓'; el.classList.add('done'); }
   else { $('bCdNextLabel').textContent=items[nextIdx].label; el.textContent=fmtMS(items[nextIdx].d); el.classList.remove('done'); }
-  $('bCdList').innerHTML=items.map((m,i)=>`<li class="${m.d<=0?'done':(i===nextIdx?'next':'')}"><span>${m.label}</span><span class="t">${secToClock(m.t+bOffset)}${m.d>0?'<br>in '+fmtMS(m.d):''}</span></li>`).join('');
+  $('bCdList').innerHTML=items.map((m,i)=>`<li class="${m.d<=0?'done':(i===nextIdx?'next':'')}"><span>${esc(m.label)}</span><span class="t">${secToClock(m.t+bOffset)}${m.d>0?'<br>in '+fmtMS(m.d):''}</span></li>`).join('');
   $('bCdOffset').value = bOffset===0 ? '±0:00' : (bOffset>0?'+':'−')+fmtMS(Math.abs(bOffset));
 }
 function bShift(d){ bOffset+=d; bTick(); requestWake(); }
 $('bCdMinus').onclick=()=>bShift(-15);
 $('bCdPlus').onclick=()=>bShift(15);
 $('bCdSetT0').onclick=()=>{ $('bClockWrap').open=true; $('bT0').focus(); };
-setInterval(bTick,500);
+setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidden')) bTick(); },500);
 
 /* ---------- Init ---------- */
 (function init(){
@@ -811,7 +841,8 @@ setInterval(bTick,500);
     $('bRestRot').checked=bi.p!==1; }
   setFormat(bState.format);
   calcLead();
-  if(bTIs.some(t=>!t.res)) recomputeAll();
+  // Nur fehlende Ergebnisse berechnen – vorhandene bleiben fix
+  { const S=bSettings(); bTIs.forEach(t=>{ if(!t.res) t.res=computeTI(t, bTIs, S, t.gap, decided(t)); }); }
   bLoadForm(); renderBoulder();
   showTab(store.get('tab','lead'));
 })();

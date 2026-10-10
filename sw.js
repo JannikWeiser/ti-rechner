@@ -1,6 +1,8 @@
 // Service Worker: macht den TI-Rechner offline nutzbar.
-// Strategie "network first": mit Internet immer die neueste Version, ohne Internet aus dem Cache.
-const CACHE = 'ti-rechner-v2';
+// Strategie "network first" mit Zeitlimit: mit gutem Internet immer die neueste Version,
+// bei schlechtem Hallen-WLAN nach spätestens 3 s die gespeicherte Version, ohne Internet sofort.
+const CACHE = 'ti-rechner-v3';
+const TIMEOUT_MS = 3000;
 const FILES = ['./', 'index.html', 'impressum.html', 'datenschutz.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
@@ -17,12 +19,18 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
-  e.respondWith(
-    fetch(req)
-      .then(res => {
-        if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
-        return res;
-      })
-      .catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match('index.html')))
-  );
+  const fromCache = () => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match('index.html'));
+  const network = fetch(req).then(res => {
+    // Nur vollständige eigene Antworten speichern
+    if (res.ok && res.type === 'basic') { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+    return res;
+  });
+  e.respondWith(new Promise(resolve => {
+    let done = false;
+    const finish = r => { if (!done && r) { done = true; resolve(r); } };
+    // Nach Ablauf des Zeitlimits die gespeicherte Version liefern (falls vorhanden)
+    const timer = setTimeout(() => fromCache().then(finish), TIMEOUT_MS);
+    network.then(r => { clearTimeout(timer); finish(r); })
+      .catch(() => { clearTimeout(timer); fromCache().then(r => finish(r || Response.error())); });
+  }));
 });
