@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TI-Rechner">
+<title>TI-Rechner Klettern</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23f97316'/><text x='50' y='68' font-size='52' text-anchor='middle' font-family='Arial' font-weight='700' fill='white'>TI</text></svg>">
+<style>
+:root{
+  --bg:#f4f5f7; --card:#ffffff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
+  --accent:#f97316; --accent-ink:#ffffff; --accent-soft:#fff1e6;
+  --ok:#15803d; --ok-soft:#e8f6ec; --warn:#b45309; --warn-soft:#fff7e0; --bad:#b91c1c;
+  --climb:#f97316; --rest:#d1d5db; --iso:#8b5cf6; --call:#0ea5e9; --slot:#16a34a; --empty:#f3f4f6;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b1120; --card:#151c2e; --text:#e5e7eb; --muted:#9ca3af; --line:#273248;
+    --accent-soft:#3a2312; --ok:#4ade80; --ok-soft:#10301d; --warn:#fbbf24; --warn-soft:#352a0c; --bad:#f87171;
+    --rest:#374151; --empty:#1e2638;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b1120; --card:#151c2e; --text:#e5e7eb; --muted:#9ca3af; --line:#273248;
+  --accent-soft:#3a2312; --ok:#4ade80; --ok-soft:#10301d; --warn:#fbbf24; --warn-soft:#352a0c; --bad:#f87171;
+  --rest:#374151; --empty:#1e2638;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  padding:env(safe-area-inset-top) 0 calc(24px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px 8px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:8px}
+h1{font-size:20px;margin:0}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);font-size:13px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;background:var(--card);padding:4px;border-radius:12px;border:1px solid var(--line)}
+.tabs button{appearance:none;border:0;background:transparent;color:var(--text);font:600 16px/1 inherit;padding:12px;border-radius:9px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+main{max-width:640px;margin:0 auto;padding:12px 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.card h2{font-size:16px;margin:0 0 12px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 6px}
+label:first-of-type{margin-top:0}
+.hint{color:var(--muted);font-size:12.5px;font-weight:400;margin-top:4px}
+input,select{width:100%;font:inherit;font-size:17px;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row>div>label{margin-top:12px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{flex:1 1 auto;min-width:44px;appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--text);font:600 16px/1 inherit;padding:12px 10px;border-radius:10px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.stepper{display:grid;grid-template-columns:52px 1fr 52px;gap:6px}
+.stepper button{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--text);font:700 22px/1 inherit;border-radius:10px;cursor:pointer}
+.stepper input{text-align:center;font-weight:700;font-size:20px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-weight:600;font-size:14px}
+.switch input{width:auto;transform:scale(1.4);accent-color:var(--accent)}
+details{margin-top:12px}
+summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
+.result{border:2px solid var(--accent);background:var(--accent-soft)}
+.big{font-size:34px;font-weight:800;line-height:1.1;margin:4px 0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:15px;margin-top:10px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:600}
+.note{border-radius:10px;padding:10px 12px;font-size:14px;margin-top:10px}
+.note.ok{background:var(--ok-soft);color:var(--ok)}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.steps{margin:8px 0 0;padding-left:20px}
+.steps li{margin:4px 0}
+.timeline{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px}
+.tl{flex:0 0 auto;min-width:46px;border-radius:8px;padding:6px 4px;text-align:center;font-size:11px;line-height:1.2;color:#fff}
+.tl b{display:block;font-size:13px}
+.tl.climb{background:var(--climb)} .tl.rest{background:var(--rest);color:var(--text)} .tl.iso{background:var(--iso)}
+.tl.call{background:var(--call)} .tl.slot{background:var(--slot)} .tl.ti{background:var(--bad)} .tl.empty{background:var(--empty);color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{flex:1 1 140px;appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font:700 16px/1 inherit;padding:14px;border-radius:12px;cursor:pointer}
+.btn.secondary{background:var(--card);color:var(--text);border:1px solid var(--line)}
+.countdown{font-variant-numeric:tabular-nums;font-size:44px;font-weight:800;text-align:center;margin:8px 0 0}
+.countdown.done{color:var(--ok)}
+.refs{font-size:12.5px;color:var(--muted);margin-top:10px}
+.hidden{display:none!important}
+footer{max-width:640px;margin:0 auto;padding:0 16px;color:var(--muted);font-size:12px}
+footer a{color:inherit}
+.theme{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;padding:8px 10px;font-size:14px;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div>
+      <h1><span>TI</span>-Rechner</h1>
+      <div class="sub">Technischer Zwischenfall · Lead &amp; Boulder</div>
+    </div>
+    <button class="theme" id="themeBtn" aria-label="Hell/Dunkel umschalten">◐</button>
+  </div>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tabLead" aria-selected="true">Lead</button>
+    <button role="tab" id="tabBoulder" aria-selected="false">Boulder</button>
+  </div>
+</header>
+
+<main>
+<!-- ======================= LEAD ======================= -->
+<section id="lead">
+  <div class="card">
+    <h2>Wo war der TI?</h2>
+    <label for="lHolds">Gewertete Griffe vor dem TI</label>
+    <div class="stepper">
+      <button type="button" data-step="lHolds" data-d="-1" aria-label="weniger">−</button>
+      <input id="lHolds" type="number" inputmode="numeric" min="0" max="99" value="10">
+      <button type="button" data-step="lHolds" data-d="1" aria-label="mehr">+</button>
+    </div>
+    <div class="hint">Höchster gewerteter Griff, der vor dem Zwischenfall benutzt wurde (z. B. 23 oder 23+ → 23). 1 Minute pro Griff, max. 20 Minuten.</div>
+
+    <label for="lRef">Uhrzeit Beginn der Erholungszeit</label>
+    <div class="row" style="grid-template-columns:1fr auto">
+      <input id="lRef" type="time" step="1">
+      <button type="button" class="btn secondary" id="lNow" style="flex:none;padding:12px 14px">Jetzt</button>
+    </div>
+    <div class="hint">Standard: Moment, in dem der Athlet nach dem TI am Boden ist.</div>
+
+    <details>
+      <summary>Startfolge (optional)</summary>
+      <label for="lGap">Abstand zwischen zwei Starts (Minuten)</label>
+      <input id="lGap" type="number" inputmode="decimal" min="1" max="15" step="0.5" value="4">
+      <div class="hint">Durchschnittlicher Takt der Runde, um die Startposition für den Neustart zu bestimmen.</div>
+      <label for="lPos">Startposition des TI-Athleten (optional)</label>
+      <input id="lPos" type="number" inputmode="numeric" min="1" placeholder="z. B. 12">
+    </details>
+  </div>
+
+  <div class="card result" id="lResult"></div>
+
+  <div class="card">
+    <h2>Countdown Erholungszeit</h2>
+    <div class="countdown" id="lCountdown">--:--</div>
+    <div class="btns">
+      <button class="btn" id="lStart">Countdown starten</button>
+      <button class="btn secondary" id="lCopy">Zusammenfassung kopieren</button>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= BOULDER ======================= -->
+<section id="boulder" class="hidden">
+  <div class="card">
+    <h2>Runde</h2>
+    <label>Format</label>
+    <div class="seg" id="bFormat">
+      <button type="button" data-v="fix" aria-pressed="true">Intervall fix</button>
+      <button type="button" data-v="max">Max-Rotation (Finale)</button>
+    </div>
+    <label for="bPreset">Vorlage</label>
+    <select id="bPreset">
+      <option value="q">DM Qualifikation – 5 Boulder, 5 min</option>
+      <option value="s">DM Semifinale – 4 Boulder, 5 min</option>
+      <option value="jf">DJC Finale – 4 Boulder, 4 min fix</option>
+      <option value="f">DM Finale – 4 Boulder, 4 min max</option>
+      <option value="c">Eigene Einstellung</option>
+    </select>
+    <div class="row">
+      <div><label for="bN">Anzahl Boulder</label>
+        <input id="bN" type="number" inputmode="numeric" min="1" max="8" value="5"></div>
+      <div><label for="bRot">Intervall (min)</label>
+        <input id="bRot" type="number" inputmode="decimal" min="1" max="10" step="0.5" value="5"></div>
+    </div>
+    <details>
+      <summary>Weitere Einstellungen</summary>
+      <div class="switch"><span>Ruhe-Intervall zwischen zwei Bouldern</span><input type="checkbox" id="bRestRot" checked></div>
+      <div class="hint">Standard (Judge Guide): Klettern und Pause wechseln sich ab – pro Intervall rückt die Startliste um einen Athleten vor.</div>
+      <label for="bChange">Wechselpause nach jedem Intervall (Sekunden)</label>
+      <input id="bChange" type="number" inputmode="numeric" min="0" max="120" value="15">
+      <div class="switch"><span>TI-Versuch zählt als Versuch</span><input type="checkbox" id="bCountAttempt" checked></div>
+      <div class="hint">Regelwerk §11.4 A: Versuch wird an Stelle/Zeitpunkt des TI als nicht erfolgreich gewertet.</div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Wo war der TI?</h2>
+    <label>Boulder</label>
+    <div class="seg" id="bBoulder"></div>
+    <div class="row">
+      <div><label for="bAttempt">Versuch Nr.</label>
+        <input id="bAttempt" type="number" inputmode="numeric" min="1" value="1"></div>
+      <div><label for="bRemain">Restzeit bei Versuchsbeginn</label>
+        <input id="bRemain" type="text" inputmode="numeric" placeholder="m:ss" value="3:00"></div>
+    </div>
+    <div class="hint">Restzeit auf der Uhr, als der vom TI betroffene Versuch begonnen hat – das ist die Obergrenze der Gutschrift (§8.5).</div>
+    <div id="bFixOnly">
+      <div class="switch" id="bB1Wrap"><span>TI vor Ende des laufenden Intervalls behoben?</span><input type="checkbox" id="bResolved"></div>
+      <div class="hint" id="bB1Hint">Nur relevant für Boulder 1 (Szenario 1 im Judge Guide).</div>
+    </div>
+    <details id="bClockWrap">
+      <summary>Uhrzeit &amp; Startliste (optional)</summary>
+      <label for="bT0">Startzeit des TI-Intervalls</label>
+      <input id="bT0" type="time" step="1">
+      <label for="bPos">Startposition des TI-Athleten</label>
+      <input id="bPos" type="number" inputmode="numeric" min="1" placeholder="z. B. 17">
+    </details>
+  </div>
+
+  <div class="card result" id="bResult"></div>
+
+  <div class="card" id="bTimelineCard">
+    <h2>Ablauf des Athleten</h2>
+    <div class="timeline" id="bTimeline"></div>
+    <div class="legend">
+      <span><i style="background:var(--bad)"></i>TI</span>
+      <span><i style="background:var(--climb)"></i>Boulder</span>
+      <span><i style="background:var(--rest)"></i>Pause</span>
+      <span><i style="background:var(--iso)"></i>Sek. Isolation</span>
+      <span><i style="background:var(--call)"></i>Call Zone</span>
+      <span><i style="background:var(--slot)"></i>TI-Slot</span>
+    </div>
+    <div class="btns"><button class="btn secondary" id="bCopy">Zusammenfassung kopieren</button></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p>Grundlage: World Climbing Rules 2026, Event Regulations Annex A/C, Judge Guide 2026 (§2.16, §5.2), Nationales Regelwerk Klettern (Entwurf 27.1). Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident. <a href="https://github.com/JannikWeiser/ti-rechner/blob/main/TI-Ablauf.md">Ablauf eines TI (Doku)</a></p>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem('ti.'+k); return v===null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k, v){ try{ localStorage.setItem('ti.'+k, JSON.stringify(v)); }catch(e){} }
+};
+
+/* ---------- Helpers ---------- */
+const pad = n => String(n).padStart(2,'0');
+function fmtMS(sec){ sec=Math.max(0,Math.round(sec)); return Math.floor(sec/60)+':'+pad(sec%60); }
+function parseMS(s){
+  s=String(s).trim().replace(',',':').replace('.',':');
+  if(!s) return NaN;
+  if(s.includes(':')){ const [m,x]=s.split(':'); return (+m||0)*60+(+x||0); }
+  const n=+s; if(isNaN(n)) return NaN;
+  return n<=10 ? n*60 : Math.floor(n/100)*60 + n%100; // "3" = 3 min, "230" = 2:30
+}
+function timeToSec(t){ if(!t) return null; const p=t.split(':').map(Number); return p[0]*3600+p[1]*60+(p[2]||0); }
+function secToClock(s){ s=((Math.round(s)%86400)+86400)%86400; return pad(Math.floor(s/3600))+':'+pad(Math.floor(s/60)%60)+':'+pad(s%60); }
+function nowClock(){ const d=new Date(); return pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()); }
+function copy(text, btn){
+  const done=()=>{ const o=btn.textContent; btn.textContent='Kopiert ✓'; setTimeout(()=>btn.textContent=o,1500); };
+  if(navigator.clipboard) navigator.clipboard.writeText(text).then(done,()=>fallback());
+  else fallback();
+  function fallback(){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');done();}catch(e){} ta.remove(); }
+}
+
+/* ---------- Theme ---------- */
+const theme = store.get('theme', null);
+if(theme) document.documentElement.dataset.theme = theme;
+$('themeBtn').onclick = () => {
+  const cur = document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  const next = cur==='dark'?'light':'dark';
+  document.documentElement.dataset.theme = next; store.set('theme', next);
+};
+
+/* ---------- Tabs ---------- */
+function showTab(t){
+  $('tabLead').setAttribute('aria-selected', t==='lead');
+  $('tabBoulder').setAttribute('aria-selected', t==='boulder');
+  $('lead').classList.toggle('hidden', t!=='lead');
+  $('boulder').classList.toggle('hidden', t!=='boulder');
+  store.set('tab', t);
+}
+$('tabLead').onclick=()=>showTab('lead');
+$('tabBoulder').onclick=()=>showTab('boulder');
+
+document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{
+  const i=$(b.dataset.step); i.value=Math.max(+i.min||0,(+i.value||0)+ +b.dataset.d); i.dispatchEvent(new Event('input'));
+});
+
+/* =========================================================
+   LEAD  – Event Regulations Annex A §8.2 B / Nat. Regelwerk Anhang A §8.2 B
+   Erholungszeit = 1 min je gewertetem Griff vor dem TI, max. 20 min
+   ========================================================= */
+let leadSummary='', leadTarget=null, leadTimer=null;
+function calcLead(){
+  const holds=Math.max(0, Math.floor(+$('lHolds').value||0));
+  const recMin=Math.min(holds,20);
+  const ref=timeToSec($('lRef').value);
+  const gap=Math.max(0.5, +$('lGap').value||4);
+  const pos=+$('lPos').value||null;
+  store.set('lead',{holds,gap,pos:$('lPos').value});
+
+  const earliest = ref!==null ? ref+recMin*60 : null;
+  const slotsAhead = recMin===0 ? 0 : Math.ceil(recMin/gap); // nachfolgende Athleten, die vorher starten
+  let html=`<div class="sub">Erholungszeit</div>
+    <div class="big">${recMin} min</div>
+    <div class="sub">${holds} Griff${holds===1?'':'e'} × 1 min${holds>20?' → auf 20 min begrenzt':''}</div>
+    <dl class="kv">
+      <dt>Frühester Neustart</dt><dd>${earliest!==null?secToClock(earliest)+' Uhr':'Uhrzeit eingeben'}</dd>
+      <dt>Einsetzen</dt><dd>${recMin===0?'sobald TI behoben ist':`nach ca. ${slotsAhead} nachfolgenden Athlet${slotsAhead===1?'':'en'}`}${pos&&recMin>0?` (vor Startposition ${pos+slotsAhead+1})`:''}</dd>
+      <dt>Wertung</dt><dd>besseres Ergebnis aus Original- und Neustart-Versuch</dd>
+    </dl>
+    <div class="note warn">Bis zum Neustart in separatem Bereich mit Aufwärmmöglichkeit – Kontakt nur mit Officials. Verlässt der Athlet den Bereich ohne Erlaubnis, ist der TI abgeschlossen.</div>
+    <ol class="steps">
+      <li>TI melden &amp; durch DAV-Schiedsrichter bestätigen (spätestens bis der nächste Athlet in der Route startet).</li>
+      <li>Athlet in separaten Bereich, Ursache beheben (ggf. Kontrollkletterer).</li>
+      <li>Erholungszeit ${recMin} min ablaufen lassen, Neustart so bald wie möglich danach terminieren.</li>
+      <li>Betroffenen Athleten und alle noch startenden Athleten informieren.</li>
+      <li>Neustart entfällt, wenn er die Platzierung am Rundenende nicht mehr beeinflussen kann.</li>
+    </ol>
+    <div class="refs">Event Regulations Annex A §8.1–8.4 · Nat. Regelwerk Anhang A §8 · Judge Guide §2.16</div>`;
+  $('lResult').innerHTML=html;
+  leadTarget = earliest;
+  leadSummary = `TI Lead\nGewertete Griffe vor TI: ${holds}\nErholungszeit: ${recMin} min\n`+
+    (ref!==null?`Beginn Erholung: ${secToClock(ref)}\nFrühester Neustart: ${secToClock(earliest)}\n`:'')+
+    (recMin>0?`Einsetzen nach ca. ${slotsAhead} nachfolgenden Athleten (Takt ${gap} min)\n`:'')+
+    `Wertung: besseres Ergebnis aus beiden Versuchen.`;
+  tickLead();
+}
+function tickLead(){
+  const el=$('lCountdown');
+  if(leadTarget===null){ el.textContent='--:--'; el.classList.remove('done'); return; }
+  const d=new Date(); const now=d.getHours()*3600+d.getMinutes()*60+d.getSeconds();
+  let diff=leadTarget-now; if(diff<-43200) diff+=86400;
+  if(diff<=0){ el.textContent='Bereit ✓'; el.classList.add('done'); }
+  else { el.textContent=fmtMS(diff); el.classList.remove('done'); }
+}
+$('lNow').onclick=()=>{ $('lRef').value=nowClock(); calcLead(); };
+$('lStart').onclick=()=>{
+  $('lRef').value=nowClock(); calcLead();
+  clearInterval(leadTimer); leadTimer=setInterval(tickLead,500);
+  try{ navigator.wakeLock && navigator.wakeLock.request('screen'); }catch(e){}
+};
+$('lCopy').onclick=e=>copy(leadSummary,e.target);
+['lHolds','lRef','lGap','lPos'].forEach(id=>$(id).addEventListener('input',calcLead));
+
+/* =========================================================
+   BOULDER
+   Fixe Intervalle: Judge Guide §5.2 (Rotation-Slot-Einfügung).
+   Allgemeine Form der Tabellen 2/3 (p = Intervalle pro Boulder, mit Pause p=2):
+     k = max( p·(N−B) + p ,  2 + p·(B−1) )
+   k = Anzahl Intervalle nach dem TI-Intervall bis der Athlet wieder an Boulder B klettert
+     = Slot vor dem k-ten nachfolgenden Athleten der Startliste.
+   Ergibt exakt: 4 Boulder → B1:8 B2:6 B3:6 B4:8 · 5 Boulder → B1:10 B2:8 B3:6 B4:8 B5:10
+   ========================================================= */
+const presets={ q:{f:'fix',n:5,r:5}, s:{f:'fix',n:4,r:5}, jf:{f:'fix',n:4,r:4}, f:{f:'max',n:4,r:4} };
+let bState=Object.assign({format:'fix', boulder:1}, store.get('boulderState',{}));
+let bSummary='';
+
+function setFormat(f){ bState.format=f; document.querySelectorAll('#bFormat button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===f)); }
+document.querySelectorAll('#bFormat button').forEach(b=>b.onclick=()=>{ setFormat(b.dataset.v); $('bPreset').value='c'; calcBoulder(); });
+$('bPreset').onchange=()=>{ const p=presets[$('bPreset').value]; if(p){ setFormat(p.f); $('bN').value=p.n; $('bRot').value=p.r; } calcBoulder(); };
+
+function renderBoulderButtons(n){
+  const wrap=$('bBoulder');
+  if(wrap.childElementCount!==n){
+    wrap.innerHTML='';
+    for(let i=1;i<=n;i++){ const b=document.createElement('button'); b.type='button'; b.textContent='B'+i; b.dataset.v=i;
+      b.onclick=()=>{ bState.boulder=i; calcBoulder(); }; wrap.appendChild(b); }
+  }
+  if(bState.boulder>n) bState.boulder=n;
+  wrap.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===bState.boulder));
+}
+
+function calcBoulder(){
+  const N=Math.min(8,Math.max(1,Math.floor(+$('bN').value||4)));
+  renderBoulderButtons(N);
+  const B=bState.boulder;
+  const rot=Math.max(0.5,+$('bRot').value||5)*60;
+  const change=Math.max(0,+$('bChange').value||0);
+  const p=$('bRestRot').checked?2:1;
+  const attempt=Math.max(1,Math.floor(+$('bAttempt').value||1));
+  let remain=parseMS($('bRemain').value);
+  const remainOk=!isNaN(remain);
+  if(remainOk) remain=Math.min(remain,rot);
+  const resolved=$('bResolved').checked;
+  const t0=timeToSec($('bT0').value);
+  const pos=+$('bPos').value||null;
+  const countAttempt=$('bCountAttempt').checked;
+  const nextAttempt=countAttempt?attempt+1:attempt;
+  const fix=bState.format==='fix';
+  store.set('boulderState',{format:bState.format,boulder:B});
+  store.set('boulderInputs',{preset:$('bPreset').value,n:N,rot:$('bRot').value,change,p,attempt,remain:$('bRemain').value,countAttempt});
+
+  $('bFixOnly').classList.toggle('hidden', !fix);
+  $('bB1Wrap').classList.toggle('hidden', B!==1);
+  $('bB1Hint').classList.toggle('hidden', B!==1);
+  $('bTimelineCard').classList.toggle('hidden', !fix);
+  $('bClockWrap').classList.toggle('hidden', !fix);
+
+  const award = remainOk ? fmtMS(remain) : '?';
+  const awardTxt = `bis zu ${award} min`;
+
+  if(!fix){
+    $('bResult').innerHTML=`<div class="sub">Zusätzliche Kletterzeit an Boulder ${B}</div>
+      <div class="big">${awardTxt}</div>
+      <dl class="kv">
+        <dt>Wiedereinstieg</dt><dd>so bald wie möglich – nach Ende der laufenden Rotation, als einziger Athlet auf dem Field of Play, die Gruppe wartet</dd>
+        <dt>Nächster Versuch</dt><dd>Versuch Nr. ${nextAttempt}</dd>
+      </dl>
+      <div class="note warn">Bis dahin im Transitbereich. Wer den Bereich vorher verlässt, darf seine Versuche nicht wieder aufnehmen (§8.4).</div>
+      <ol class="steps">
+        <li>TI bestätigen – spätestens vor Beginn der nächsten planmäßigen Rotation.</li>
+        <li>Behebbar? Athlet wählt: weiterklettern ohne Zusatzzeit <i>oder</i> aussetzen (§8.2).</li>
+        <li>Gutschrift nur für verlorene/nicht genutzte Zeit, max. Restzeit bei Beginn des betroffenen Versuchs (§8.5).</li>
+      </ol>
+      <div class="refs">Event Regulations Annex C §8 · Nat. Regelwerk Anhang C §8 · Judge Guide §5.2 (Max-Rotation)</div>`;
+    bSummary=`TI Boulder (Max-Rotation)\nBoulder ${B}, Versuch ${attempt}\nGutschrift: ${awardTxt}\nWiedereinstieg: nach Ende der laufenden Rotation, als einziger Athlet\nNächster Versuch: Nr. ${nextAttempt}`;
+    return;
+  }
+
+  // --- Fixe Intervalle ---
+  const finishLast = p*(N-B);                 // Intervall (relativ zu t=0), in dem der letzte reguläre Boulder geklettert wird
+  let k, scenario1=false;
+  if(B===1 && resolved){ k=1; scenario1=true; }
+  else k=Math.max(p*(N-B)+p, 2+p*(B-1));
+  const wait = k - finishLast - 1;            // Intervalle zwischen letztem Boulder und TI-Slot
+  const isoRots = Math.max(0, wait-1);        // davon in sekundärer Isolation (letztes = Call Zone)
+  const cycle = rot+change;
+  const slotStart = t0!==null ? t0 + k*cycle : null;
+  const climbStart = (slotStart!==null && remainOk) ? slotStart + (rot-remain) : null;
+
+  let where;
+  if(scenario1) where=`im <b>nächsten Intervall</b> an Boulder 1`;
+  else where=`<b>${k} Intervalle</b> nach dem TI-Intervall`;
+
+  const steps=[];
+  if(scenario1){
+    steps.push(`Rotation-Slot vor dem <b>nächsten</b> Athleten einfügen${pos?` (vor Startposition ${pos+1})`:''} – alle Folgenden rücken ein Intervall nach.`);
+    steps.push(`Athlet klettert im nächsten Intervall an Boulder 1, wenn noch ${award} auf der Uhr stehen, danach regulär weiter mit Boulder 2.`);
+  } else {
+    steps.push(`Rotation-Slot vor dem <b>${k}. nachfolgenden</b> Athleten einfügen${pos?` (vor Startposition ${pos+k})`:''}.`);
+    if(B<N) steps.push(`Athlet klettert regulär weiter bis Boulder ${N}.`);
+    else steps.push(`Boulder ${N} war der letzte – Athlet hat keine regulären Boulder mehr.`);
+    if(isoRots>0) steps.push(`Danach <b>${isoRots} Intervall${isoRots===1?'':'e'} sekundäre Isolation</b> / Aufwärmbereich, anschließend 1 Intervall Call Zone für Boulder ${B}.`);
+    else if(wait===1) steps.push(`Danach 1 Intervall Pause/Call Zone, dann direkt zu Boulder ${B} – keine sekundäre Isolation nötig.`);
+    else steps.push(`Direkt im Anschluss zu Boulder ${B} – keine sekundäre Isolation nötig.`);
+    steps.push(`Im Slot startet der Athlet, wenn noch ${award} auf der Intervalluhr stehen.`);
+  }
+
+  $('bResult').innerHTML=`<div class="sub">Wiedereinstieg an Boulder ${B}</div>
+    <div class="big">${scenario1?'Nächstes Intervall':'+'+k+' Intervalle'}</div>
+    <div class="sub">${where}${climbStart!==null?` · Start an der Wand ca. <b>${secToClock(climbStart)} Uhr</b>`:''}</div>
+    <dl class="kv">
+      <dt>Gutschrift</dt><dd>${awardTxt}</dd>
+      ${slotStart!==null?`<dt>Slot-Intervall</dt><dd>beginnt ${secToClock(slotStart)} Uhr</dd>`:''}
+      <dt>Nächster Versuch</dt><dd>Versuch Nr. ${nextAttempt}</dd>
+      <dt>Sek. Isolation</dt><dd>${scenario1?'nein':(isoRots>0?isoRots+' Intervall'+(isoRots===1?'':'e'):'nicht nötig')}</dd>
+    </dl>
+    <ol class="steps">${steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <div class="note warn">Alternative §8.2 A: Ist der TI vor Beginn des nächsten Intervalls behoben, kann der Athlet im laufenden Intervall weiterklettern – dann ohne Zusatzzeit/-versuche.</div>
+    ${remainOk?'':'<div class="note warn">Restzeit im Format m:ss eingeben (z. B. 2:30).</div>'}
+    <div class="refs">Event Regulations Annex C §8.1–8.5 · Nat. Regelwerk Anhang C §8 · Judge Guide §5.2, Tabellen 2/3</div>`;
+
+  // Timeline
+  const tl=[];
+  const startIdx = -p*(B-1);
+  for(let r=startIdx; r<=Math.max(k,finishLast); r++){
+    let cls='empty', top='', lab='';
+    const rel=r-startIdx;
+    const isClimb = rel%p===0 && rel/p < N;
+    const bNo = rel/p+1;
+    if(r===0){ cls='ti'; top='B'+B; lab='TI'; }
+    else if(r===k){ cls='slot'; top='B'+B; lab='Slot'; }
+    else if(r<0){ cls=isClimb?'climb':'rest'; top=isClimb?'B'+bNo:'–'; lab=isClimb?'':'Pause'; }
+    else if(r<=finishLast){ cls=isClimb?'climb':'rest'; top=isClimb?'B'+bNo:'–'; lab=isClimb?'':'Pause'; }
+    else if(r===k-1){ cls='call'; top='CZ'; lab='Call'; }
+    else { cls='iso'; top='Iso'; lab=''; }
+    if(scenario1 && r===1){ cls='slot'; top='B1'; lab='Slot'; }
+    tl.push(`<div class="tl ${cls}"><b>${top}</b>${r>0?'+'+r:(r===0?'±0':r)}${lab?'<br>'+lab:''}</div>`);
+  }
+  $('bTimeline').innerHTML=tl.join('');
+
+  bSummary=`TI Boulder (Intervall fix, ${N} Boulder, ${fmtMS(rot)} min)\n`+
+    `Boulder ${B}, Versuch ${attempt}${pos?`, Startposition ${pos}`:''}\n`+
+    `Gutschrift: ${awardTxt}\n`+
+    (scenario1?`Wiedereinstieg: nächstes Intervall an B1 (Slot vor nächstem Athleten)\n`
+              :`Wiedereinstieg: +${k} Intervalle (Slot vor dem ${k}. nachfolgenden Athleten${pos?`, Pos. ${pos+k}`:''})\n`)+
+    (slotStart!==null?`Slot-Intervall: ${secToClock(slotStart)} Uhr`+(climbStart!==null?`, Start an der Wand ca. ${secToClock(climbStart)} Uhr`:'')+`\n`:'')+
+    (!scenario1?`Sek. Isolation: ${isoRots>0?isoRots+' Intervalle':'nicht nötig'}\n`:'')+
+    `Nächster Versuch: Nr. ${nextAttempt}`;
+}
+$('bCopy').onclick=e=>copy(bSummary,e.target);
+['bN','bRot','bChange','bAttempt','bRemain','bT0','bPos'].forEach(id=>$(id).addEventListener('input',()=>{ if(['bN','bRot'].includes(id)) $('bPreset').value='c'; calcBoulder(); }));
+['bRestRot','bResolved','bCountAttempt'].forEach(id=>$(id).addEventListener('change',calcBoulder));
+
+/* ---------- Init ---------- */
+(function init(){
+  const l=store.get('lead',null);
+  if(l){ $('lHolds').value=l.holds; $('lGap').value=l.gap; $('lPos').value=l.pos||''; }
+  const bi=store.get('boulderInputs',null);
+  if(bi){ $('bPreset').value=bi.preset; $('bN').value=bi.n; $('bRot').value=bi.rot; $('bChange').value=bi.change;
+    $('bRestRot').checked=bi.p===2; $('bAttempt').value=bi.attempt; $('bRemain').value=bi.remain; $('bCountAttempt').checked=bi.countAttempt!==false; }
+  setFormat(bState.format);
+  $('lRef').value=nowClock();
+  calcLead(); calcBoulder();
+  showTab(store.get('tab','lead'));
+})();
+</script>
+</body>
+</html>
