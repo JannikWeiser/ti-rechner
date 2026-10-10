@@ -161,8 +161,15 @@ nach dem TI-Intervall ein Platz frei. In der Call Zone B1 wird dafür vor dem k-
 
 Uhrzeit: Ein Intervall dauert Kletterzeit + 15 s Wechselpause. Beispiel: 5:00 + 0:15 = 5:15.
 
+### Mehrere TIs in einer Runde
+Jeder Slot hält genau ein Intervall an Boulder 1 frei. Die Athleten dahinter rücken jeweils um ein Intervall nach. Das entspricht dem Beispiel im Judge Guide §5.2.3, bei dem „vor dem 6. nachfolgenden Athleten“ den bereits eingefügten Slot mitzählt.
+- Brauchen zwei TIs dieselbe Lücke an B1, bekommt sie **der zuerst eingetragene TI**. Der andere rückt 1 Intervall nach.
+- Bereits mitgeteilte Slots bleiben **fix**, auch wenn ein anderer TI geändert oder gelöscht wird.
+- Damit der Rechner die Athleten einordnen kann, braucht er ab dem 2. TI die **Startposition** (Platz in der Startliste, nicht die Startnummer).
+- Bei 2 Kursen beeinflussen sich nur TIs auf demselben Kurs.
+
 ### World-Series- / Classic-Format (z. B. DM Finale 4 min max)
-Der Athlet bekommt seine zusätzlichen Versuche **so bald wie möglich** (Judge Guide §5.2). In der Praxis heißt das: **immer nach Ende der laufenden Rotation**. Er klettert dann als **einziger Athlet**, während die Gruppe wartet.
+Der Athlet bekommt seine zusätzlichen Versuche **so bald wie möglich** (Judge Guide §5.2). In der Praxis heißt das: **immer nach Ende der laufenden Rotation**. Er klettert dann als **einziger Athlet**, während die Gruppe wartet. Mehrere TIs kommen nacheinander dran, in der Reihenfolge, in der sie passiert sind.
 
 ### 2-Kurs-Runden (z. B. DJC Flash 2×3)
 Die Verschiebung passiert **nur auf dem betroffenen Kurs**. Der Slot wird in die Startliste dieses Kurses eingefügt, der andere Kurs läuft unverändert weiter. Für die Berechnung ist N die Anzahl der Boulder des betroffenen Kurses.

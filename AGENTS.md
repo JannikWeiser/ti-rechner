@@ -61,6 +61,23 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **Gutschrift** = Restzeit bei Beginn des betroffenen Versuchs, angezeigt als **ca.-Wert** (§8.5).
 - Grafik „Ablauf des Athleten“: Alle Kacheln sind gleich groß (54×44 px). Die obere Reihe zeigt den TI-Athleten. In der unteren Reihe erscheint **nur die Lücke** („Lücke / B1 frei“, rot gestrichelt), kein „B1 belegt“. Bei Szenario 1 gibt es keine untere Reihe. Über jeder Spalte stehen Intervall und Uhrzeit.
 
+### Mehrere TIs (Lead & Boulder)
+- Button **„+ weiterer TI“**. Ab 2 TIs erscheinen Chips („TI 2 · B3 · Pos 7“) zum Umschalten und „Diesen TI löschen“. Bei 1 TI sieht alles aus wie früher.
+- Die TI-Nummern sind stabil. Nach dem Löschen wird nicht neu nummeriert.
+- **Boulder, Rechenkern** (`computeTI`): gemeinsame Achse = Intervalle an B1 ab Rundenbeginn (0 = Startposition 1). Jeder Slot reserviert ein B1-Intervall G. Reguläre Athleten füllen die übrigen der Reihe nach (`b1Start`). Details und Formeln in [PLAN-mehrere-TIs.md](PLAN-mehrere-TIs.md). Geprüft gegen Judge Guide §5.2.3 (JENFT → vor Pos. 9, PEINADO → vor Pos. 12).
+- **Startposition** = Platz in der Startliste (Spalte „Order“), **nicht** die Startnummer. Ab 2 TIs ist sie Pflicht und rutscht aus „Uhrzeit & Startliste“ nach oben ins Formular. Ohne Startposition wird ein TI ohne Wechselwirkung gerechnet, mit Hinweis.
+- **Vorrang bei gleicher Lücke: wer zuerst eingetragen wurde.** Der spätere TI rückt 1 Intervall nach, mit Hinweis.
+- **Ergebnisse sind fix.** Ändern oder Löschen eines TI rechnet nur diesen TI neu, die Slots der anderen bleiben. Nur geänderte Rundeneinstellungen (Boulder, Intervall, Ruhe-Intervall, Wechselpause, Vorlage) rechnen alle in Eingabereihenfolge neu. „vor Startposition X“ wird immer live aus allen Lücken berechnet.
+- Automatisch erkannt: gleicher Athlet mit zweitem TI (der Slot kommt nach allem Geplanten), TI im eigenen Nachhol-Slot, Szenario 1 nicht möglich, weil das nächste B1-Intervall reserviert ist.
+- **Späte Entscheidung:** Liegt „jetzt“ 1 bis 60 min nach der Startzeit des TI-Intervalls und ist das Intervall schon vorbei, zählt die Lücke ab dem aktuellen Intervall (+1/+2), mit Hinweis. Liegt die Zeit mehr als 60 min zurück, gilt das als nachträgliche Eingabe und wird ignoriert.
+- **2 Kurse:** Bei der Vorlage „DJC Flash 2×3“ gibt es pro TI den Schalter Kurs A/B. Nur TIs auf demselben Kurs beeinflussen sich. Die Lücken-Karte ist nach Kurs gruppiert.
+- Karte **„Lücken an Boulder 1“** (ab 2 TIs): alle Lücken sortiert mit Uhrzeit, „vor Pos. X“, TI, Rundenverlängerung („+n Intervalle, ca. m:ss min“) und dem Link „Alle TIs der Runde zurücksetzen“.
+- Grafik: Zwischen den Bouldern steht **„CZ B(nächster)“** statt „Pause“. Laut Judge Guide §5.2.3 ist das die Call Zone des nächsten Boulders. Fremde Lücken erscheinen grau gestrichelt („TI 2“). Eigene weitere Slots stehen als grüne Kachel „TI n“.
+- Countdown Boulder: alle TIs zusammen, mit „TI n:“ markiert, sobald es mehr als einen gibt. Uhrzeiten von TIs ohne eigene Startzeit leitet er von einem anderen TI auf derselben Achse ab.
+- **Lead:** Jeder TI hat eigene Griffe, eigene Sturzzeit, eigene Startposition und einen eigenen Countdown (Start und Stopp je TI). Ab 2 TIs zeigt die Countdown-Karte eine Liste aller TIs (läuft / gestoppt / nicht gestartet). Der Starttakt gilt für alle.
+- **World Series:** Bei mehreren TIs gilt nur der Hinweis „nacheinander in der Reihenfolge, in der sie passiert sind“.
+- Speicherung: `ti.boulderTIs`, `ti.boulderSel`, `ti.leadTIs`, `ti.leadSel`, `ti.leadGap` in localStorage. Bei einem einzelnen Lead-TI ohne Countdown wird die Sturzzeit beim Laden wie früher auf „jetzt“ gesetzt.
+
 ### Boulder, Live-Countdown
 - Erscheint nur im Intervall-Format und nur, wenn die **Startzeit des TI-Intervalls** eingegeben ist. Sonst zeigt die Karte einen Button „Startzeit eingeben“.
 - Meilensteine: „Boulder 1 bleibt frei (Lücke)“, „Athlet in die Call Zone für Boulder B“ (nur wenn er dazwischen wartet), „Slot-Intervall beginnt“ und „Athlet an Boulder B (Restzeit)“. Bei Szenario 1: „Intervall mit Restzeit an B1 beginnt“ und „Athlet an Boulder 1“.
@@ -118,7 +135,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 |---|---|---|
 | 1 | Lead-Neustart mit Startliste (Namen statt „nach ca. X Athleten“) | Erst wenn es in einem anderen Tool eingebaut ist |
 | 2 | Boulder-Startliste mit Namen („Lücke vor MÜLLER“) | Erst wenn es in einem anderen Tool eingebaut ist |
-| 3 | **Mehrere TIs gleichzeitig** (Slots verschieben sich gegenseitig, Judge Guide §5.2.3) | **Plan erstellt:** [PLAN-mehrere-TIs.md](PLAN-mehrere-TIs.md), wartet auf Entscheidungen |
+| 3 | **Mehrere TIs gleichzeitig** (Slots verschieben sich gegenseitig, Judge Guide §5.2.3) | **Umgesetzt** nach [PLAN-mehrere-TIs.md](PLAN-mehrere-TIs.md) |
 | 4 | Einsprüche wie TI behandeln | **Abgelehnt**, bleibt so (rechnerisch identisch) |
 | 5 | Offline-Nutzung als App (PWA) | **Umgesetzt** |
 | 6 | Live-Countdown für Boulder | **Umgesetzt**, ohne Ton und Vibration |

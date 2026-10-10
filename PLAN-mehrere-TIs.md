@@ -1,6 +1,6 @@
 # Plan: Mehrere TIs in einer Boulder-Runde (Intervall-Format)
 
-Stand: 10.10.2026 · Status: **Entwurf, wartet auf Entscheidungen (Abschnitt 7)**
+Stand: 10.10.2026 · Status: **umgesetzt** – Entscheidungen siehe Abschnitt 7
 
 ## 1. Ziel
 
@@ -106,15 +106,17 @@ Bei einem einzelnen TI liefert der Algorithmus exakt die heutigen Werte (k = max
 6. **Späte Entscheidung (S8)**, auch für den Einzel-TI.
 7. Doku: TI-Ablauf.md und AGENTS.md. Test im Browser auf Handygröße mit allen Sonderfällen.
 
-## 7. Offene Entscheidungen
+## 7. Entscheidungen (vom Projektinhaber, 10.10.2026)
 
-1. **Vorrang bei Kollision (S2):** Wer bekommt die Lücke, wenn zwei TIs dasselbe B1-Intervall brauchen?
-   a) der zuerst eingetragene TI *(Vorschlag)* · b) die frühere Startposition · c) der TI am höheren Boulder, weil er sonst länger wartet
-2. **Startposition ab dem 2. TI als Pflicht.** Passt das?
-3. **2 Kurse:** Soll jeder TI einen Schalter „Kurs A / B“ bekommen? Er wäre nur bei der Vorlage „DJC Flash 2×3“ sichtbar.
-4. **Ändern/Löschen (S9):** Sollen bereits mitgeteilte Slots anderer TIs neu berechnet werden dürfen (mit Markierung „geändert“)? Oder bleiben sie fix, und nur der bearbeitete TI ändert sich?
-5. **Lead:** Mehrere parallele Countdowns gewünscht oder nicht nötig?
-6. **World Series:** Mehrere TIs nacheinander in TI-Reihenfolge nach Rotationsende. Stimmt das?
+1. Vorrang bei Kollision: **der zuerst eingetragene TI**
+2. Startposition = Platz in der Startliste (Spalte „Order“), ab dem 2. TI Pflicht
+3. 2 Kurse: **ja**, Schalter Kurs A/B pro TI (nur bei der Vorlage „DJC Flash“)
+4. Ändern/Löschen: **bereits berechnete Slots der anderen TIs bleiben fix**
+5. Lead: **ja**, mehrere parallele Countdowns
+6. World Series: **ja**, nacheinander in TI-Reihenfolge nach Rotationsende
+7. Nebenbefund: **umgesetzt** („CZ B2“ statt „Pause“)
+
+Zusätzlich bei der Umsetzung: Die Erkennung „späte Entscheidung“ gilt nur bis 60 min nach Beginn des TI-Intervalls. So verschiebt eine nachträgliche Eingabe nichts.
 
 ## 8. Nebenbefund
 

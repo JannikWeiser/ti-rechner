@@ -1,6 +1,6 @@
 // Service Worker: macht den TI-Rechner offline nutzbar.
 // Strategie "network first": mit Internet immer die neueste Version, ohne Internet aus dem Cache.
-const CACHE = 'ti-rechner-v1';
+const CACHE = 'ti-rechner-v2';
 const FILES = ['./', 'index.html', 'impressum.html', 'datenschutz.html', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
