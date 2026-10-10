@@ -118,7 +118,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 |---|---|---|
 | 1 | Lead-Neustart mit Startliste (Namen statt „nach ca. X Athleten“) | Erst wenn es in einem anderen Tool eingebaut ist |
 | 2 | Boulder-Startliste mit Namen („Lücke vor MÜLLER“) | Erst wenn es in einem anderen Tool eingebaut ist |
-| 3 | **Mehrere TIs gleichzeitig** (Slots verschieben sich gegenseitig, Judge Guide §5.2.3) | **Offen, den Projektinhaber aktiv daran erinnern** |
+| 3 | **Mehrere TIs gleichzeitig** (Slots verschieben sich gegenseitig, Judge Guide §5.2.3) | **Plan erstellt:** [PLAN-mehrere-TIs.md](PLAN-mehrere-TIs.md), wartet auf Entscheidungen |
 | 4 | Einsprüche wie TI behandeln | **Abgelehnt**, bleibt so (rechnerisch identisch) |
 | 5 | Offline-Nutzung als App (PWA) | **Umgesetzt** |
 | 6 | Live-Countdown für Boulder | **Umgesetzt**, ohne Ton und Vibration |
