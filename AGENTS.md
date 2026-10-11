@@ -121,7 +121,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 
 ## UI-Entscheidungen
 
-- **Karte „Runde“ ist aufklappbar** (`<details id="bRoundCard">`). Im Kopf steht immer eine Zusammenfassung, z. B. „Qualifikation · 5 Boulder · 5 min“ oder „World Series (Finals)“. Der Klappzustand wird in `ti.roundOpen` gespeichert, beim ersten Besuch ist die Karte offen.
+- **Karte „Runde“ ist aufklappbar** (`<details id="bRoundCard">`). Im Kopf steht immer eine Zusammenfassung, z. B. „Qualifikation · 5 Boulder · 5 min“ oder „World Series (Finals)“. **Standardmäßig zugeklappt** (auch nach jedem Neuladen), aufgeklappt wird nur zum Bearbeiten. Der Klappzustand wird nicht gespeichert.
 - **Buttons im TI-Formular:** „+ weiterer TI“ groß und orange über die ganze Breite, darunter nebeneinander „Diesen TI löschen“ und „Alle TIs löschen“. Letzteres erscheint nur ab 2 TIs und hat eine Rückfrage. Das gilt für Lead und Boulder. Der frühere Link „Alle TIs der Runde zurücksetzen“ in der Lücken-Karte ist entfallen.
 - **Keine feste Ergebnisleiste.** Sie wurde getestet und auf Wunsch wieder entfernt, weil sie verwirrend war.
 - **Lead: Route** ist ein freies Eingabefeld neben der Startnummer (keine Auswahl-Buttons). Es dient **nur zur Benennung**: `leadName()` ergibt „Bib 106 an Route 1“. Ein vorangestelltes „Route“ wird weggelassen (`routeStr`, höchstens 12 Zeichen: Buchstaben, Ziffern, Leerzeichen, Bindestrich). Die Route steht in Ergebnis, Reiter („R1“), über dem großen Countdown, in der Countdown-Liste und in der Löschabfrage.

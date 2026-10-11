@@ -218,7 +218,7 @@ footer a{color:inherit}
 
 <!-- ======================= BOULDER ======================= -->
 <section id="boulder" class="hidden">
-  <details class="card fold" id="bRoundCard" open>
+  <details class="card fold" id="bRoundCard">
     <summary><span class="foldtitle" data-i18n="round">Runde</span><span class="foldinfo" id="bRoundInfo"></span></summary>
     <label data-i18n="format">Format</label>
     <div class="seg" id="bFormat">
@@ -941,7 +941,6 @@ $('bDel').onclick=()=>{
   else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
   pruneGhosts(); bSave(); bLoadForm(); renderBoulder();
 };
-$('bRoundCard').addEventListener('toggle',()=>store.set('roundOpen', $('bRoundCard').open));
 $('bReset').onclick=()=>{
   if(!confirm(t('confirmReset'))) return;
   bTIs=[newBTI(1)]; bNext=2; bSel=0; bGhosts=[]; recomputeOne(0); bSave(); bLoadForm(); renderBoulder();
@@ -1157,7 +1156,6 @@ setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidde
 /* ---------- Init ---------- */
 (function init(){
   applyStatic();
-  if(store.get('roundOpen',true)===false) $('bRoundCard').open=false;
   const lg=store.get('leadGap',null) ?? (store.get('lead',null)||{}).gap; if(lg) $('lGap').value=lg;
   // Einzelner TI ohne laufenden Countdown: Sturzzeit wie bisher mit „jetzt“ vorbelegen
   if(lTIs.length===1 && lTIs[0].cdTarget===null && lTIs[0].cdFrozen===null) lTIs[0].ref=nowClock();
