@@ -1,7 +1,7 @@
 // Service Worker: macht den TI-Rechner offline nutzbar.
 // Strategie "network first" mit Zeitlimit: mit gutem Internet immer die neueste Version,
 // bei schlechtem Hallen-WLAN nach spätestens 3 s die gespeicherte Version, ohne Internet sofort.
-const CACHE = 'ti-rechner-v5';
+const CACHE = 'ti-rechner-v6';
 const TIMEOUT_MS = 3000;
 const FILES = ['./', 'index.html', 'impressum.html', 'datenschutz.html', 'manifest.webmanifest', 'manifest-en.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];

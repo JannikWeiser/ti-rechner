@@ -94,7 +94,7 @@ Bei einem einzelnen TI liefert der Algorithmus exakt die heutigen Werte (k = max
 ## 5. Lead und World Series
 
 - **Lead:** Mehrere TIs sind dort voneinander unabhängig, jeder hat seine eigene Erholungszeit. Möglich wäre eine einfache Liste mit mehreren Countdowns. → **Frage 5**
-- **World Series / Classic:** Bleibt ein reiner Hinweis. Bei mehreren TIs: nacheinander nach Ende der Rotation, in TI-Reihenfolge. → **Frage 6**
+- **World Series (Finals):** Bleibt ein reiner Hinweis. Bei mehreren TIs: nacheinander nach Ende der Rotation, in TI-Reihenfolge. → **Frage 6**
 
 ## 6. Umsetzung in Schritten
 

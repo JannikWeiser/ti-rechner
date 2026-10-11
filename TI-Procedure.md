@@ -168,11 +168,14 @@ Each slot keeps exactly one rotation free at boulder 1. The athletes behind it e
 - Slots that have already been communicated stay **fixed**, even if another TI is changed or deleted.
 - To place the athletes, the calculator needs the **start position** from the 2nd TI onwards (position in the start list, not the bib number).
 - With 2 courses, only TIs on the same course affect each other.
+- **Sharing a free slot:** an inserted slot moves on by one boulder every two rotations after its gap at B1. It is only occupied at the boulder of its own TI and is free at all other boulders. Another TI athlete can use that free place when the slot reaches their TI boulder, provided they had at least 1 rotation of rest after their TI and do not climb directly before or after. Principle: **the athlete climbs their TI boulder as soon as possible.** If the free slot comes earlier than (or at the same time as) a new slot, the calculator uses it. No new gap at B1 is needed and the round does not get longer.
+  Example (5 boulders): TI 1 on B2 (pos. 1) gets the gap at B1 before pos. 9. Two rotations later the slot is at B2 (TI 1 climbs there), then free at B3, B4 and B5. A TI 2 on B5 (pos. 3) uses it and returns after **+6** instead of +10 rotations.
+- If a TI whose slot is shared by another TI is changed or deleted, the gap at B1 remains. It is shown in the gaps card as “Slot TI n (changed/deleted)” until no TI uses it any more.
 
-### World Series / Classic format (e.g. DM final, 4 min max)
+### World Series (Finals) format (e.g. final, 4 min max)
 The athlete gets their additional attempts **as soon as practical** (Judge Guide §5.2). In practice this means **always after the end of the current rotation**. They then climb as the **only athlete** while the group waits. Several TIs are dealt with one after another, in the order they happened.
 
-### Rounds with 2 courses (e.g. DJC flash 2×3)
+### Rounds with 2 courses (e.g. Qualification B (flash), 2 courses of 3 boulders)
 The shift only happens **on the affected course**. The slot is inserted into that course's start list, and the other course continues unchanged. For the calculation, N is the number of boulders on the affected course.
 
 In flash rounds with 2 sets, there must be at least **3 attempt periods** between the end of the first set and the start of the second set (Annex C §4.7 C). Check whether the TI slot shortens this gap.
@@ -195,4 +198,4 @@ The Judge Guide (§5.2) mentions stopping the whole course as an alternative.
 | Boulder 1, scenario 1 | Next rotation: remaining time on B1, then 1 rotation of rest, then B2 |
 | Rounds with 2 courses | Shift only on the affected course |
 | Lead qualification with 2 routes | No effect on the calculation. At least 50 min between the end of the restart on route 1 and route 2 (Annex A §4.4) |
-| World Series / Classic | Return always after the end of the current rotation, as the only athlete |
+| World Series (Finals) | Return always after the end of the current rotation, as the only athlete |

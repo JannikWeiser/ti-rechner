@@ -69,6 +69,10 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **Startposition** = Platz in der Startliste (Spalte „Order“), **nicht** die Startnummer. Ab 2 TIs ist sie Pflicht und rutscht aus „Uhrzeit & Startliste“ nach oben ins Formular. Ohne Startposition wird ein TI ohne Wechselwirkung gerechnet, mit Hinweis.
 - **Vorrang bei gleicher Lücke: wer zuerst eingetragen wurde.** Der spätere TI rückt 1 Intervall nach, mit Hinweis.
 - **Ergebnisse sind fix.** Ändern oder Löschen eines TI rechnet nur diesen TI neu, die Slots der anderen bleiben. Nur geänderte Rundeneinstellungen (Boulder, Intervall, Ruhe-Intervall, Wechselpause, Vorlage) rechnen alle in Eingabereihenfolge neu. „vor Startposition X“ wird immer live aus allen Lücken berechnet.
+- **Freien Slot mitnutzen** (Wunsch des Projektinhabers, Grundsatz „so schnell wie möglich“): Ein Slot mit Lücke G erreicht Boulder B im Intervall `G + p·(B−1)`. Belegt ist er nur am Boulder seines eigenen TI (und an Bouldern, an denen ihn schon ein anderer TI mitnutzt). In `computeTI` wird der früheste nutzbare Durchlauf X gesucht. Bedingungen: X ≥ max(TI-Intervall, aktuelles Intervall) + 2 (mindestens 1 Intervall Pause), der Athlet klettert nicht in X−1, X oder X+1, keine Szenario-1- und keine selbst mitgenutzten Slots. Ist X ≤ neuer Slot R, gilt `res.reuse=true`, `G=null`, `reuseSid`/`reuseNo`. Es gibt keine neue Lücke und keine Rundenverlängerung, dafür den Hinweis `{k:'reuse'}`.
+- **Slot-Kennung `sid`** für jeden Slot mit eigener Lücke. Sie bleibt erhalten, solange sich der Slot nicht ändert (`sameRes`).
+- **Geister-Slots (`bGhosts`, gespeichert in `ti.boulderGhosts`):** Wird ein TI geändert oder gelöscht, dessen Slot mitgenutzt wird, bleibt der alte Slot als Geist mit seiner Lücke bestehen. Geister ohne Mitnutzer werden entfernt (`pruneGhosts`). Neu berechnet wird dabei nur der bearbeitete TI. Geister zählen bei Lücken, „vor Pos.“ und Rundenverlängerung mit und erscheinen in der Lücken-Karte als „Slot TI n (geändert/gelöscht)“. `recomputeAll` (geänderte Rundeneinstellungen) löscht alle Geister und rechnet in Eingabereihenfolge neu.
+- Geprüft: Ein TI 2 an B5 (Pos. 3) nutzt den Slot von TI 1 an B2 (Pos. 1) und kommt nach +6 statt +10 Intervallen dran. Ein dritter TI kann denselben Durchlauf nicht doppelt belegen. Das Judge-Guide-Beispiel §5.2.3 und die Tabellen sind unverändert.
 - Automatisch erkannt: gleicher Athlet mit zweitem TI (der Slot kommt nach allem Geplanten), TI im eigenen Nachhol-Slot, Szenario 1 nicht möglich, weil das nächste B1-Intervall reserviert ist.
 - **Späte Entscheidung:** Maßgeblich ist der Moment, in dem die Startzeit des TI-Intervalls eingegeben wird (`decidedAt`, pro TI gespeichert). Liegt er bis zu **3 h** nach dieser Startzeit und ist das TI-Intervall schon vorbei, zählt die Lücke ab dem dann laufenden Intervall (+1/+2), mit Hinweis. Bei mehr als 3 h gilt es als nachträgliche Eingabe und wird ignoriert. Späteres Neuberechnen, z. B. bei geänderten Rundeneinstellungen, nutzt den gespeicherten `decidedAt` und verschiebt nichts nachträglich.
 - **2 Kurse:** Bei der Vorlage „DJC Flash 2×3“ gibt es pro TI den Schalter Kurs A/B. Nur TIs auf demselben Kurs beeinflussen sich. Die Lücken-Karte ist nach Kurs gruppiert.
@@ -86,7 +90,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - „Zeitplan verschieben“ in ±15-s-Schritten, wenn die Runde hinterherläuft. Das gilt nur für den Countdown und wird bei einer neuen Startzeit zurückgesetzt.
 - **Kein Ton und keine Vibration** (ausdrücklich so entschieden). Der Bildschirm bleibt an (Wake Lock).
 
-### Boulder, World Series / Classic
+### Boulder, World Series (Finals)
 - **Hier wird nichts berechnet, die App zeigt nur einen Hinweis:** Wiedereinstieg **immer nach Ende der laufenden Rotation**, als einziger Athlet, die Gruppe wartet. Gutschrift ca. Restzeit bei Versuchsbeginn.
 - In diesem Format sind die Eingaben (Vorlage, Anzahl Boulder, Intervall, „Wo war der TI?“) und die Grafik ausgeblendet.
 
@@ -100,7 +104,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 | Boulder 1, Szenario 1 | Nächstes Intervall Restzeit an B1 → 1 Intervall Pause → B2 |
 | Runden mit 2 Kursen (z. B. DJC Flash 2×3) | Die Verschiebung betrifft nur den betroffenen Kurs. Kein eigener Schalter, nur ein Hinweis: „Anzahl Boulder = Boulder des betroffenen Kurses“ |
 | Lead-Quali mit 2 Routen | Kein Einfluss auf die Berechnung. In der Doku steht der Hinweis auf 50 min bis Route 2 (Anhang A §4.4). **Die Routen-Buttons wurden auf Wunsch wieder entfernt** |
-| World Series / Classic | Immer nach Ende der laufenden Rotation, nur als Hinweis |
+| World Series (Finals) | Immer nach Ende der laufenden Rotation, nur als Hinweis |
 
 ## Zweisprachigkeit (DE/EN)
 
@@ -117,9 +121,9 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 
 - Mobile first (375 px), helles und dunkles Theme (Button oben rechts, gespeichert in `ti.theme`)
 - **Orange Ergebniskästen zeigen nur berechnete Werte.** Keine To-Do-Listen, keine Angaben zur Wertung, keine Paragraphen-Verweise. Der Schiedsrichter kennt die Regeln und soll nicht verwirrt werden.
-- Formatnamen wie im Regelwerk: **„Intervall“** (nicht „Intervall fix“) und **„World Series / Classic“** (nicht „Max-Rotation“)
+- Formatnamen: **„Intervall“** (nicht „Intervall fix“) und **„World Series (Finals)“** (früher „World Series / Classic“, davor „Max-Rotation“)
 - **±-Stepper einheitlich** an allen Zahlenfeldern: Griffe, Starttakt, Startpositionen, Anzahl Boulder, Intervall (0,5er-Schritte), Restzeit (15-s-Schritte). Uhrzeitfelder haben keine Stepper.
-- Vorlagen (nur im Intervall-Format): DM Quali 5×5 min, DM Semi 4×5 min, DJC Finale 4×4 min, DJC Quali Flash 2×3 4 min (je Kurs), Eigene. Für World Series gibt es keine Vorlage, weil immer dasselbe herauskommt.
+- Vorlagen (nur im Intervall-Format), **benannt wie die World-Climbing-Formate** (Event Regulations Annex C, Tab. 1/3): „Qualifikation – 5 Boulder, 5 min fix“ (bisher DM Quali), „Qualifikation B (Flash) – 2 Kurse à 3 Boulder, 4 min fix“ (bisher DJC Quali; bei World Climbing „Qualification B“, Flash, 4/5 min fix), „Halbfinale – 4 Boulder, 5 min fix“ (bisher DM Semi), „Finale im Intervall – 4 Boulder, 4 min fix“ (bisher DJC Finale; kein World-Climbing-Pendant, dort ist das Finale 4 min max), „Eigene Einstellung“. Interne Schlüssel bleiben `q`, `jq`, `s`, `jf`, `c` (`jq` = 2 Kurse). Für World Series gibt es keine Vorlage, weil immer dasselbe herauskommt.
 - Footer: nur der Hinweis „Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident“, der Link zur TI-Doku (GitHub-Ansicht der `TI-Ablauf.md`), Impressum und Datenschutz. **Keine Quellenliste.**
 - **Die Funktion „Zusammenfassung kopieren“ wurde auf Wunsch entfernt.**
 - Keine Erklär-Hinweise mit Regelbezug an den Eingabefeldern, z. B. „Szenario 1 im Judge Guide“ oder „daraus ergibt sich die Gutschrift (§8.5)“

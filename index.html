@@ -197,15 +197,15 @@ footer a{color:inherit}
     <label data-i18n="format">Format</label>
     <div class="seg" id="bFormat">
       <button type="button" data-v="fix" aria-pressed="true" data-i18n="fmtFix">Intervall</button>
-      <button type="button" data-v="max">World Series / Classic</button>
+      <button type="button" data-v="max" data-i18n="fmtMax">World Series (Finals)</button>
     </div>
     <div id="bPresetWrap">
     <label for="bPreset" data-i18n="preset">Vorlage</label>
     <select id="bPreset">
       <option value="q" data-i18n="pq">DM Qualifikation – 5 Boulder, 5 min</option>
-      <option value="s" data-i18n="ps">DM Semifinale – 4 Boulder, 5 min</option>
-      <option value="jf" data-i18n="pjf">DJC Finale – 4 Boulder, 4 min</option>
-      <option value="jq" data-i18n="pjq">DJC Qualifikation – Flash 2×3, 4 min (je Kurs)</option>
+      <option value="jq" data-i18n="pjq">Qualifikation B (Flash)</option>
+      <option value="s" data-i18n="ps">Halbfinale</option>
+      <option value="jf" data-i18n="pjf">Finale im Intervall</option>
       <option value="c" data-i18n="pc">Eigene Einstellung</option>
     </select>
     </div>
@@ -224,7 +224,7 @@ footer a{color:inherit}
       <button type="button" data-step="bRot" data-d="0.5" aria-label="mehr">+</button>
     </div></div>
     </div>
-    <div class="hint" data-i18n="twoCourse">Bei 2 Kursen: Anzahl Boulder je Kurs. Mit der Vorlage „DJC Flash“ wählst du pro TI den Kurs – Lücken und Verschiebungen betreffen nur diesen Kurs.</div>
+    <div class="hint" data-i18n="twoCourse">Bei 2 Kursen: Anzahl Boulder je Kurs. Mit der Vorlage „Qualifikation B (Flash)“ wählst du pro TI den Kurs – Lücken und Verschiebungen betreffen nur diesen Kurs.</div>
     <details>
       <summary data-i18n="moreSet">Weitere Einstellungen</summary>
       <div class="switch"><span data-i18n="restRot">Ruhe-Intervall zwischen zwei Bouldern</span><input type="checkbox" id="bRestRot" checked></div>
@@ -377,11 +377,11 @@ de:{
   addTI:'+ weiterer TI', delTI:'Diesen TI löschen',
   cdTitle:'Countdown Erholungszeit', cdHint:'Beim Start wird die seit dem Sturz vergangene Zeit abgezogen.',
   cdStart:'Countdown starten', cdStop:'Countdown stoppen',
-  round:'Runde', format:'Format', fmtFix:'Intervall', fmtMax:'World Series / Classic', preset:'Vorlage',
-  pq:'DM Qualifikation – 5 Boulder, 5 min', ps:'DM Semifinale – 4 Boulder, 5 min', pjf:'DJC Finale – 4 Boulder, 4 min',
-  pjq:'DJC Qualifikation – Flash 2×3, 4 min (je Kurs)', pc:'Eigene Einstellung',
+  round:'Runde', format:'Format', fmtFix:'Intervall', fmtMax:'World Series (Finals)', preset:'Vorlage',
+  pq:'Qualifikation – 5 Boulder, 5 min fix', ps:'Halbfinale – 4 Boulder, 5 min fix',
+  pjq:'Qualifikation B (Flash) – 2 Kurse à 3 Boulder, 4 min fix', pjf:'Finale im Intervall – 4 Boulder, 4 min fix', pc:'Eigene Einstellung',
   bN:'Anzahl Boulder', bRot:'Intervall (min)',
-  twoCourse:'Bei 2 Kursen: Anzahl Boulder je Kurs. Mit der Vorlage „DJC Flash“ wählst du pro TI den Kurs – Lücken und Verschiebungen betreffen nur diesen Kurs.',
+  twoCourse:'Bei 2 Kursen: Anzahl Boulder je Kurs. Mit der Vorlage „Qualifikation B (Flash)“ wählst du pro TI den Kurs – Lücken und Verschiebungen betreffen nur diesen Kurs.',
   moreSet:'Weitere Einstellungen', restRot:'Ruhe-Intervall zwischen zwei Bouldern',
   restRotHint:'Standard (Judge Guide): Klettern und Pause wechseln sich ab – pro Intervall rückt die Startliste um einen Athleten vor.',
   change:'Wechselpause nach jedem Intervall (Sekunden)', course:'Kurs', courseA:'Kurs A', courseB:'Kurs B', courseX:c=>'Kurs '+c, boulder:'Boulder',
@@ -429,6 +429,8 @@ de:{
   n_late:x=>`Späte Entscheidung: Lücke frühestens im ${x.g===1?'nächsten':'übernächsten'} Intervall ab jetzt.`,
   n_pushed:x=>`${x.n} ${pl(x.n,'Intervall','Intervalle')} später wegen ${x.l.map(n=>'TI '+n).join(', ')} (gleiche Lücke an B1).`,
   n_inSlot:x=>`TI im Nachhol-Slot von TI ${x.no}.`,
+  n_reuse:x=>`Nutzt den schon freien Slot von TI ${x.no} – keine neue Lücke an B1 nötig.`,
+  gapReuse:no=>`keine neue Lücke – nutzt den Slot von TI ${no}`, alsoUsed:l=>`mitgenutzt von ${l}`, ghostWho:no=>`Slot TI ${no} (geändert/gelöscht)`,
 },
 en:{
   title:'TI Calculator Climbing', brand:'<span>TI</span> Calculator', sub:'Technical Incident · Lead &amp; Boulder',
@@ -442,11 +444,11 @@ en:{
   addTI:'+ another TI', delTI:'Delete this TI',
   cdTitle:'Recovery countdown', cdHint:'On start, the time elapsed since the fall is subtracted.',
   cdStart:'Start countdown', cdStop:'Stop countdown',
-  round:'Round', format:'Format', fmtFix:'Rotation', fmtMax:'World Series / Classic', preset:'Template',
-  pq:'DM qualification – 5 boulders, 5 min', ps:'DM semi-final – 4 boulders, 5 min', pjf:'DJC final – 4 boulders, 4 min',
-  pjq:'DJC qualification – flash 2×3, 4 min (per course)', pc:'Custom',
+  round:'Round', format:'Format', fmtFix:'Rotation', fmtMax:'World Series (Finals)', preset:'Template',
+  pq:'Qualification – 5 boulders, 5 min fixed', ps:'Semi-final – 4 boulders, 5 min fixed',
+  pjq:'Qualification B (flash) – 2 courses of 3 boulders, 4 min fixed', pjf:'Final in rotation format – 4 boulders, 4 min fixed', pc:'Custom',
   bN:'Number of boulders', bRot:'Rotation (min)',
-  twoCourse:'With 2 courses: number of boulders per course. With the “DJC Flash” template you choose the course for each TI – gaps and shifts only affect that course.',
+  twoCourse:'With 2 courses: number of boulders per course. With the “Qualification B (flash)” template you choose the course for each TI – gaps and shifts only affect that course.',
   moreSet:'More settings', restRot:'Rest rotation between two boulders',
   restRotHint:'Default (Judge Guide): climbing and rest alternate – the start list moves on by one athlete per rotation.',
   change:'Changeover after each rotation (seconds)', course:'Course', courseA:'Course A', courseB:'Course B', courseX:c=>'Course '+c, boulder:'Boulder',
@@ -492,6 +494,8 @@ en:{
   n_late:x=>`Late decision: gap at the earliest in the ${x.g===1?'next rotation':'rotation after next'} from now.`,
   n_pushed:x=>`${x.n} ${pl(x.n,'rotation','rotations')} later because of ${x.l.map(n=>'TI '+n).join(', ')} (same gap at B1).`,
   n_inSlot:x=>`TI in the make-up slot of TI ${x.no}.`,
+  n_reuse:x=>`Uses the already free slot of TI ${x.no} – no new gap at B1 needed.`,
+  gapReuse:no=>`no new gap – uses the slot of TI ${no}`, alsoUsed:l=>`also used by ${l}`, ghostWho:no=>`Slot TI ${no} (changed/deleted)`,
 }};
 const detectLang=()=>{ const l=(navigator.languages&&navigator.languages[0])||navigator.language||'en'; return /^de\b/i.test(l)?'de':'en'; };
 let LANG=(()=>{ const s=store.get('lang',null); return s==='de'||s==='en'?s:detectLang(); })();
@@ -675,6 +679,15 @@ let bState=Object.assign({format:'fix'}, store.get('boulderState',{}));
    Ergebnisse sind „fix“: Ändert/löscht man einen TI, bleiben die Slots der anderen unverändert.
    Nur bei geänderten Rundeneinstellungen wird alles neu berechnet (in Eingabereihenfolge = Vorrang). */
 const newBTI=no=>({no, B:1, remain:'3:00', resolved:false, gap:2, t0:'', pos:'', course:'A', res:null});
+// Gespeichertes Ergebnis prüfen. G = Lücke an B1 (null, wenn der TI einen schon freien Slot nutzt), sid = Slot-Kennung
+function cleanRes(r){
+  const int=v=>Number.isInteger(v);
+  if(!(r && int(r.t) && int(r.s0) && (int(r.G)||(r.reuse && r.G===null)) && int(r.R) && int(r.k) && int(r.L) && (r.P===null||int(r.P)) && Array.isArray(r.notes))) return null;
+  const okNote=x=>typeof x==='string' || (x && typeof x.k==='string' && ['sc1Blocked','sc1Late','late','pushed','inSlot','reuse'].includes(x.k)
+    && (x.k!=='pushed' || (int(x.n) && Array.isArray(x.l) && x.l.every(int))) && (!('no' in x) || int(x.no)));
+  return {P:r.P, t:r.t, s0:r.s0, G:r.G, R:r.R, k:r.k, L:r.L, scen1:!!r.scen1, reuse:!!r.reuse,
+    sid:int(r.sid)?r.sid:null, reuseSid:int(r.reuseSid)?r.reuseSid:null, reuseNo:int(r.reuseNo)?r.reuseNo:null, notes:r.notes.filter(okNote)};
+}
 let bTIs=store.get('boulderTIs',null);
 if(!Array.isArray(bTIs)||!bTIs.length){
   const t=newBTI(1), bi=store.get('boulderInputs',null);
@@ -688,16 +701,24 @@ bTIs=bTIs.filter(t=>t&&typeof t==='object').map((t,i)=>{
   n.resolved=!!t.resolved; n.gap=t.gap===1?1:2; n.t0=timeStr(t.t0); n.pos=posStr(t.pos); n.course=t.course==='B'?'B':'A';
   n.decidedAt=Number.isFinite(t.decidedAt)?t.decidedAt:null;
   // Fixe Ergebnisse übernehmen (nicht neu berechnen!), aber nur wenn sie gültig aussehen
-  const r=t.res, int=v=>Number.isInteger(v);
-  n.res = r && int(r.t) && int(r.s0) && int(r.G) && int(r.R) && int(r.k) && int(r.L) && (r.P===null||int(r.P)) && Array.isArray(r.notes)
-    ? {P:r.P, t:r.t, s0:r.s0, G:r.G, R:r.R, k:r.k, L:r.L, scen1:!!r.scen1, notes:r.notes.filter(x=>typeof x==='string' || (x && typeof x.k==='string' && ['sc1Blocked','sc1Late','late','pushed','inSlot'].includes(x.k) && (x.k!=='pushed' || (Number.isInteger(x.n) && Array.isArray(x.l) && x.l.every(Number.isInteger))) && (!('no' in x) || Number.isInteger(x.no))))} : null;
+  n.res=cleanRes(t.res);
   return n;
 });
 if(!bTIs.length) bTIs=[newBTI(1)];
 let bNext=Math.max(...bTIs.map(t=>t.no))+1;
 let bSel=Math.min(store.get('boulderSel',0), bTIs.length-1);
 const bCur=()=>bTIs[bSel];
-const bSave=()=>{ store.set('boulderTIs',bTIs); store.set('boulderSel',bSel); };
+/* Geister-Slots: Wird ein TI geändert oder gelöscht, dessen Slot von einem anderen TI mitgenutzt wird,
+   bleibt der alte Slot (seine Lücke an B1) als „Geist“ bestehen – sonst verlöre der andere TI seinen Platz. */
+let bGhosts=(store.get('boulderGhosts',[])||[]).filter(g=>g&&typeof g==='object').map(g=>({no:Number.isInteger(g.no)?g.no:0, ghost:true,
+  B:Math.min(8,Math.max(1,Math.floor(+g.B||1))), course:g.course==='B'?'B':'A', pos:'', t0:timeStr(g.t0), res:cleanRes(g.res)})).filter(g=>g.res && g.res.G!==null);
+let bSid=Math.max(store.get('boulderSid',1)||1, ...bTIs.concat(bGhosts).map(t=>t.res&&t.res.sid||0).map(x=>x+1));
+// Ältere Ergebnisse ohne Slot-Kennung bekommen eine
+bTIs.concat(bGhosts).forEach(t=>{ if(t.res && t.res.G!==null && !t.res.reuse && t.res.sid===null) t.res.sid=bSid++; });
+const allSlots=()=>bTIs.concat(bGhosts);
+const usersOf=sid=>sid==null?[]:bTIs.filter(q=>q.res && q.res.reuse && q.res.reuseSid===sid);
+function pruneGhosts(){ bGhosts=bGhosts.filter(g=>usersOf(g.res.sid).length>0); }
+const bSave=()=>{ store.set('boulderTIs',bTIs); store.set('boulderSel',bSel); store.set('boulderGhosts',bGhosts); store.set('boulderSid',bSid); };
 
 function bSettings(){
   const N=Math.min(8,Math.max(1,Math.floor(+$('bN').value||4)));
@@ -712,7 +733,7 @@ function bSettings(){
    Einzel-TI ergibt exakt Judge Guide Tab. 2/3: k = max(p·(N−B)+p, g+p·(B−1)), g = 2 (Standard) bzw. 1.
    Geprüft gegen Judge Guide §5.2.3 (JENFT Pos 1/B2 → vor Pos 9, PEINADO Pos 7/B3 → vor Pos 12). */
 const onAxis=(o,ti,S)=>o!==ti && o.res && o.res.P && (!S.two || o.course===ti.course);
-function reservedOf(list){ const m=new Map(); list.forEach(o=>{ if(o.res) m.set(o.res.G,o); }); return m; }
+function reservedOf(list){ const m=new Map(); list.forEach(o=>{ if(o.res && o.res.G!==null) m.set(o.res.G,o); }); return m; }
 function b1Start(P, reserved){ let n=0; for(let i=0;i<=P+reserved.size;i++){ if(reserved.has(i)) continue; if(++n===P) return i; } return P-1; }
 // Alle Kletter-Intervalle eines Athleten (reguläre Boulder + eigene Slots)
 function athleteSchedule(P, list, S, self){
@@ -748,25 +769,56 @@ function computeTI(ti, all, S, g, now){
     notes.push(reserved.has(G) ? {k:'sc1Blocked', no:reserved.get(G).no} : {k:'sc1Late'});
   }
   if(cur>t) notes.push({k:'late', g});
+  if(inSlot) notes.push({k:'inSlot', no:inSlot.no});
+  // a) Neuer Slot (Lücke an B1)
   let R=Math.max(L+p, Math.max(t,cur)+g+p*(B-1)), G=R-p*(B-1);
   const pushedBy=[];
   while(reserved.has(G)){ pushedBy.push(reserved.get(G).no); G++; R++; }
+  // b) Schon vorhandenen Slot mitnutzen: Der Slot eines anderen TI zieht ab seiner Lücke G' alle p Intervalle
+  //    einen Boulder weiter (Boulder B im Intervall G'+p·(B−1)) und ist nur am Boulder seines eigenen TI belegt.
+  //    Bedingungen: Boulder B dort noch frei, Athlet hatte nach dem TI mindestens 1 Intervall Pause,
+  //    und er klettert weder direkt davor noch direkt danach (Call Zone).
+  const busy=new Set([t, ...sch.climbs.map(c=>c.r)]);
+  let best=null;
+  others.forEach(o=>{
+    const x=o.res; if(!x || x.G===null || x.scen1 || x.reuse || x.sid==null) return;
+    const X=x.G+p*(B-1);
+    const taken=(!o.ghost && o.B===B) || all.some(q=>q!==ti && q.res && q.res.reuse && q.res.reuseSid===x.sid && q.B===B);
+    if(taken || X<Math.max(t,cur)+2 || busy.has(X) || busy.has(X-1) || busy.has(X+1)) return;
+    if(!best || X<best.X) best={X, o};
+  });
+  // Grundsatz: so schnell wie möglich. Bei Gleichstand den vorhandenen Slot nutzen (keine zusätzliche Lücke).
+  if(best && best.X<=R){
+    const Lb=Math.max(t, ...sch.climbs.map(c=>c.r).filter(r=>r<best.X));
+    notes.push({k:'reuse', no:best.o.no});
+    return {P, t, s0:sch.s0, G:null, R:best.X, k:best.X-t, L:Lb, scen1:false, reuse:true, reuseSid:best.o.res.sid, reuseNo:best.o.no, notes};
+  }
   if(pushedBy.length) notes.push({k:'pushed', n:pushedBy.length, l:[...new Set(pushedBy)]});
-  if(inSlot) notes.push({k:'inSlot', no:inSlot.no});
   return {P, t, s0:sch.s0, G, R, k:R-t, L, scen1:false, notes};
 }
 // „Jetzt“ für die späte Entscheidung ist der Moment, in dem die Startzeit eingegeben wurde (decidedAt) –
 // so verschiebt ein späteres Neuberechnen (z. B. geänderte Rundeneinstellungen) nichts nachträglich.
 const decided=t=>t.decidedAt ?? null;
-function recomputeOne(i){ const S=bSettings(); bTIs[i].res=computeTI(bTIs[i], bTIs, S, bTIs[i].gap, decided(bTIs[i])); }
-function recomputeAll(){ const S=bSettings(); bTIs.forEach(t=>t.res=null); bTIs.forEach(t=>{ t.res=computeTI(t, bTIs, S, t.gap, decided(t)); }); }
+const sameRes=(a,b)=>a&&b&&a.t===b.t&&a.G===b.G&&a.R===b.R&&a.reuseSid===b.reuseSid&&a.scen1===b.scen1;
+function withSid(res, old){
+  if(res.G!==null && !res.reuse) res.sid = old && sameRes(old,res) && old.sid!=null ? old.sid : bSid++;
+  return res;
+}
+// Einen TI neu berechnen. Ändert sich sein Slot und nutzt ein anderer TI diesen Slot, bleibt der alte als Geist bestehen.
+function recomputeOne(i){
+  const S=bSettings(), ti=bTIs[i], old=ti.res;
+  const res=computeTI(ti, allSlots(), S, ti.gap, decided(ti));
+  if(old && !sameRes(old,res) && usersOf(old.sid).some(q=>q!==ti)) bGhosts.push({no:ti.no, ghost:true, B:ti.B, course:ti.course, pos:'', t0:ti.t0, res:old});
+  ti.res=withSid(res, old); pruneGhosts();
+}
+function recomputeAll(){ const S=bSettings(); bGhosts=[]; bTIs.forEach(t=>t.res=null); bTIs.forEach(t=>{ t.res=withSid(computeTI(t, bTIs, S, t.gap, decided(t)), null); }); }
 // „vor Startposition X“: wer ohne Lücke in Intervall G an B1 gewesen wäre (live aus allen Lücken des Kurses)
-function vorPos(ti, S){ const r=ti.res; const n=bTIs.filter(o=>o.res && o.res.P && (o===ti||onAxis(o,ti,S)) && o.res.G<r.G).length; return r.G-n+1; }
+function vorPos(ti, S){ const r=ti.res; const n=allSlots().filter(o=>o.res && o.res.P && o.res.G!==null && (o===ti||onAxis(o,ti,S)) && o.res.G<r.G).length; return r.G-n+1; }
 // Uhrzeit eines Achsen-Intervalls: aus der eigenen Startzeit, sonst aus einem anderen TI auf derselben Achse
 function timeOf(a, ti, S){
   const own=timeToSec(ti.t0); if(own!==null && ti.res) return own+(a-ti.res.t)*S.cycle;
   if(!ti.res||!ti.res.P) return null;
-  const ref=bTIs.find(o=>onAxis(o,ti,S) && timeToSec(o.t0)!==null);
+  const ref=allSlots().find(o=>onAxis(o,ti,S) && timeToSec(o.t0)!==null);
   return ref ? timeToSec(ref.t0)+(a-ref.res.t)*S.cycle : null;
 }
 
@@ -811,13 +863,16 @@ $('bAdd').onclick=()=>{
 $('bDel').onclick=()=>{
   if(!confirm(bTIs.length<2 ? t('confirmDel',bCur().no) : t('confirmDelMulti',bCur().no))) return;
   // Letzter TI: Formular wird mit einem leeren TI neu begonnen
-  if(bTIs.length<2){ bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; recomputeOne(0); }
+  const gone=bCur();
+  // Wird sein Slot von einem anderen TI mitgenutzt, bleibt die Lücke an B1 als Geist bestehen
+  if(gone.res && usersOf(gone.res.sid).some(q=>q!==gone)) bGhosts.push({no:gone.no, ghost:true, B:gone.B, course:gone.course, pos:'', t0:gone.t0, res:gone.res});
+  if(bTIs.length<2){ bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); }
   else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
-  bSave(); bLoadForm(); renderBoulder();
+  pruneGhosts(); bSave(); bLoadForm(); renderBoulder();
 };
 $('bReset').onclick=()=>{
   if(!confirm(t('confirmReset'))) return;
-  bTIs=[newBTI(1)]; bNext=2; bSel=0; recomputeOne(0); bSave(); bLoadForm(); renderBoulder();
+  bTIs=[newBTI(1)]; bNext=2; bSel=0; bGhosts=[]; recomputeOne(0); bSave(); bLoadForm(); renderBoulder();
 };
 
 /* ---------- Anzeige ---------- */
@@ -830,7 +885,7 @@ function renderBoulder(){
   const r=ti.res, B=ti.B;
 
   ['bFixOnly','bFixSettings','bPresetWrap','bTiCard','bTimelineCard','bCdCard','bClockWrap'].forEach(id=>$(id).classList.toggle('hidden', !fix));
-  $('bGapsCard').classList.toggle('hidden', !fix || !multi);
+  $('bGapsCard').classList.toggle('hidden', !fix || (!multi && !bGhosts.length));
   $('bCourseWrap').classList.toggle('hidden', !S.two);
   document.querySelectorAll('#bCourse button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===ti.course));
   $('bB1Wrap').classList.toggle('hidden', B!==1);
@@ -845,7 +900,7 @@ function renderBoulder(){
   }
 
   if(!fix){
-    $('bResult').innerHTML=`<div class="sub">World Series / Classic</div>
+    $('bResult').innerHTML=`<div class="sub">${t('fmtMax')}</div>
       <div class="big" style="font-size:24px">${t('wsBig')}</div>
       <dl class="kv">
         <dt>${t('wsFlow')}</dt><dd>${t('wsFlowTxt')}</dd>
@@ -857,7 +912,7 @@ function renderBoulder(){
 
   // +1/+2 nur zeigen, wenn die Wahl das Ergebnis ändert
   const now=nowSec();
-  const alt1=computeTI(ti,bTIs,S,1,decided(ti)), alt2=computeTI(ti,bTIs,S,2,decided(ti));
+  const alt1=computeTI(ti,allSlots(),S,1,decided(ti)), alt2=computeTI(ti,allSlots(),S,2,decided(ti));
   $('bGapWrap').classList.toggle('hidden', r.scen1 || alt1.R===alt2.R);
   document.querySelectorAll('#bGap button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===ti.gap));
 
@@ -869,16 +924,16 @@ function renderBoulder(){
   const wait=r.R-r.L-1, iso=Math.max(0,wait-1);
   const lastTxt=lastBefore ? (lastBefore.kind==='slot'?`Slot TI ${lastBefore.no}`:'B'+lastBefore.B) : 'B'+S.N;
   const isoTxt = r.scen1 ? t('isoSc1') : (iso>0 ? t('isoN',iso,lastTxt) : t('isoNone'));
-  const gTime=at(r.G), climb=at(r.R);
-  const posTxt = r.P ? t('beforePos',vorPos(ti,S)) : t('beforeKth',r.k);
+  const gTime=r.G!==null?at(r.G):null, climb=at(r.R);
+  const posTxt = r.reuse ? '' : (r.P ? t('beforePos',vorPos(ti,S)) : t('beforeKth',r.k));
   const notes = r.notes.map(noteText).filter(Boolean).map(n=>`<div class="note warn">${esc(n)}</div>`).join('') + (multi && !r.P ? `<div class="note warn">${t('noPos')}</div>` : '') + (remainOk?'':`<div class="note warn">${t('remainFmt')}</div>`);
   $('bResult').innerHTML=`<div class="sub">${t('returnAt',B)}${multi?' · TI '+ti.no:''}</div>
     <div class="big">${r.scen1?t('nextInt'):t('plusK',r.k)}</div>
     ${climb&&remainOk?`<div class="sub">${t('wallStart',secToClock(timeOf(r.R,ti,S)+rest),award)}</div>`:''}
     <dl class="kv">
       <dt>${t('credit')}</dt><dd>${awardTxt}</dd>
-      <dt>${t('gapB1')}</dt><dd>${r.scen1?t('gapSelf'):t('gapInt',r.G-r.t)}${gTime?t('atClock',gTime):''}<br>
-        <span class="hint">${t('czLine', r.scen1 ? t('beforeNext')+(r.P?t('posShort',vorPos(ti,S)):'') : posTxt)}</span></dd>
+      <dt>${t('gapB1')}</dt><dd>${r.reuse ? t('gapReuse', r.reuseNo) : `${r.scen1?t('gapSelf'):t('gapInt',r.G-r.t)}${gTime?t('atClock',gTime):''}<br>
+        <span class="hint">${t('czLine', r.scen1 ? t('beforeNext')+(r.P?t('posShort',vorPos(ti,S)):'') : posTxt)}</span>`}</dd>
       <dt>${t('iso')}</dt><dd>${isoTxt}</dd>
     </dl>${notes}`;
 
@@ -899,7 +954,7 @@ function renderBoulder(){
     return ['iso','Iso',''];
   };
   const gapsHere=new Map();
-  bTIs.forEach(o=>{ if(o.res && (o===ti || (r.P && onAxis(o,ti,S)))) gapsHere.set(o.res.G,o); });
+  allSlots().forEach(o=>{ if(o.res && o.res.G!==null && (o===ti || (r.P && onAxis(o,ti,S)))) gapsHere.set(o.res.G,o); });
   const b1Cell=a=>{ const o=gapsHere.get(a); if(!o) return null; if(o===ti) return r.scen1?null:['gap',t('tlGap'),t('tlFree')]; return ['gapother',t('tlGap'),'TI '+o.no]; };
   const end=Math.max(r.R, ...sch.climbs.map(c=>c.r));
   const cell=c=>c?`<div class="tl ${c[0]}"><b>${c[1]}</b>${c[2]}</div>`:`<div class="tl" style="visibility:hidden"><b>&nbsp;</b>&nbsp;</div>`;
@@ -925,7 +980,7 @@ function renderBoulder(){
       bMilestones.push({t:T(x.G), label:tag+t('msSc1')});
       bMilestones.push({t:T(x.G)+rs, label:tag+t('msWall',1,aw)});
     } else {
-      bMilestones.push({t:T(x.G), label:tag+t('msGap')});
+      if(x.G!==null) bMilestones.push({t:T(x.G), label:tag+t('msGap')});
       if(x.R-x.L-1>=1) bMilestones.push({t:T(x.R-1), label:tag+t('msCZ',o.B)});
       bMilestones.push({t:T(x.R), label:tag+t('msSlot')});
       bMilestones.push({t:T(x.R)+rs, label:tag+t('msWall',o.B,aw)});
@@ -936,10 +991,10 @@ function renderBoulder(){
 }
 
 function renderGaps(S){
-  if(bTIs.length<2){ $('bGaps').innerHTML=''; return; }
+  if(bTIs.length<2 && !bGhosts.length){ $('bGaps').innerHTML=''; return; }
   const courses = S.two ? ['A','B'] : [null];
   $('bGaps').innerHTML=courses.map(c=>{
-    const list=bTIs.filter(o=>o.res && (!c || o.course===c)).sort((a,b)=>{
+    const list=allSlots().filter(o=>o.res && o.res.G!==null && (!c || o.course===c)).sort((a,b)=>{
       if(a.res.P && b.res.P) return a.res.G-b.res.G;
       const ta=timeOf(a.res.G,a,S), tb=timeOf(b.res.G,b,S); return (ta??1e9)-(tb??1e9);
     });
@@ -949,7 +1004,9 @@ function renderGaps(S){
       const tm=timeOf(o.res.G,o,S);
       const when=tm!==null?secToClock(tm):t('intShort',o.res.G-o.res.t);
       const what=o.res.scen1?t('gSelf')+(o.res.P?t('posDot',vorPos(o,S)):''):(o.res.P?t('free')+t('posDot',vorPos(o,S)):t('freeNoPos'));
-      return `<li><span class="when">${when}</span><span>${what}</span><span class="who">TI ${o.no} · B${o.B}</span></li>`;
+      const users=usersOf(o.res.sid).map(q=>'TI '+q.no+' · B'+q.B);
+      const who=o.ghost ? t('ghostWho',o.no) : 'TI '+o.no+' · B'+o.B;
+      return `<li><span class="when">${when}</span><span>${what}${users.length?'<br><span class="hint">'+esc(t('alsoUsed',users.join(', ')))+'</span>':''}</span><span class="who">${esc(who)}</span></li>`;
     }).join('');
     return `${c?`<label>${t('courseX',c)}</label>`:''}<ul class="gaplist">${items}</ul>
       <div class="hint">${t('extend',n,c,fmtMS(n*S.cycle))}</div>`;
@@ -999,7 +1056,7 @@ setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidde
   setFormat(bState.format);
   calcLead();
   // Nur fehlende Ergebnisse berechnen – vorhandene bleiben fix
-  { const S=bSettings(); bTIs.forEach(t=>{ if(!t.res) t.res=computeTI(t, bTIs, S, t.gap, decided(t)); }); }
+  { const S=bSettings(); bTIs.forEach(t=>{ if(!t.res) t.res=withSid(computeTI(t, allSlots(), S, t.gap, decided(t)), null); }); pruneGhosts(); }
   bLoadForm(); renderBoulder();
   showTab(store.get('tab','lead'));
 })();

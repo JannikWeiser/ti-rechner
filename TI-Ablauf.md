@@ -168,11 +168,14 @@ Jeder Slot hält genau ein Intervall an Boulder 1 frei. Die Athleten dahinter r�
 - Bereits mitgeteilte Slots bleiben **fix**, auch wenn ein anderer TI geändert oder gelöscht wird.
 - Damit der Rechner die Athleten einordnen kann, braucht er ab dem 2. TI die **Startposition** (Platz in der Startliste, nicht die Startnummer).
 - Bei 2 Kursen beeinflussen sich nur TIs auf demselben Kurs.
+- **Freien Slot mitnutzen:** Ein eingefügter Slot zieht ab seiner Lücke an B1 alle zwei Intervalle einen Boulder weiter. Belegt ist er nur am Boulder seines eigenen TI, an allen anderen Bouldern ist er frei. Ein weiterer TI-Athlet kann diesen freien Platz nutzen, wenn der Slot seinen TI-Boulder erreicht. Voraussetzung: Der Athlet hatte nach seinem TI mindestens 1 Intervall Pause, und er klettert weder direkt davor noch direkt danach. Grundsatz: **Der Athlet klettert seinen TI-Boulder so schnell wie möglich.** Ist der freie Slot früher (oder gleich früh) als ein neuer Slot, nutzt der Rechner ihn. Dann ist keine neue Lücke an B1 nötig und die Runde wird nicht länger.
+  Beispiel (5 Boulder): TI 1 an B2 (Pos. 1) bekommt die Lücke an B1 vor Pos. 9. Der Slot ist zwei Intervalle später an B2 (dort klettert TI 1), dann an B3, B4 und B5 frei. Ein TI 2 an B5 (Pos. 3) nutzt ihn und kommt nach **+6** statt nach +10 Intervallen dran.
+- Wird ein TI geändert oder gelöscht, dessen Slot ein anderer TI mitnutzt, bleibt die Lücke an B1 bestehen. Sie erscheint in der Lücken-Karte als „Slot TI n (geändert/gelöscht)“, bis kein TI sie mehr nutzt.
 
-### World-Series- / Classic-Format (z. B. DM Finale 4 min max)
+### Format World Series (Finals) (z. B. Finale 4 min max)
 Der Athlet bekommt seine zusätzlichen Versuche **so bald wie möglich** (Judge Guide §5.2). In der Praxis heißt das: **immer nach Ende der laufenden Rotation**. Er klettert dann als **einziger Athlet**, während die Gruppe wartet. Mehrere TIs kommen nacheinander dran, in der Reihenfolge, in der sie passiert sind.
 
-### 2-Kurs-Runden (z. B. DJC Flash 2×3)
+### 2-Kurs-Runden (z. B. Qualifikation B (Flash), 2 Kurse à 3 Boulder)
 Die Verschiebung passiert **nur auf dem betroffenen Kurs**. Der Slot wird in die Startliste dieses Kurses eingefügt, der andere Kurs läuft unverändert weiter. Für die Berechnung ist N die Anzahl der Boulder des betroffenen Kurses.
 
 Bei Flash mit 2 Sets müssen zwischen dem Ende des ersten Sets und dem Start im zweiten Set mindestens **3 Versuchsphasen** liegen (Anhang C §4.7 C). Es ist zu prüfen, ob der TI-Slot diesen Abstand verkürzt.
@@ -195,4 +198,4 @@ Der Judge Guide (§5.2) erwähnt als Alternative, den ganzen Kurs zu stoppen.
 | Boulder 1, Szenario 1 | Nächstes Intervall: Restzeit an B1, dann 1 Intervall Pause, dann B2 |
 | Runden mit 2 Kursen | Verschiebung nur auf dem betroffenen Kurs |
 | Lead-Quali mit 2 Routen | Kein Einfluss auf die Berechnung. Mindestens 50 min zwischen dem Ende des Neustarts an Route 1 und Route 2 (Anhang A §4.4) |
-| World Series / Classic | Wiedereinstieg immer nach Ende der laufenden Rotation, als einziger Athlet |
+| World Series (Finals) | Wiedereinstieg immer nach Ende der laufenden Rotation, als einziger Athlet |
