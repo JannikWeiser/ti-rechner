@@ -7,7 +7,7 @@ Mobile Web-App für Officials: berechnet nach einem **Technischen Zwischenfall (
 
 📱 Offline nutzbar: Seite öffnen → „Zum Home-Bildschirm“.
 
-👉 **Live:** https://jannikweiser.github.io/ti-rechner/
+👉 **Live:** https://ti.comptools.cloud/
 
 Regeln & Ablauf: [TI-Ablauf.md](TI-Ablauf.md) · English: [TI-Procedure.md](TI-Procedure.md)
 

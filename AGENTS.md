@@ -13,7 +13,7 @@ Dazu gehört [TI-Ablauf.md](TI-Ablauf.md): eine Doku, wie ein TI abläuft und wa
 ## Repo / Deployment
 
 - GitHub: `JannikWeiser/ti-rechner`, Branch `main`. GitHub Pages veröffentlicht aus dem Root von `main` (klassischer Pages-Build).
-- Live: https://jannikweiser.github.io/ti-rechner/
+- Live: **https://ti.comptools.cloud/** (eigene Domain; DNS: CNAME `ti` → `jannikweiser.github.io`, Datei `CNAME` im Repo). Die alte Adresse https://jannikweiser.github.io/ti-rechner/ leitet automatisch weiter.
 - Kein Build-Schritt. Alles ist reines HTML/CSS/JS ohne externe Bibliotheken, Schriften oder Tracking.
 - Lokale Vorschau: `.claude/launch.json` startet `python3 -m http.server 8765`.
 - `.gitignore` schließt `Grundlagen Regelwerk/` aus. Die Regelwerk-PDFs sind urheberrechtlich geschützt, und das nationale Regelwerk ist ein Entwurf. **Sie werden nicht veröffentlicht.**
