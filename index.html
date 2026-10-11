@@ -86,6 +86,12 @@ summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
 .tcol{display:flex;flex-direction:column;gap:3px;flex:0 0 auto;border-radius:10px;outline:3px solid transparent;outline-offset:1px}
 .tcol.now{outline-color:var(--ok)}
 .tcol.now .idx{color:var(--ok);font-weight:700}
+.tlwrap{flex:1 1 100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tlgrid{display:flex;gap:4px;width:max-content;padding:4px 4px 6px 0}
+.tlabels{position:sticky;left:0;z-index:2;background:var(--card);display:flex;flex-direction:column;gap:3px;padding-right:6px}
+.tlabels .idx{height:28px}
+.lab{height:44px;display:flex;align-items:center;font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap}
+.lab.sel{color:var(--accent)}
 .tcol .idx{width:54px;height:28px;font-size:11px;line-height:14px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
 .tl.gap{background:transparent;color:var(--bad);border:2px dashed var(--bad);font-weight:700}
 .cdlist{list-style:none;margin:12px 0 0;padding:0}
@@ -317,7 +323,7 @@ footer a{color:inherit}
   <div class="card" id="bTimelineCard">
     <h2 data-i18n="tlTitle">Ablauf des Athleten</h2>
     <div class="timeline" id="bTimeline"></div>
-    <div class="hint" data-i18n="tlHint">Untere Reihe: Lücke an Boulder 1 – in diesem Intervall wird an B1 niemand aufgerufen. Grüner Rand: Intervall, das gerade läuft (aus der Startzeit des TI-Intervalls).</div>
+    <div class="hint" id="bTlHint" data-i18n="tlHint">Untere Reihe: Lücke an Boulder 1 – in diesem Intervall wird an B1 niemand aufgerufen. Grüner Rand: Intervall, das gerade läuft (aus der Startzeit des TI-Intervalls).</div>
     <div class="legend">
       <span><i style="background:var(--bad)"></i>TI</span>
       <span><i style="background:var(--climb)"></i>Boulder</span>
@@ -395,7 +401,8 @@ de:{
   cdEmpty:'Für den Countdown die Startzeit des TI-Intervalls eingeben.', cdSetT0:'Startzeit eingeben',
   shift:'Zeitplan verschieben', earlier:'15 Sekunden früher', later:'15 Sekunden später', offset:'Verschiebung',
   shiftHint:'Wenn die Runde dem Plan hinterherläuft: in 15-Sekunden-Schritten verschieben (gilt nur für den Countdown).',
-  tlTitle:'Ablauf des Athleten',
+  tlTitle:'Ablauf des Athleten', tlTitleMulti:'Ablauf aller TIs', tlB1Row:'B1 frei',
+  tlHintMulti:'Jede Zeile ein TI (der gewählte ist orange beschriftet), letzte Zeile: Lücken an Boulder 1 – dort wird niemand aufgerufen. Waagerecht wischen für weitere Intervalle. Grüner Rand: Intervall, das gerade läuft.',
   tlHint:'Untere Reihe: Lücke an Boulder 1 – in diesem Intervall wird an B1 niemand aufgerufen. Grüner Rand: Intervall, das gerade läuft (aus der Startzeit des TI-Intervalls).',
   lgIso:'Sek. Isolation', lgCZ:'Call Zone (nächster Boulder)', lgSlot:'TI-Slot', lgGap:'Lücke B1',
   footer:'Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident.', docLink:'Ablauf eines TI (Doku)',
@@ -462,7 +469,8 @@ en:{
   cdEmpty:'Enter the start time of the TI rotation to use the countdown.', cdSetT0:'Enter start time',
   shift:'Shift schedule', earlier:'15 seconds earlier', later:'15 seconds later', offset:'Shift',
   shiftHint:'If the round is running behind schedule: shift in 15-second steps (affects the countdown only).',
-  tlTitle:'Athlete’s schedule',
+  tlTitle:'Athlete’s schedule', tlTitleMulti:'Schedule of all TIs', tlB1Row:'B1 free',
+  tlHintMulti:'One row per TI (the selected one is labelled in orange), last row: gaps at boulder 1 – nobody is called there. Swipe sideways for more rotations. Green border: the rotation running right now.',
   tlHint:'Bottom row: gap at boulder 1 – nobody is called to B1 in this rotation. Green border: the rotation running right now (based on the start time of the TI rotation).',
   lgIso:'Secondary isolation', lgCZ:'Call zone (next boulder)', lgSlot:'TI slot', lgGap:'Gap B1',
   footer:'This calculator is an aid – the decision is made by the Jury President.', docLink:'TI procedure (docs)',
@@ -939,32 +947,51 @@ function renderBoulder(){
 
   renderGaps(S);
 
-  // Grafik: obere Reihe TI-Athlet, untere Reihe Lücken an Boulder 1
-  const byR=new Map(sch.climbs.map(c=>[c.r,c]));
-  const athleteCell=a=>{
-    if(a===r.t) return ['ti','B'+B,'TI'];
-    const c=byR.get(a);
-    if(c){
-      if(c.kind==='slot' && c.self) return ['slot','B'+c.B, r.scen1?t('tlCredit'):'Slot'];
-      if(c.kind==='slot') return ['slot','B'+c.B,'TI '+c.no];
-      return ['climb','B'+c.B,''];
-    }
-    const nx=byR.get(a+1);
-    if(nx) return ['call','CZ','B'+nx.B];
-    return ['iso','Iso',''];
+  // Grafik: eine Zeile pro TI (bei einem TI nur dieser), letzte Zeile: Lücken an Boulder 1
+  const rowFor=o=>{
+    const x=o.res, sc=athleteSchedule(x.P, allSlots().filter(q=>q===o||(x.P&&onAxis(q,o,S))), S, o);
+    const by=new Map(sc.climbs.map(c=>[c.r,c])), last=Math.max(x.R, ...sc.climbs.map(c=>c.r));
+    return {o, from:x.t, to:last, cell:a=>{
+      if(a<x.t || a>last) return null;
+      if(a===x.t) return ['ti','B'+o.B,'TI'];
+      const c=by.get(a);
+      if(c){
+        if(c.kind==='slot' && c.self) return ['slot','B'+c.B, x.scen1?t('tlCredit'):'Slot'];
+        if(c.kind==='slot') return ['slot','B'+c.B,'TI '+c.no];
+        return ['climb','B'+c.B,''];
+      }
+      const nx=by.get(a+1);
+      if(nx) return ['call','CZ','B'+nx.B];
+      return ['iso','Iso',''];
+    }};
   };
+  // Alle TIs auf derselben Achse (Startposition bekannt, gleicher Kurs)
+  const rows=[ti, ...bTIs.filter(o=>o!==ti && o.res && r.P && onAxis(o,ti,S))].sort((a,b)=>a.no-b.no).map(rowFor);
+  const many=rows.length>1;
   const gapsHere=new Map();
   allSlots().forEach(o=>{ if(o.res && o.res.G!==null && (o===ti || (r.P && onAxis(o,ti,S)))) gapsHere.set(o.res.G,o); });
-  const b1Cell=a=>{ const o=gapsHere.get(a); if(!o) return null; if(o===ti) return r.scen1?null:['gap',t('tlGap'),t('tlFree')]; return ['gapother',t('tlGap'),'TI '+o.no]; };
-  const end=Math.max(r.R, ...sch.climbs.map(c=>c.r));
+  const b1Cell=a=>{ const o=gapsHere.get(a); if(!o) return null;
+    if(many) return o.res.scen1?null:['gap',t('tlGap'),o.ghost?'Slot '+o.no:'TI '+o.no];
+    if(o===ti) return r.scen1?null:['gap',t('tlGap'),t('tlFree')]; return ['gapother',t('tlGap'),'TI '+o.no]; };
+  const from=Math.min(...rows.map(x=>x.from)), end=Math.max(...rows.map(x=>x.to));
   const cell=c=>c?`<div class="tl ${c[0]}"><b>${c[1]}</b>${c[2]}</div>`:`<div class="tl" style="visibility:hidden"><b>&nbsp;</b>&nbsp;</div>`;
-  const cols=[]; let anyGap=false;
-  for(let a=r.t;a<=end;a++){ if(b1Cell(a)) anyGap=true; }
-  for(let a=r.t;a<=end;a++){
-    const tm=at(a);
-    cols.push(`<div class="tcol" data-a="${a}"><div class="idx">${a===r.t?'±0':'+'+(a-r.t)}${tm?'<br>'+tm.slice(0,5):''}</div>${cell(athleteCell(a))}${anyGap?cell(b1Cell(a)):''}</div>`);
+  let anyGap=false;
+  for(let a=from;a<=end;a++){ if(b1Cell(a)) anyGap=true; }
+  const head=a=>{ const tm=at(a), d=a-r.t; return `<div class="idx">${d===0?'±0':(d>0?'+':'−')+Math.abs(d)}${tm?'<br>'+tm.slice(0,5):''}</div>`; };
+  const cols=[];
+  for(let a=from;a<=end;a++) cols.push(`<div class="tcol" data-a="${a}">${head(a)}${rows.map(x=>cell(x.cell(a))).join('')}${anyGap?cell(b1Cell(a)):''}</div>`);
+  document.querySelector('#bTimelineCard h2').textContent=t(many?'tlTitleMulti':'tlTitle');
+  $('bTlHint').textContent=t(many?'tlHintMulti':'tlHint');
+  if(!many){
+    $('bTimeline').innerHTML=cols.join('');
+  } else {
+    // Mehrere TIs: Zeilen mit Beschriftung links, waagerecht scrollbar (nur innerhalb der Karte)
+    const labels=rows.map(x=>`<div class="lab${x.o===ti?' sel':''}">TI ${x.o.no} · B${x.o.B}</div>`).join('')+(anyGap?`<div class="lab">${t('tlB1Row')}</div>`:'');
+    $('bTimeline').innerHTML=`<div class="tlwrap" id="bTlWrap"><div class="tlgrid"><div class="tlabels"><div class="idx"></div>${labels}</div>${cols.join('')}</div></div>`;
+    const wrap=$('bTlWrap'), col=wrap.querySelector(`.tcol[data-a="${r.t}"]`), lab=wrap.querySelector('.tlabels');
+    // Spalte des gewählten TI direkt rechts neben die feste Beschriftung scrollen
+    if(col) wrap.scrollLeft=Math.max(0, wrap.scrollLeft + col.getBoundingClientRect().left - wrap.getBoundingClientRect().left - lab.offsetWidth - 6);
   }
-  $('bTimeline').innerHTML=cols.join('');
   // Für die Live-Markierung des laufenden Intervalls
   const tStart=timeOf(r.t,ti,S);
   bTl = tStart===null ? null : {start:tStart, t:r.t, cycle:S.cycle};
