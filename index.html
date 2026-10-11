@@ -118,6 +118,13 @@ summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
 .fold:not([open])>summary::after{transform:rotate(-90deg)}
 .fold[open]>summary{margin-bottom:12px}
 .btn.wide{width:100%;flex:1 1 100%}
+/* Feste Ergebnisleiste unten – erscheint, wenn der orange Kasten nicht im Bild ist */
+.resbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:16px;line-height:1.3;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.18);cursor:pointer;display:flex;align-items:center;gap:10px}
+.resbar span{flex:1;min-width:0}
+.resbar::after{content:'▴';font-size:14px;opacity:.85}
+body.hasbar{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+.cdname{text-align:center;font-weight:700;color:var(--muted);margin-top:4px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
 .chip{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:999px;padding:8px 12px;font:600 14px/1.1 inherit;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -155,8 +162,12 @@ footer a{color:inherit}
   <div class="card">
     <h2 data-i18n="whereTI">Wo war der TI?</h2>
     <div class="chips hidden" id="lChips"></div>
-    <label for="lBib" data-i18n="bib">Startnummer (Bib, optional)</label>
-    <input id="lBib" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="z. B. 104" data-i18n-ph="eg104">
+    <div class="row">
+      <div><label for="lBib" data-i18n="bibShort">Startnummer (Bib)</label>
+        <input id="lBib" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="optional" data-i18n-ph="optional"></div>
+      <div><label data-i18n="routeLbl">Route</label>
+        <div class="seg" id="lRoute"><button type="button" data-v="0">–</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button></div></div>
+    </div>
     <label for="lHolds" data-i18n="lHolds">Gewertete Griffe vor dem TI</label>
     <div class="stepper">
       <button type="button" data-step="lHolds" data-d="-1" aria-label="weniger">−</button>
@@ -199,6 +210,7 @@ footer a{color:inherit}
 
   <div class="card">
     <h2 data-i18n="cdTitle">Countdown Erholungszeit</h2>
+    <div class="cdname hidden" id="lCdName"></div>
     <div class="countdown" id="lCountdown">--:--</div>
     <div class="hint" style="text-align:center" id="lCdHint" data-i18n="cdHint">Beim Start wird die seit dem Sturz vergangene Zeit abgezogen.</div>
     <div class="btns">
@@ -349,6 +361,7 @@ footer a{color:inherit}
   </div>
 </section>
 </main>
+<div class="resbar hidden" id="resBar" role="button" tabindex="0"><span id="resBarText"></span></div>
 
 <footer>
   <p><span data-i18n="footer">Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident.</span> <a id="docLink" href="https://github.com/JannikWeiser/ti-rechner/blob/main/TI-Ablauf.md" data-i18n="docLink">Ablauf eines TI (Doku)</a></p>
@@ -416,6 +429,8 @@ de:{
   gap1:'nächstes Intervall (+1)', gap2:'übernächstes (+2)',
   gapHint:'JP entscheidet: Kann der schon aufgerufene nächste Athlet noch warten?',
   clockSum:'Uhrzeit (optional)', t0:'Startzeit des TI-Intervalls', bPos:'Startposition des TI-Athleten',
+  routeLbl:'Route', onRoute:n=>` an Route ${n}`, barRestart:'Neustart', barGap:'B1 frei', barBefore:p=>`vor Pos. ${p}`,
+  barReuse:n=>`nutzt Slot von ${n}`, barSc1:'Restzeit an B1', barTo:'zum Ergebnis',
   posReq:'· Pflicht', resetAll:'Alle TIs löschen', confirmResetLead:'Alle Lead-TIs löschen?',
   roundInfo:(p,n,m)=>`${p?p+' · ':''}${n} Boulder · ${m} min`, pShort:{q:'Qualifikation',jq:'Qualifikation B (Flash)',s:'Halbfinale',jf:'Finale im Intervall'}, bib:'Startnummer (Bib, optional)', bibShort:'Startnummer (Bib)', bPosShort:'Startposition', eg104:'z. B. 104', optional:'optional',
   needPos:'Startposition eingeben', needPosHint:'Ohne Startposition kann der Rechner den Athleten nicht in die Startliste einordnen.', posHint:'Platz in der Startliste („Order“), nicht die Startnummer.',
@@ -486,6 +501,8 @@ en:{
   gap1:'next rotation (+1)', gap2:'the one after (+2)',
   gapHint:'JP decides: can the next athlete, already called, still wait?',
   clockSum:'Time (optional)', t0:'Start time of the TI rotation', bPos:'Start position of the TI athlete',
+  routeLbl:'Route', onRoute:n=>` on route ${n}`, barRestart:'restart', barGap:'B1 free', barBefore:p=>`before pos. ${p}`,
+  barReuse:n=>`uses slot of ${n}`, barSc1:'time left on B1', barTo:'to the result',
   posReq:'· required', resetAll:'Delete all TIs', confirmResetLead:'Delete all lead TIs?',
   roundInfo:(p,n,m)=>`${p?p+' · ':''}${n} ${n===1?'boulder':'boulders'} · ${m} min`, pShort:{q:'Qualification',jq:'Qualification B (flash)',s:'Semi-final',jf:'Final in rotation format'}, bib:'Bib number (optional)', bibShort:'Bib number', bPosShort:'Start position', eg104:'e.g. 104', optional:'optional',
   needPos:'Enter the start position', needPosHint:'Without the start position the calculator cannot place the athlete in the start list.', posHint:'Position in the start list (“Order”), not the bib number.',
@@ -562,7 +579,7 @@ $('themeBtn').onclick = () => {
 
 /* ---------- Tabs ---------- */
 function showTab(t){
-  setTimeout(()=>{ tickLead(); bTick(); if(t==='boulder') scrollTl(); },0);
+  setTimeout(()=>{ tickLead(); bTick(); if(t==='boulder') scrollTl(); updateBar(); },0);
   $('tabLead').setAttribute('aria-selected', t==='lead');
   $('tabBoulder').setAttribute('aria-selected', t==='boulder');
   $('lead').classList.toggle('hidden', t!=='lead');
@@ -599,7 +616,7 @@ if(!Array.isArray(lTIs)||!lTIs.length){
 }
 const today=new Date().toDateString();
 lTIs=lTIs.filter(t=>t&&typeof t==='object').map((t,i)=>({no:Number.isInteger(t.no)&&t.no>0?t.no:i+1,
-  holds:Math.max(0,Math.floor(+t.holds||0)), ref:timeStr(t.ref), pos:posStr(t.pos), bib:bibStr(t.bib),
+  holds:Math.max(0,Math.floor(+t.holds||0)), ref:timeStr(t.ref), pos:posStr(t.pos), bib:bibStr(t.bib), route:[1,2].includes(t.route)?t.route:0,
   // Countdowns vom Vortag nicht weiterlaufen lassen (Zeiten sind Sekunden seit Mitternacht)
   cdTarget: t.cdDay===today && Number.isFinite(t.cdTarget) ? t.cdTarget : null,
   // eingefrorener Stand in Sekunden (ältere Versionen speicherten Text wie „6:58“ oder „Bereit ✓“)
@@ -609,6 +626,9 @@ if(!lTIs.length) lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', cdTarget:null, c
 lNext=Math.max(...lTIs.map(t=>t.no))+1;
 lSel=Math.min(store.get('leadSel',0), lTIs.length-1);
 const lCur=()=>lTIs[lSel];
+// Name eines Lead-TI: „Bib 106 an Route 1“ (Route nur zur Benennung)
+const leadName=o=>tiName(o)+(o.route?t('onRoute',o.route):'');
+document.querySelectorAll('#lRoute button').forEach(b=>b.onclick=()=>{ lCur().route=+b.dataset.v; calcLead(); });
 const lSave=()=>{ store.set('leadTIs',lTIs); store.set('leadSel',lSel); store.set('leadGap',$('lGap').value); };
 const lRec=ti=>Math.min(Math.max(0,Math.floor(+ti.holds||0)),20)*60;
 
@@ -619,7 +639,7 @@ function renderLeadChips(){
   const multi=lTIs.length>1;
   $('lChips').classList.toggle('hidden', !multi);
   $('lReset').classList.toggle('hidden', !multi);
-  if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">${esc(tiName(t))} · ${esc(I18N[LANG].chipHolds(Math.max(0,Math.floor(+t.holds||0))))}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
+  if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">${esc(tiName(t))}${t.route?' · R'+t.route:''} · ${esc(I18N[LANG].chipHolds(Math.max(0,Math.floor(+t.holds||0))))}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
   $('lChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ lSel=+c.dataset.i; lLoadForm(); calcLead(); });
 }
 
@@ -632,13 +652,15 @@ function calcLead(){
   const pos=+ti.pos||null;
   const earliest = ref!==null ? ref+recMin*60 : null;
   const slotsAhead = recMin===0 ? 0 : Math.ceil(recMin/gap); // nachfolgende Athleten, die vorher starten
-  $('lResult').innerHTML=`<div class="sub">${t('recTitle')}${lTIs.length>1||ti.bib?' · '+esc(tiName(ti)):''}</div>
+  $('lResult').innerHTML=`<div class="sub">${t('recTitle')}${lTIs.length>1||ti.bib||ti.route?' · '+esc(leadName(ti)):''}</div>
     <div class="big">${recMin} min</div>
     <div class="sub">${t('holds',holds)}${holds>20?t('capped'):''}</div>
     <dl class="kv">
       <dt>${t('earliest')}</dt><dd>${earliest!==null?t('clock',secToClock(earliest)):t('enterTime')}</dd>
       <dt>${t('insert')}</dt><dd>${recMin===0?t('whenFixed'):t('afterN',slotsAhead)}${pos&&recMin>0?t('beforeStartPos',pos+slotsAhead+1):''}</dd>
     </dl>`;
+  document.querySelectorAll('#lRoute button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===(ti.route||0)));
+  barBaseLead = (lTIs.length>1||ti.bib||ti.route?leadName(ti)+': ':'')+recMin+' min'+(earliest!==null?' · '+t('barRestart')+' '+secToClock(earliest).slice(0,5):'');
   // Läuft der Countdown, passt sich das Ziel an geänderte Eingaben an
   if(ti.cdTarget!==null) ti.cdTarget=(ref!==null?ref:ti.cdStartedAt)+lRec(ti);
   renderLeadChips(); lSave(); tickLead();
@@ -653,12 +675,17 @@ const lCdText=ti=>{ const d=lCdLeft(ti); return d<=0 && (ti.cdTarget!==null||ti.
 function tickLead(){
   const ti=lCur(), el=$('lCountdown'), txt=lCdText(ti);
   el.textContent=txt; el.classList.toggle('done', txt===t('ready'));
+  // Name über dem großen Countdown, z. B. „Bib 106 an Route 1“
+  const nm=(lTIs.length>1||ti.bib||ti.route)?leadName(ti):''; $('lCdName').textContent=nm; $('lCdName').classList.toggle('hidden', !nm);
+  // In der Ergebnisleiste läuft ein gestarteter Countdown mit
+  barText.lead = barBaseLead + (ti.cdTarget!==null ? ' · ⏱ '+txt : '');
+  updateBar();
   $('lStart').textContent = ti.cdTarget!==null ? t('cdStop') : t('cdStart');
   const multi=lTIs.length>1;
   $('lCdList').classList.toggle('hidden', !multi);
   if(multi) $('lCdList').innerHTML=lTIs.map((x,i)=>{
     const tx=lCdText(x), state=x.cdTarget!==null?(tx===t('ready')?'':t('running')):(x.cdFrozen!==null?t('stopped'):t('notStarted'));
-    return `<li class="${i===lSel?'next':''}"><span>${esc(tiName(x))}${x.pos?' · Pos '+esc(x.pos):''} <span class="hint">${state}</span></span><span class="t">${tx}</span></li>`;
+    return `<li class="${i===lSel?'next':''}"><span>${esc(leadName(x))}${x.pos?' · Pos '+esc(x.pos):''} <span class="hint">${state}</span></span><span class="t">${tx}</span></li>`;
   }).join('');
 }
 // Automatischer Takt nur für den sichtbaren Reiter und nur, wenn die Seite angezeigt wird
@@ -685,7 +712,7 @@ $('lAdd').onclick=()=>{
   lSel=lTIs.length-1; lLoadForm(); calcLead(); $('lHolds').focus();
 };
 $('lDel').onclick=()=>{
-  if(!confirm(t('confirmDel',tiName(lCur())))) return;
+  if(!confirm(t('confirmDel',leadName(lCur())))) return;
   // Letzter TI: Formular wird mit einem leeren TI neu begonnen
   if(lTIs.length<2){ lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', cdTarget:null, cdFrozen:null}]; lNext=2; lSel=0; }
   else { lTIs.splice(lSel,1); lSel=Math.max(0,lSel-1); }
@@ -952,9 +979,10 @@ function renderBoulder(){
         <dt>${t('credit')}</dt><dd>${t('wsCredit')}</dd>
         <dt>${t('wsMulti')}</dt><dd>${t('wsMultiTxt')}</dd>
       </dl>`;
-    bMilestones=[]; bTick(); return;
+    bMilestones=[]; barText.boulder=''; bTick(); updateBar(); return;
   }
 
+  barText.boulder='';
   // Startposition ist Pflicht: ohne sie kein Ergebnis (verhindert Verwechslungen in der Startliste)
   $('bTimelineCard').classList.toggle('hidden', !r.P);
   if(!r.P){
@@ -991,6 +1019,10 @@ function renderBoulder(){
     </dl>${notes}`;
 
   renderGaps(S);
+  { const who=(multi||ti.bib)?tiName(ti)+': ':'';
+    barText.boulder = who + (r.scen1 ? t('nextInt')+' · '+t('barSc1')
+      : t('plusK',r.k)+' · '+(r.reuse ? t('barReuse',nameNo(r.reuseNo))
+      : t('barGap')+' '+(gTime?gTime.slice(0,5):'+'+(r.G-r.t))+' · '+t('barBefore', r.P?vorPos(ti,S):r.k))); }
 
   // Grafik: eine Zeile pro TI (bei einem TI nur dieser), letzte Zeile: Lücken an Boulder 1
   const rowFor=o=>{
@@ -1040,7 +1072,7 @@ function renderBoulder(){
   bTl = tStart===null ? null : {start:tStart, t:r.t, cycle:S.cycle};
 
   buildMilestones(S, multi);
-  bTick();
+  bTick(); updateBar();
 }
 
 function buildMilestones(S, multi){
@@ -1087,6 +1119,27 @@ function renderGaps(S){
       <div class="hint">${t('extend',n,c,fmtMS(n*S.cycle))}</div>`;
   }).join('');
 }
+
+/* ---------- Feste Ergebnisleiste ----------
+   Zeigt das Wichtigste des aktuellen Reiters, solange der orange Kasten nicht zu sehen ist. Antippen springt zum Ergebnis. */
+let barBaseLead='';
+const barText={lead:'', boulder:''};
+function curTab(){ return $('lead').classList.contains('hidden') ? 'boulder' : 'lead'; }
+// Ist der orange Kasten des aktuellen Reiters (zumindest teilweise) im Bild? Direkt gemessen, ohne Browser-Meldungen.
+function resultInView(tab){
+  const r=$(tab==='lead'?'lResult':'bResult').getBoundingClientRect();
+  return r.height>0 && r.bottom>120 && r.top<window.innerHeight-80;
+}
+function updateBar(){
+  const tab=curTab(), txt=barText[tab], show=!!txt && !resultInView(tab);
+  $('resBar').classList.toggle('hidden', !show); document.body.classList.toggle('hasbar', show);
+  if(show) $('resBarText').textContent=txt;
+}
+window.addEventListener('scroll', updateBar, {passive:true});
+window.addEventListener('resize', updateBar);
+const goResult=()=>{ const el=$(curTab()==='lead'?'lResult':'bResult'); window.scrollTo({top:el.getBoundingClientRect().top+scrollY-140, behavior:'smooth'}); };
+$('resBar').onclick=goResult;
+$('resBar').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); goResult(); } };
 
 /* ---------- Boulder Live-Countdown ---------- */
 let bTl=null, bTlFocus=null;
