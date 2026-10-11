@@ -8,7 +8,7 @@ Eine mobile Web-App für Schiedsrichter (JU/JP). Nach einem **Technischen Zwisch
 - **Lead:** Erholungszeit und Zeitpunkt des Neustarts
 - **Boulder:** Rotation-Slot, Lücke an Boulder 1, sekundäre Isolation, Gutschrift
 
-Dazu gehört [TI-Ablauf.md](TI-Ablauf.md): eine Doku, wie ein TI abläuft und wann er greift. Die Doku ist auf der Seite verlinkt.
+Dazu gehört [TI-Ablauf.md](TI-Ablauf.md): eine Doku, wie ein TI abläuft und wann er greift. Die Doku ist **nicht** auf der Seite verlinkt (Link auf Wunsch entfernt).
 
 ## Repo / Deployment
 
@@ -134,7 +134,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - Formatnamen: **„Intervall“** (nicht „Intervall fix“) und **„World Series (Finals)“** (früher „World Series / Classic“, davor „Max-Rotation“)
 - **±-Stepper einheitlich** an allen Zahlenfeldern: Griffe, Starttakt, Startpositionen, Anzahl Boulder, Intervall (0,5er-Schritte), Restzeit (15-s-Schritte). Uhrzeitfelder haben keine Stepper.
 - Vorlagen (nur im Intervall-Format), **benannt wie die World-Climbing-Formate** (Event Regulations Annex C, Tab. 1/3): „Qualifikation – 5 Boulder, 5 min fix“ (bisher DM Quali), „Qualifikation B (Flash) – 2 Kurse à 3 Boulder, 4 min fix“ (bisher DJC Quali; bei World Climbing „Qualification B“, Flash, 4/5 min fix), „Halbfinale – 4 Boulder, 5 min fix“ (bisher DM Semi), „Finale im Intervall – 4 Boulder, 4 min fix“ (bisher DJC Finale; kein World-Climbing-Pendant, dort ist das Finale 4 min max), „Eigene Einstellung“. Interne Schlüssel bleiben `q`, `jq`, `s`, `jf`, `c` (`jq` = 2 Kurse). Für World Series gibt es keine Vorlage, weil immer dasselbe herauskommt.
-- Footer: nur der Hinweis „Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident“, der Link zur TI-Doku (GitHub-Ansicht der `TI-Ablauf.md`), Impressum und Datenschutz. **Keine Quellenliste.**
+- Footer: nur der Hinweis „Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident“, Impressum und Datenschutz. **Kein Link zur TI-Doku** (auf Wunsch entfernt). **Keine Quellenliste.**
 - **Die Funktion „Zusammenfassung kopieren“ wurde auf Wunsch entfernt.**
 - Keine Erklär-Hinweise mit Regelbezug an den Eingabefeldern, z. B. „Szenario 1 im Judge Guide“ oder „daraus ergibt sich die Gutschrift (§8.5)“
 
@@ -160,7 +160,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **CSP** per Meta-Tag in allen drei Seiten: nur eigene Quellen, keine externen Skripte, `object-src 'none'`, `base-uri 'none'`, `form-action 'none'`. Dazu `referrer: no-referrer`.
 - `b1Start` läuft ohne feste Obergrenze und endet nach spätestens P + (Anzahl Lücken) Schritten. Früher brach die Schleife nach 5000 Schritten ab und lieferte falsch 0.
 - **Takt:** Der 500-ms-Takt aktualisiert nur den sichtbaren Reiter und pausiert bei verstecktem Browser-Tab. Eingaben aktualisieren die Anzeige **immer sofort** (`tickLead()`/`bTick()` direkt, ohne Sichtbarkeitsprüfung).
-- **Service Worker:** network first mit **3 s Zeitlimit**. Bei schlechtem Hallen-WLAN kommt dann die gespeicherte Version. Gespeichert werden nur eigene, vollständige Antworten (`res.type === 'basic'`). Cache-Name derzeit `ti-rechner-v15`.
+- **Service Worker:** network first mit **3 s Zeitlimit**. Bei schlechtem Hallen-WLAN kommt dann die gespeicherte Version. Gespeichert werden nur eigene, vollständige Antworten (`res.type === 'basic'`). Cache-Name derzeit `ti-rechner-v16`.
 
 ## Impressum / Datenschutz
 

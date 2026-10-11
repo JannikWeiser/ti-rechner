@@ -377,7 +377,7 @@ footer a{color:inherit}
 </main>
 
 <footer>
-  <p><span data-i18n="footer">Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident.</span> <a id="docLink" href="https://github.com/JannikWeiser/ti-rechner/blob/main/TI-Ablauf.md" data-i18n="docLink">Ablauf eines TI (Doku)</a></p>
+  <p><span data-i18n="footer">Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident.</span></p>
   <p><a href="impressum.html" data-i18n="imprint">Impressum</a> · <a href="datenschutz.html" data-i18n="privacy">Datenschutz</a></p>
 </footer>
 
@@ -459,8 +459,8 @@ de:{
   tlHintMulti:'Jede Zeile ein TI (der gewählte ist orange beschriftet), letzte Zeile: Lücken an Boulder 1 – dort wird niemand aufgerufen. Waagerecht wischen für weitere Intervalle. Grüner Rand: Intervall, das gerade läuft.',
   tlHint:'Untere Reihe: Lücke an Boulder 1 – in diesem Intervall wird an B1 niemand aufgerufen. Grüner Rand: Intervall, das gerade läuft (aus der Startzeit des TI-Intervalls).',
   lgIso:'Sek. Isolation', lgCZ:'Call Zone (nächster Boulder)', lgSlot:'TI-Slot', lgGap:'Lücke B1',
-  footer:'Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident.', docLink:'Ablauf eines TI (Doku)',
-  docHref:'https://github.com/JannikWeiser/ti-rechner/blob/main/TI-Ablauf.md', imprint:'Impressum', privacy:'Datenschutz',
+  footer:'Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident.',
+  imprint:'Impressum', privacy:'Datenschutz',
   // dynamisch – Lead
   recTitle:'Erholungszeit', holds:n=>`${n} ${pl(n,'Griff','Griffe')} × 1 min`, capped:' → auf 20 min begrenzt',
   earliest:'Frühester Neustart', clock:t=>t+' Uhr', enterTime:'Uhrzeit eingeben', insert:'Einsetzen',
@@ -533,8 +533,8 @@ en:{
   tlHintMulti:'One row per TI (the selected one is labelled in orange), last row: gaps at boulder 1 – nobody is called there. Swipe sideways for more rotations. Green border: the rotation running right now.',
   tlHint:'Bottom row: gap at boulder 1 – nobody is called to B1 in this rotation. Green border: the rotation running right now (based on the start time of the TI rotation).',
   lgIso:'Secondary isolation', lgCZ:'Call zone (next boulder)', lgSlot:'TI slot', lgGap:'Gap B1',
-  footer:'This calculator is an aid – the decision is made by the Jury President.', docLink:'TI procedure (docs)',
-  docHref:'https://github.com/JannikWeiser/ti-rechner/blob/main/TI-Procedure.md', imprint:'Impressum', privacy:'Datenschutz',
+  footer:'This calculator is an aid – the decision is made by the Jury President.',
+  imprint:'Impressum', privacy:'Datenschutz',
   recTitle:'Recovery period', holds:n=>`${n} ${pl(n,'hold','holds')} × 1 min`, capped:' → capped at 20 min',
   earliest:'Earliest restart', clock:t=>t, enterTime:'Enter time', insert:'Insert',
   whenFixed:'as soon as the TI is fixed', afterN:n=>`after approx. ${n} following ${pl(n,'athlete','athletes')}`,
@@ -579,7 +579,6 @@ function applyStatic(){
   document.querySelectorAll('[data-i18n-aria]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18nAria)));
   document.querySelectorAll('[data-step]').forEach(b=>b.setAttribute('aria-label', t(+b.dataset.d<0?'less':'more')));
   $('langBtn').textContent=LANG==='de'?'EN':'DE';
-  $('docLink').href=t('docHref');
   // App-Name auf dem Homescreen: wird beim Installieren aus Manifest bzw. Apple-Titel übernommen
   $('manifestLink').href = LANG==='de' ? 'manifest.webmanifest' : 'manifest-en.webmanifest';
   $('appTitle').content = LANG==='de' ? 'TI-Rechner' : 'TI Calculator';
