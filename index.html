@@ -172,7 +172,7 @@ footer a{color:inherit}
     <label for="lHolds" data-i18n="lHolds">Gewertete Griffe vor dem TI</label>
     <div class="stepper">
       <button type="button" data-step="lHolds" data-d="-1" aria-label="weniger">−</button>
-      <input id="lHolds" type="number" inputmode="numeric" min="0" max="99" value="10">
+      <input id="lHolds" type="number" inputmode="numeric" min="0" max="99" placeholder="z. B. 12" data-i18n-ph="eg12">
       <button type="button" data-step="lHolds" data-d="1" aria-label="mehr">+</button>
     </div>
     <div class="hint" data-i18n="lHoldsHint">Höchster gewerteter Griff, der vor dem Zwischenfall benutzt wurde (z. B. 23 oder 23+ → 23). 1 Minute pro Griff, max. 20 Minuten.</div>
@@ -297,7 +297,7 @@ footer a{color:inherit}
     <label for="bRemain" data-i18n="remain">Restzeit bei Versuchsbeginn</label>
     <div class="stepper">
       <button type="button" data-step="bRemain" data-time="1" data-d="-15" aria-label="weniger">−</button>
-      <input id="bRemain" type="text" inputmode="numeric" placeholder="m:ss" value="3:00">
+      <input id="bRemain" type="text" inputmode="numeric" placeholder="m:ss">
       <button type="button" data-step="bRemain" data-time="1" data-d="15" aria-label="mehr">+</button>
     </div>
     <div class="hint" data-i18n="remainHint">Restzeit auf der Uhr, als der vom TI betroffene Versuch begonnen hat.</div>
@@ -312,7 +312,7 @@ footer a{color:inherit}
         <div class="hint" data-i18n="gapHint">Entscheidung des JP in der Call Zone – ob der bereits aufgerufene nächste Athlet noch zurückgestellt werden kann.</div>
       </div>
     </div>
-    <details id="bClockWrap">
+    <details id="bClockWrap" open>
       <summary data-i18n-html="clockSum">Uhrzeit (optional)</summary>
       <label for="bT0" data-i18n="t0">Startzeit des TI-Intervalls</label>
       <input id="bT0" class="timefield" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="hh:mm:ss">
@@ -450,6 +450,7 @@ de:{
   routeLbl:'Route', onRoute:n=>` an Route ${n}`,
   posReq:'· Pflicht', resetAll:'Alle TIs löschen', confirmResetLead:'Alle Lead-TIs löschen?',
   roundInfo:(p,n,m,a)=>`${p?p+' · ':''}${n} Boulder · ${m} min${a?' · '+a+' Athl.':''}`, pShort:{q:'Qualifikation',jq:'Qualifikation B (Flash)',s:'Halbfinale',jf:'Finale im Intervall'}, bib:'Startnummer (Bib, optional)', bibShort:'Startnummer (Bib)', bPosShort:'Startposition', eg104:'z. B. 104', optional:'optional',
+  needB:'Boulder wählen', needBoth:'Startposition und Boulder eingeben', returnAtQ:'Wiedereinstieg', enterRemain:'Restzeit eingeben', needHolds:'Griffe eingeben',
   needPos:'Startposition eingeben', needPosHint:'Ohne Startposition kann der Rechner den Athleten nicht in die Startliste einordnen.', posHint:'Platz in der Startliste („Order“), nicht die Startnummer.',
   gapsTitle:'Lücken an Boulder 1', reset:'Alle TIs der Runde zurücksetzen', liveCd:'Live-Countdown',
   cdEmpty:'Für den Countdown die Startzeit des TI-Intervalls eingeben.', cdSetT0:'Startzeit eingeben',
@@ -524,6 +525,7 @@ en:{
   routeLbl:'Route', onRoute:n=>` on route ${n}`,
   posReq:'· required', resetAll:'Delete all TIs', confirmResetLead:'Delete all lead TIs?',
   roundInfo:(p,n,m,a)=>`${p?p+' · ':''}${n} ${n===1?'boulder':'boulders'} · ${m} min${a?' · '+a+' athl.':''}`, pShort:{q:'Qualification',jq:'Qualification B (flash)',s:'Semi-final',jf:'Final in rotation format'}, bib:'Bib number (optional)', bibShort:'Bib number', bPosShort:'Start position', eg104:'e.g. 104', optional:'optional',
+  needB:'Choose the boulder', needBoth:'Enter start position and boulder', returnAtQ:'Return', enterRemain:'Enter the time left', needHolds:'Enter the holds',
   needPos:'Enter the start position', needPosHint:'Without the start position the calculator cannot place the athlete in the start list.', posHint:'Position in the start list (“Order”), not the bib number.',
   gapsTitle:'Gaps at boulder 1', reset:'Reset all TIs of this round', liveCd:'Live countdown',
   cdEmpty:'Enter the start time of the TI rotation to use the countdown.', cdSetT0:'Enter start time',
@@ -641,20 +643,23 @@ document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>{
 // Mehrere TIs: jeder hat eigene Griffe, Sturzzeit, Startposition und eigenen Countdown.
 const nowSec=()=>{ const d=new Date(); return d.getHours()*3600+d.getMinutes()*60+d.getSeconds(); };
 const wrapDiff=d=>{ if(d<-43200) d+=86400; if(d>43200) d-=86400; return d; };
+// Neuer, leerer Lead-TI (alle Felder leer; der Starttakt bleibt als Einstellung)
+const newLTI=no=>({no, holds:null, ref:'', pos:'', bib:'', route:'', cdTarget:null, cdFrozen:null});
+const holdsVal=v=>v===null||v===undefined||v===''?null:Math.max(0,Math.floor(+v||0));
 let lTIs=store.get('leadTIs',null), lSel=0, lNext=1;
 if(!Array.isArray(lTIs)||!lTIs.length){
   const l=store.get('lead',null);
-  lTIs=[{no:1, holds:l?l.holds:10, ref:nowClock(), pos:l?(l.pos||''):'', cdTarget:null, cdFrozen:null}];
+  lTIs=[{no:1, holds:l?l.holds:null, ref:'', pos:l?(l.pos||''):'', cdTarget:null, cdFrozen:null}];
 }
 const today=new Date().toDateString();
 lTIs=lTIs.filter(t=>t&&typeof t==='object').map((t,i)=>({no:Number.isInteger(t.no)&&t.no>0?t.no:i+1,
-  holds:Math.max(0,Math.floor(+t.holds||0)), ref:timeStr(t.ref), pos:posStr(t.pos), bib:bibStr(t.bib), route:routeStr(t.route),
+  holds:holdsVal(t.holds), ref:timeStr(t.ref), pos:posStr(t.pos), bib:bibStr(t.bib), route:routeStr(t.route),
   // Countdowns vom Vortag nicht weiterlaufen lassen (Zeiten sind Sekunden seit Mitternacht)
   cdTarget: t.cdDay===today && Number.isFinite(t.cdTarget) ? t.cdTarget : null,
   // eingefrorener Stand in Sekunden (ältere Versionen speicherten Text wie „6:58“ oder „Bereit ✓“)
   cdFrozen: t.cdDay!==today ? null : Number.isFinite(t.cdFrozen) ? Math.max(0,t.cdFrozen) : typeof t.cdFrozen==='string' ? (isNaN(parseMS(t.cdFrozen))?0:parseMS(t.cdFrozen)) : null,
   cdStartedAt: Number.isFinite(t.cdStartedAt)?t.cdStartedAt:null, cdDay:t.cdDay}));
-if(!lTIs.length) lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', cdTarget:null, cdFrozen:null}];
+if(!lTIs.length) lTIs=[newLTI(1)];
 lNext=Math.max(...lTIs.map(t=>t.no))+1;
 lSel=Math.min(store.get('leadSel',0), lTIs.length-1);
 const lCur=()=>lTIs[lSel];
@@ -663,14 +668,14 @@ const leadName=o=>tiName(o)+(o.route?t('onRoute',o.route):'');
 const lSave=()=>{ store.set('leadTIs',lTIs); store.set('leadSel',lSel); store.set('leadGap',$('lGap').value); };
 const lRec=ti=>Math.min(Math.max(0,Math.floor(+ti.holds||0)),20)*60;
 
-function lLoadForm(){ const ti=lCur(); $('lHolds').value=ti.holds; $('lRef').value=ti.ref||''; $('lPos').value=ti.pos||''; $('lBib').value=ti.bib||''; $('lRoute').value=ti.route||''; }
-function lReadForm(){ const ti=lCur(); ti.holds=Math.max(0,Math.floor(+$('lHolds').value||0)); ti.ref=timeStr($('lRef').value); ti.pos=posStr($('lPos').value); ti.bib=bibStr($('lBib').value); ti.route=routeStr($('lRoute').value); }
+function lLoadForm(){ const ti=lCur(); $('lHolds').value=ti.holds??''; $('lRef').value=ti.ref||''; $('lPos').value=ti.pos||''; $('lBib').value=ti.bib||''; $('lRoute').value=ti.route||''; }
+function lReadForm(){ const ti=lCur(); ti.holds=holdsVal($('lHolds').value); ti.ref=timeStr($('lRef').value); ti.pos=posStr($('lPos').value); ti.bib=bibStr($('lBib').value); ti.route=routeStr($('lRoute').value); }
 
 function renderLeadChips(){
   const multi=lTIs.length>1;
   $('lChips').classList.toggle('hidden', !multi);
   $('lReset').classList.toggle('hidden', !multi);
-  if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">${esc(tiName(t))}${t.route?' · R'+esc(t.route):''} · ${esc(I18N[LANG].chipHolds(Math.max(0,Math.floor(+t.holds||0))))}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
+  if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">${esc(tiName(t))}${t.route?' · R'+esc(t.route):''} · ${t.holds===null?'? Gr.':esc(I18N[LANG].chipHolds(t.holds))}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
   $('lChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ lSel=+c.dataset.i; lLoadForm(); calcLead(); });
 }
 
@@ -683,6 +688,11 @@ function calcLead(){
   const pos=+ti.pos||null;
   const earliest = ref!==null ? ref+recMin*60 : null;
   const slotsAhead = recMin===0 ? 0 : Math.ceil(recMin/gap); // nachfolgende Athleten, die vorher starten
+  if(ti.holds===null){
+    $('lResult').innerHTML=`<div class="sub">${t('recTitle')}${lTIs.length>1||ti.bib||ti.route?' · '+esc(leadName(ti)):''}</div><div class="big" style="font-size:24px">${t('needHolds')}</div>`;
+    if(ti.cdTarget!==null) ti.cdTarget=(ref!==null?ref:ti.cdStartedAt);
+    renderLeadChips(); lSave(); tickLead(); return;
+  }
   $('lResult').innerHTML=`<div class="sub">${t('recTitle')}${lTIs.length>1||ti.bib||ti.route?' · '+esc(leadName(ti)):''}</div>
     <div class="big">${recMin} min</div>
     <div class="sub">${t('holds',holds)}${holds>20?t('capped'):''}</div>
@@ -700,7 +710,7 @@ function lCdLeft(ti){
   if(ti.cdTarget===null) return ti.cdFrozen!==null ? ti.cdFrozen : lRec(ti);
   return Math.max(0, wrapDiff(ti.cdTarget-nowSec()));
 }
-const lCdText=ti=>{ const d=lCdLeft(ti); return d<=0 && (ti.cdTarget!==null||ti.cdFrozen!==null) ? t('ready') : fmtMS(d); };
+const lCdText=ti=>{ if(ti.holds===null && ti.cdTarget===null && ti.cdFrozen===null) return '--:--'; const d=lCdLeft(ti); return d<=0 && (ti.cdTarget!==null||ti.cdFrozen!==null) ? t('ready') : fmtMS(d); };
 function tickLead(){
   const ti=lCur(), el=$('lCountdown'), txt=lCdText(ti);
   el.textContent=txt; el.classList.toggle('done', txt===t('ready'));
@@ -726,6 +736,7 @@ $('lStart').onclick=()=>{
     ti.cdFrozen=lCdLeft(ti); ti.cdTarget=null; ti.cdDay=new Date().toDateString(); lSave(); tickLead();
     if(wakeLock && !lTIs.some(t=>t.cdTarget!==null)){ wakeLock.release(); wakeLock=null; } return;
   }
+  if(ti.holds===null){ $('lHolds').focus(); return; }   // ohne Griffe keine Erholungszeit
   // Start: Ziel = Uhrzeit des Sturzes + Erholungszeit (die eingegebene Uhrzeit bleibt unverändert)
   ti.cdStartedAt=nowSec(); ti.cdFrozen=null; ti.cdDay=new Date().toDateString();
   const ref=timeToSec(ti.ref);
@@ -734,20 +745,20 @@ $('lStart').onclick=()=>{
 };
 $('lAdd').onclick=()=>{
   lReadForm();
-  lTIs.push({no:lNext++, holds:10, ref:nowClock(), pos:'', cdTarget:null, cdFrozen:null});
+  lTIs.push(newLTI(lNext++));
   lSel=lTIs.length-1; lLoadForm(); calcLead(); $('lHolds').focus();
 };
 $('lDel').onclick=()=>{
   if(!confirm(t('confirmDel',leadName(lCur())))) return;
   // Letzter TI: Formular wird mit einem leeren TI neu begonnen
-  if(lTIs.length<2){ lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', cdTarget:null, cdFrozen:null}]; lNext=2; lSel=0; }
+  if(lTIs.length<2){ lTIs=[newLTI(1)]; lNext=2; lSel=0; }
   else { lTIs.splice(lSel,1); lSel=Math.max(0,lSel-1); }
   if(wakeLock && !lTIs.some(t=>t.cdTarget!==null)){ wakeLock.release(); wakeLock=null; }
   lLoadForm(); calcLead();
 };
 $('lReset').onclick=()=>{
   if(!confirm(t('confirmResetLead'))) return;
-  lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', bib:'', cdTarget:null, cdFrozen:null}]; lNext=2; lSel=0;
+  lTIs=[newLTI(1)]; lNext=2; lSel=0;
   if(wakeLock){ wakeLock.release(); wakeLock=null; }
   lLoadForm(); calcLead();
 };
@@ -770,9 +781,8 @@ let bState=Object.assign({format:'fix'}, store.get('boulderState',{}));
    Jeder TI speichert seine Eingaben und sein berechnetes Ergebnis (res).
    Ergebnisse sind „fix“: Ändert/löscht man einen TI, bleiben die Slots der anderen unverändert.
    Nur bei geänderten Rundeneinstellungen wird alles neu berechnet (in Eingabereihenfolge = Vorrang). */
-const newBTI=no=>({no, B:1, remain:'3:00', resolved:false, gap:2, t0:'', pos:'', bib:'', course:'A', late:false, res:null});
-// Neuer TI im Formular: Startzeit des TI-Intervalls mit „jetzt“ vorbelegen (wie die Sturzzeit bei Lead)
-const freshBTI=no=>Object.assign(newBTI(no), {t0:nowClock(), decidedAt:nowSec()});
+// Neuer TI: alle Felder leer (Boulder nicht gewählt, keine Restzeit, keine Startzeit)
+const newBTI=no=>({no, B:null, remain:'', resolved:false, gap:2, t0:'', pos:'', bib:'', course:'A', late:false, res:null});
 // Gespeichertes Ergebnis prüfen. G = Lücke an B1 (null, wenn der TI einen schon freien Slot nutzt), sid = Slot-Kennung
 function cleanRes(r){
   const int=v=>Number.isInteger(v);
@@ -784,14 +794,14 @@ function cleanRes(r){
 }
 let bTIs=store.get('boulderTIs',null);
 if(!Array.isArray(bTIs)||!bTIs.length){
-  const t=freshBTI(1), bi=store.get('boulderInputs',null);
+  const t=newBTI(1), bi=store.get('boulderInputs',null);
   if(bi&&bi.remain) t.remain=bi.remain;
   if(bState.boulder) t.B=bState.boulder;
   bTIs=[t];
 }
 bTIs=bTIs.filter(t=>t&&typeof t==='object').map((t,i)=>{
   const n=newBTI(Number.isInteger(t.no)&&t.no>0?t.no:i+1);
-  n.B=Math.min(8,Math.max(1,Math.floor(+t.B||1))); n.remain=typeof t.remain==='string'?t.remain.slice(0,8):'3:00';
+  n.B=t.B==null||t.B===''?null:Math.min(8,Math.max(1,Math.floor(+t.B||1))); n.remain=typeof t.remain==='string'?t.remain.slice(0,8):'';
   n.resolved=!!t.resolved; n.gap=t.gap===1?1:2; n.t0=timeStr(t.t0); n.pos=posStr(t.pos); n.bib=bibStr(t.bib); n.course=t.course==='B'?'B':'A';
   n.decidedAt=Number.isFinite(t.decidedAt)?t.decidedAt:null;
   // Früher galt die späte Entscheidung automatisch – alte Einträge behalten das
@@ -800,9 +810,7 @@ bTIs=bTIs.filter(t=>t&&typeof t==='object').map((t,i)=>{
   n.res=cleanRes(t.res);
   return n;
 });
-if(!bTIs.length) bTIs=[freshBTI(1)];
-// Nur ein TI: Startzeit beim Neuladen wie bei Lead auf „jetzt“ setzen (bei mehreren bleiben die Uhrzeiten)
-else if(bTIs.length===1){ bTIs[0].t0=nowClock(); bTIs[0].decidedAt=nowSec(); }
+if(!bTIs.length) bTIs=[newBTI(1)];
 let bNext=Math.max(...bTIs.map(t=>t.no))+1;
 let bSel=Math.min(store.get('boulderSel',0), bTIs.length-1);
 const bCur=()=>bTIs[bSel];
@@ -848,11 +856,12 @@ function athleteSchedule(P, list, S, self){
   return {s0, base, climbs};
 }
 function computeTI(ti, all, S, g, now){
-  const P=+ti.pos||null;
+  // Ohne Startposition oder Boulder kein Ergebnis (P=null)
+  const P=ti.B ? (+ti.pos||null) : null;
   const others = P ? all.filter(o=>onAxis(o,ti,S)) : [];
   const reserved=reservedOf(others);
   const sch=athleteSchedule(P, others, S, null);
-  const B=ti.B, p=S.p, notes=[];
+  const B=ti.B||1, p=S.p, notes=[];
   const sameSlots=sch.climbs.filter(c=>c.kind==='slot' && c.B===B);
   const inSlot=sameSlots.length ? sameSlots[sameSlots.length-1] : null;   // TI im eigenen Nachhol-Slot
   const t = inSlot ? inSlot.r : (B===1 ? sch.s0 : sch.base+p*(B-1));
@@ -990,8 +999,8 @@ $('bBib').addEventListener('input',()=>{ bCur().bib=bibStr($('bBib').value); bSa
 $('bRestRot').addEventListener('change',settingsChanged);
 $('bAth').addEventListener('input',settingsChanged);
 $('bAdd').onclick=()=>{
-  const prev=bCur(), t=freshBTI(bNext++);
-  t.course=prev.course; t.remain=prev.remain;
+  const prev=bCur(), t=newBTI(bNext++);
+  t.course=prev.course;
   bTIs.push(t); bSel=bTIs.length-1; recomputeOne(bSel); bSave(); bLoadForm(); renderBoulder();
   $('bPosMain').scrollIntoView({block:'center'});
 };
@@ -1001,13 +1010,13 @@ $('bDel').onclick=()=>{
   const gone=bCur();
   // Wird sein Slot von einem anderen TI mitgenutzt, bleibt die Lücke an B1 als Geist bestehen
   if(gone.res && usersOf(gone.res.sid).some(q=>q!==gone)) bGhosts.push({no:gone.no, ghost:true, B:gone.B, course:gone.course, pos:'', bib:gone.bib, t0:gone.t0, res:gone.res});
-  if(bTIs.length<2){ bTIs=[freshBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); }
+  if(bTIs.length<2){ bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); }
   else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
   pruneGhosts(); bSave(); bLoadForm(); renderBoulder();
 };
 $('bReset').onclick=()=>{
   if(!confirm(t('confirmReset'))) return;
-  bTIs=[freshBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); bSave(); bLoadForm(); renderBoulder();
+  bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); bSave(); bLoadForm(); renderBoulder();
 };
 
 /* ---------- Anzeige ---------- */
@@ -1034,7 +1043,7 @@ function renderBoulder(){
   // Chips
   $('bChips').classList.toggle('hidden', !multi);
   if(multi){
-    $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">${esc(tiName(t))} · B${t.B}${S.two?' · '+esc(t.course):''} · Pos ${t.pos?esc(t.pos):'?'}</button>`).join('');
+    $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">${esc(tiName(t))} · B${t.B||'?'}${S.two?' · '+esc(t.course):''} · Pos ${t.pos?esc(t.pos):'?'}</button>`).join('');
     $('bChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ bSel=+c.dataset.i; bSave(); bLoadForm(); renderBoulder(); });
   }
 
@@ -1053,8 +1062,9 @@ function renderBoulder(){
   $('bTimelineCard').classList.toggle('hidden', !r.P);
   if(!r.P){
     $('bGapWrap').classList.add('hidden');
-    $('bResult').innerHTML=`<div class="sub">${t('returnAt',B)}${(multi||ti.bib)?' · '+esc(tiName(ti)):''}</div>
-      <div class="big" style="font-size:24px">${t('needPos')}</div><div class="hint">${t('needPosHint')}</div>`;
+    const need=!ti.B&&!ti.pos?'needBoth':!ti.B?'needB':'needPos';
+    $('bResult').innerHTML=`<div class="sub">${B?t('returnAt',B):t('returnAtQ')}${(multi||ti.bib)?' · '+esc(tiName(ti)):''}</div>
+      <div class="big" style="font-size:24px">${t(need)}</div>${ti.pos?'':`<div class="hint">${t('needPosHint')}</div>`}`;
     renderGaps(S); buildMilestones(S, multi); bTl=null; bTick(); return;
   }
   // +1/+2 nur zeigen, wenn die Wahl das Ergebnis ändert
@@ -1063,8 +1073,8 @@ function renderBoulder(){
   $('bGapWrap').classList.toggle('hidden', r.scen1 || alt1.R===alt2.R);
   document.querySelectorAll('#bGap button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===ti.gap));
 
-  let remain=parseMS(ti.remain); const remainOk=!isNaN(remain); if(remainOk) remain=Math.min(remain,S.rot);
-  const award=remainOk?fmtMS(remain):'?', awardTxt=t('approx',award), rest=remainOk?S.rot-remain:0;
+  let remain=parseMS(ti.remain); const remainOk=!isNaN(remain), remainEmpty=!String(ti.remain||'').trim(); if(remainOk) remain=Math.min(remain,S.rot);
+  const award=remainOk?fmtMS(remain):'?', awardTxt=remainEmpty?t('enterRemain'):t('approx',award), rest=remainOk?S.rot-remain:0;
   const at=a=>{ const x=timeOf(a,ti,S); return x===null?null:secToClock(x); };
   const sch=athleteSchedule(r.P, bTIs.filter(o=>o===ti||(r.P&&onAxis(o,ti,S))), S, ti);
   const lastBefore=sch.climbs.filter(c=>c.r<r.R && !(c.kind==='slot'&&c.self)).pop();
@@ -1073,7 +1083,7 @@ function renderBoulder(){
   const isoTxt = r.scen1 ? t('isoSc1') : (iso>0 ? t('isoN',iso,lastTxt) : t('isoNone'));
   const gTime=r.G!==null?at(r.G):null, climb=at(r.R);
   const posTxt = r.reuse ? '' : (r.P ? t('beforePos',vorPos(ti,S)) : t('beforeKth',r.k));
-  const notes = r.notes.map(noteText).filter(Boolean).map(n=>`<div class="note warn">${esc(n)}</div>`).join('') + (multi && !r.P ? `<div class="note warn">${t('noPos')}</div>` : '') + (remainOk?'':`<div class="note warn">${t('remainFmt')}</div>`);
+  const notes = r.notes.map(noteText).filter(Boolean).map(n=>`<div class="note warn">${esc(n)}</div>`).join('') + (multi && !r.P ? `<div class="note warn">${t('noPos')}</div>` : '') + (remainOk||remainEmpty?'':`<div class="note warn">${t('remainFmt')}</div>`);
   $('bResult').innerHTML=`<div class="sub">${t('returnAt',B)}${(multi||ti.bib)?' · '+esc(tiName(ti)):''}</div>
     <div class="big">${r.scen1?t('nextInt'):t('plusK',r.k)}</div>
     ${climb&&remainOk?`<div class="sub">${t('wallStart',secToClock(timeOf(r.R,ti,S)+rest),award)}</div>`:''}
@@ -1222,8 +1232,6 @@ setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidde
 (function init(){
   applyStatic();
   const lg=store.get('leadGap',null) ?? (store.get('lead',null)||{}).gap; if(lg) $('lGap').value=lg;
-  // Einzelner TI ohne laufenden Countdown: Sturzzeit wie bisher mit „jetzt“ vorbelegen
-  if(lTIs.length===1 && lTIs[0].cdTarget===null && lTIs[0].cdFrozen===null) lTIs[0].ref=nowClock();
   lLoadForm();
   const bi=store.get('boulderInputs',null);
   if(bi){ $('bPreset').value=(presets[bi.preset]||bi.preset==='c')?bi.preset:'c'; $('bN').value=bi.n; $('bRot').value=bi.rot; $('bChange').value=bi.change;
