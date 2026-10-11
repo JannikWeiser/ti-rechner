@@ -146,6 +146,8 @@ footer a{color:inherit}
   <div class="card">
     <h2 data-i18n="whereTI">Wo war der TI?</h2>
     <div class="chips hidden" id="lChips"></div>
+    <label for="lBib" data-i18n="bib">Startnummer (Bib, optional)</label>
+    <input id="lBib" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="z. B. 104" data-i18n-ph="eg104">
     <label for="lHolds" data-i18n="lHolds">Gewertete Griffe vor dem TI</label>
     <div class="stepper">
       <button type="button" data-step="lHolds" data-d="-1" aria-label="weniger">−</button>
@@ -251,6 +253,17 @@ footer a{color:inherit}
         <button type="button" data-v="B" data-i18n="courseB">Kurs B</button>
       </div>
     </div>
+    <div class="row">
+      <div><label for="bBib" data-i18n="bibShort">Startnummer (Bib)</label>
+        <input id="bBib" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="optional" data-i18n-ph="optional"></div>
+      <div id="bPosBox"><label for="bPos"><span data-i18n="bPosShort">Startposition</span> <span class="req" id="bPosReq" data-i18n="posReq">· Pflicht</span></label>
+        <div class="stepper">
+        <button type="button" data-step="bPos" data-d="-1" aria-label="weniger">−</button>
+        <input id="bPos" type="number" inputmode="numeric" min="1" placeholder="z. B. 17" data-i18n-ph="eg17">
+        <button type="button" data-step="bPos" data-d="1" aria-label="mehr">+</button>
+        </div></div>
+    </div>
+    <div class="hint" data-i18n="posHint">Platz in der Startliste der Runde (Spalte „Order“), nicht die Startnummer.</div>
     <div id="bPosMain"></div>
     <label data-i18n="boulder">Boulder</label>
     <div class="seg" id="bBoulder"></div>
@@ -273,18 +286,9 @@ footer a{color:inherit}
       </div>
     </div>
     <details id="bClockWrap">
-      <summary data-i18n-html="clockSum">Uhrzeit &amp; Startliste (optional)</summary>
+      <summary data-i18n-html="clockSum">Uhrzeit (optional)</summary>
       <label for="bT0" data-i18n="t0">Startzeit des TI-Intervalls</label>
       <input id="bT0" type="time" step="1">
-      <div id="bPosBox">
-      <label for="bPos"><span data-i18n="bPos">Startposition des TI-Athleten</span> <span class="req hidden" id="bPosReq" data-i18n="posReq">· Pflicht bei mehreren TIs</span></label>
-      <div class="stepper">
-      <button type="button" data-step="bPos" data-d="-1" aria-label="weniger">−</button>
-      <input id="bPos" type="number" inputmode="numeric" min="1" placeholder="z. B. 17" data-i18n-ph="eg17">
-      <button type="button" data-step="bPos" data-d="1" aria-label="mehr">+</button>
-      </div>
-      <div class="hint" data-i18n="posHint">Platz in der Startliste der Runde (Spalte „Order“), nicht die Startnummer.</div>
-      </div>
     </details>
     <div class="btns">
       <button type="button" class="btn secondary" id="bAdd" data-i18n="addTI">+ weiterer TI</button>
@@ -354,6 +358,12 @@ function fmtMS(sec){ sec=Math.max(0,Math.round(sec)); return Math.floor(sec/60)+
 // Startposition: nur ganze Zahlen ≥ 1 (z. B. „12.5“, „-3“ oder „1e9“ werden verworfen)
 const posInt=v=>{ const n=Number(v); return Number.isInteger(n) && n>=1 && n<=9999 ? n : null; };
 const posStr=v=>{ const n=posInt(v); return n===null ? '' : String(n); };
+// Startnummer (Bib): nur Ziffern/Buchstaben/Bindestrich, max. 8 Zeichen – dient nur der Benennung, nicht der Berechnung
+const bibStr=v=>String(v||'').trim().replace(/[^0-9A-Za-z-]/g,'').slice(0,8);
+const tiName=o=>o.bib ? 'Bib '+o.bib : 'TI '+o.no;           // z. B. „Bib 104“ oder „TI 2“
+const tiShort=o=>o.bib ? '#'+o.bib : 'TI '+o.no;             // für die schmalen Kacheln der Grafik
+// Name zu einer TI-Nummer (für gespeicherte Hinweise); gelöschte TIs behalten „TI n“
+function nameNo(no){ const o=(typeof bTIs!=='undefined'&&bTIs.find(q=>q.no===no)) || (typeof bGhosts!=='undefined'&&bGhosts.find(g=>g.no===no)); return o?tiName(o):'TI '+no; }
 const timeStr=v=>/^\d{2}:\d{2}(:\d{2})?$/.test(String(v||'')) ? String(v) : '';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function parseMS(s){
@@ -395,8 +405,9 @@ de:{
   resolved:'TI vor Ende des laufenden Intervalls behoben?', gapLabel:'Boulder 1 frei lassen',
   gap1:'nächstes Intervall (+1)', gap2:'übernächstes (+2)',
   gapHint:'Entscheidung des JP in der Call Zone – ob der bereits aufgerufene nächste Athlet noch zurückgestellt werden kann.',
-  clockSum:'Uhrzeit &amp; Startliste (optional)', t0:'Startzeit des TI-Intervalls', bPos:'Startposition des TI-Athleten',
-  posReq:'· Pflicht bei mehreren TIs', posHint:'Platz in der Startliste der Runde (Spalte „Order“), nicht die Startnummer.',
+  clockSum:'Uhrzeit (optional)', t0:'Startzeit des TI-Intervalls', bPos:'Startposition des TI-Athleten',
+  posReq:'· Pflicht', bib:'Startnummer (Bib, optional)', bibShort:'Startnummer (Bib)', bPosShort:'Startposition', eg104:'z. B. 104', optional:'optional',
+  needPos:'Startposition eingeben', needPosHint:'Ohne Startposition kann der Rechner den Athleten nicht in die Startliste einordnen.', posHint:'Platz in der Startliste der Runde (Spalte „Order“), nicht die Startnummer.',
   gapsTitle:'Lücken an Boulder 1', reset:'Alle TIs der Runde zurücksetzen', liveCd:'Live-Countdown',
   cdEmpty:'Für den Countdown die Startzeit des TI-Intervalls eingeben.', cdSetT0:'Startzeit eingeben',
   shift:'Zeitplan verschieben', earlier:'15 Sekunden früher', later:'15 Sekunden später', offset:'Verschiebung',
@@ -413,7 +424,7 @@ de:{
   whenFixed:'sobald TI behoben ist', afterN:n=>`nach ca. ${n} nachfolgenden ${pl(n,'Athleten','Athleten')}`,
   beforeStartPos:p=>` (vor Startposition ${p})`, chipHolds:n=>`${n} Gr.`, ready:'Bereit ✓',
   running:'läuft', stopped:'gestoppt', notStarted:'nicht gestartet',
-  confirmDel:no=>`TI ${no} löschen?`, confirmDelMulti:no=>`TI ${no} löschen? Die Slots der anderen TIs bleiben unverändert.`,
+  confirmDel:n=>`${n} löschen?`, confirmDelMulti:n=>`${n} löschen? Die Slots der anderen TIs bleiben unverändert.`,
   confirmReset:'Alle TIs dieser Runde löschen?',
   // dynamisch – Boulder
   wsBig:'Wiedereinstieg nach Ende der laufenden Rotation', wsFlow:'Ablauf', wsFlowTxt:'als einziger Athlet auf dem Field of Play, die Gruppe wartet',
@@ -431,13 +442,13 @@ de:{
   extend:(n,c,m)=>`Runde${c?' (Kurs '+c+')':''} verlängert sich um ${n} ${pl(n,'Intervall','Intervalle')} (ca. ${m} min).`,
   msSc1:'Intervall mit Restzeit an Boulder 1 beginnt', msWall:(b,a)=>`Athlet an Boulder ${b} (${a} Restzeit)`, msGap:'Boulder 1 bleibt frei (Lücke)',
   msCZ:b=>`Athlet in die Call Zone für Boulder ${b}`, msSlot:'Slot-Intervall beginnt', allDone:'Alle Schritte erledigt',
-  n_sc1Blocked:x=>`Szenario 1 nicht möglich – B1 im nächsten Intervall ist schon für TI ${x.no} reserviert.`,
+  n_sc1Blocked:x=>`Szenario 1 nicht möglich – B1 im nächsten Intervall ist schon für ${nameNo(x.no)} reserviert.`,
   n_sc1Late:()=>'Szenario 1 nicht mehr möglich – das nächste Intervall läuft bereits.',
   n_late:x=>`Späte Entscheidung: Lücke frühestens im ${x.g===1?'nächsten':'übernächsten'} Intervall ab jetzt.`,
-  n_pushed:x=>`${x.n} ${pl(x.n,'Intervall','Intervalle')} später wegen ${x.l.map(n=>'TI '+n).join(', ')} (gleiche Lücke an B1).`,
-  n_inSlot:x=>`TI im Nachhol-Slot von TI ${x.no}.`,
-  n_reuse:x=>`Nutzt den schon freien Slot von TI ${x.no} – keine neue Lücke an B1 nötig.`,
-  gapReuse:no=>`keine neue Lücke – nutzt den Slot von TI ${no}`, alsoUsed:l=>`mitgenutzt von ${l}`, ghostWho:no=>`Slot TI ${no} (geändert/gelöscht)`,
+  n_pushed:x=>`${x.n} ${pl(x.n,'Intervall','Intervalle')} später wegen ${x.l.map(nameNo).join(', ')} (gleiche Lücke an B1).`,
+  n_inSlot:x=>`TI im Nachhol-Slot von ${nameNo(x.no)}.`,
+  n_reuse:x=>`Nutzt den schon freien Slot von ${nameNo(x.no)} – keine neue Lücke an B1 nötig.`,
+  gapReuse:no=>`keine neue Lücke – nutzt den Slot von ${nameNo(no)}`, alsoUsed:l=>`mitgenutzt von ${l}`, ghostWho:n=>`Slot ${n} (geändert/gelöscht)`,
 },
 en:{
   title:'TI Calculator Climbing', brand:'<span>TI</span> Calculator', sub:'Technical Incident · Lead &amp; Boulder',
@@ -463,8 +474,9 @@ en:{
   resolved:'TI fixed before the end of the current rotation?', gapLabel:'Keep boulder 1 free',
   gap1:'next rotation (+1)', gap2:'the one after (+2)',
   gapHint:'Decision of the JP in the call zone – whether the next athlete, who has already been called, can still be held back.',
-  clockSum:'Time &amp; start list (optional)', t0:'Start time of the TI rotation', bPos:'Start position of the TI athlete',
-  posReq:'· required with several TIs', posHint:'Position in the round’s start list (column “Order”), not the bib number.',
+  clockSum:'Time (optional)', t0:'Start time of the TI rotation', bPos:'Start position of the TI athlete',
+  posReq:'· required', bib:'Bib number (optional)', bibShort:'Bib number', bPosShort:'Start position', eg104:'e.g. 104', optional:'optional',
+  needPos:'Enter the start position', needPosHint:'Without the start position the calculator cannot place the athlete in the start list.', posHint:'Position in the round’s start list (column “Order”), not the bib number.',
   gapsTitle:'Gaps at boulder 1', reset:'Reset all TIs of this round', liveCd:'Live countdown',
   cdEmpty:'Enter the start time of the TI rotation to use the countdown.', cdSetT0:'Enter start time',
   shift:'Shift schedule', earlier:'15 seconds earlier', later:'15 seconds later', offset:'Shift',
@@ -480,7 +492,7 @@ en:{
   whenFixed:'as soon as the TI is fixed', afterN:n=>`after approx. ${n} following ${pl(n,'athlete','athletes')}`,
   beforeStartPos:p=>` (before start position ${p})`, chipHolds:n=>`${n} ${pl(n,'hold','holds')}`, ready:'Ready ✓',
   running:'running', stopped:'stopped', notStarted:'not started',
-  confirmDel:no=>`Delete TI ${no}?`, confirmDelMulti:no=>`Delete TI ${no}? The slots of the other TIs stay unchanged.`,
+  confirmDel:n=>`Delete ${n}?`, confirmDelMulti:n=>`Delete ${n}? The slots of the other TIs stay unchanged.`,
   confirmReset:'Delete all TIs of this round?',
   wsBig:'Return after the end of the current rotation', wsFlow:'Procedure', wsFlowTxt:'as the only athlete on the field of play, the group waits',
   credit:'Time credit', wsCredit:'approx. time left when the affected attempt started', wsMulti:'Several TIs', wsMultiTxt:'one after another, in the order they happened',
@@ -497,13 +509,13 @@ en:{
   extend:(n,c,m)=>`Round${c?' (course '+c+')':''} is extended by ${n} ${pl(n,'rotation','rotations')} (approx. ${m} min).`,
   msSc1:'Rotation with time left at boulder 1 starts', msWall:(b,a)=>`Athlete on boulder ${b} (${a} left)`, msGap:'Boulder 1 stays free (gap)',
   msCZ:b=>`Athlete to the call zone for boulder ${b}`, msSlot:'Slot rotation starts', allDone:'All steps done',
-  n_sc1Blocked:x=>`Scenario 1 not possible – B1 in the next rotation is already reserved for TI ${x.no}.`,
+  n_sc1Blocked:x=>`Scenario 1 not possible – B1 in the next rotation is already reserved for ${nameNo(x.no)}.`,
   n_sc1Late:()=>'Scenario 1 no longer possible – the next rotation is already running.',
   n_late:x=>`Late decision: gap at the earliest in the ${x.g===1?'next rotation':'rotation after next'} from now.`,
-  n_pushed:x=>`${x.n} ${pl(x.n,'rotation','rotations')} later because of ${x.l.map(n=>'TI '+n).join(', ')} (same gap at B1).`,
-  n_inSlot:x=>`TI in the make-up slot of TI ${x.no}.`,
-  n_reuse:x=>`Uses the already free slot of TI ${x.no} – no new gap at B1 needed.`,
-  gapReuse:no=>`no new gap – uses the slot of TI ${no}`, alsoUsed:l=>`also used by ${l}`, ghostWho:no=>`Slot TI ${no} (changed/deleted)`,
+  n_pushed:x=>`${x.n} ${pl(x.n,'rotation','rotations')} later because of ${x.l.map(nameNo).join(', ')} (same gap at B1).`,
+  n_inSlot:x=>`TI in the make-up slot of ${nameNo(x.no)}.`,
+  n_reuse:x=>`Uses the already free slot of ${nameNo(x.no)} – no new gap at B1 needed.`,
+  gapReuse:no=>`no new gap – uses the slot of ${nameNo(no)}`, alsoUsed:l=>`also used by ${l}`, ghostWho:n=>`Slot ${n} (changed/deleted)`,
 }};
 const detectLang=()=>{ const l=(navigator.languages&&navigator.languages[0])||navigator.language||'en'; return /^de\b/i.test(l)?'de':'en'; };
 let LANG=(()=>{ const s=store.get('lang',null); return s==='de'||s==='en'?s:detectLang(); })();
@@ -538,7 +550,7 @@ $('themeBtn').onclick = () => {
 
 /* ---------- Tabs ---------- */
 function showTab(t){
-  setTimeout(()=>{ tickLead(); bTick(); },0);
+  setTimeout(()=>{ tickLead(); bTick(); if(t==='boulder') scrollTl(); },0);
   $('tabLead').setAttribute('aria-selected', t==='lead');
   $('tabBoulder').setAttribute('aria-selected', t==='boulder');
   $('lead').classList.toggle('hidden', t!=='lead');
@@ -575,7 +587,7 @@ if(!Array.isArray(lTIs)||!lTIs.length){
 }
 const today=new Date().toDateString();
 lTIs=lTIs.filter(t=>t&&typeof t==='object').map((t,i)=>({no:Number.isInteger(t.no)&&t.no>0?t.no:i+1,
-  holds:Math.max(0,Math.floor(+t.holds||0)), ref:timeStr(t.ref), pos:posStr(t.pos),
+  holds:Math.max(0,Math.floor(+t.holds||0)), ref:timeStr(t.ref), pos:posStr(t.pos), bib:bibStr(t.bib),
   // Countdowns vom Vortag nicht weiterlaufen lassen (Zeiten sind Sekunden seit Mitternacht)
   cdTarget: t.cdDay===today && Number.isFinite(t.cdTarget) ? t.cdTarget : null,
   // eingefrorener Stand in Sekunden (ältere Versionen speicherten Text wie „6:58“ oder „Bereit ✓“)
@@ -588,13 +600,13 @@ const lCur=()=>lTIs[lSel];
 const lSave=()=>{ store.set('leadTIs',lTIs); store.set('leadSel',lSel); store.set('leadGap',$('lGap').value); };
 const lRec=ti=>Math.min(Math.max(0,Math.floor(+ti.holds||0)),20)*60;
 
-function lLoadForm(){ const ti=lCur(); $('lHolds').value=ti.holds; $('lRef').value=ti.ref||''; $('lPos').value=ti.pos||''; }
-function lReadForm(){ const ti=lCur(); ti.holds=Math.max(0,Math.floor(+$('lHolds').value||0)); ti.ref=timeStr($('lRef').value); ti.pos=posStr($('lPos').value); }
+function lLoadForm(){ const ti=lCur(); $('lHolds').value=ti.holds; $('lRef').value=ti.ref||''; $('lPos').value=ti.pos||''; $('lBib').value=ti.bib||''; }
+function lReadForm(){ const ti=lCur(); ti.holds=Math.max(0,Math.floor(+$('lHolds').value||0)); ti.ref=timeStr($('lRef').value); ti.pos=posStr($('lPos').value); ti.bib=bibStr($('lBib').value); }
 
 function renderLeadChips(){
   const multi=lTIs.length>1;
   $('lChips').classList.toggle('hidden', !multi);
-  if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">TI ${t.no} · ${esc(I18N[LANG].chipHolds(Math.max(0,Math.floor(+t.holds||0))))}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
+  if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">${esc(tiName(t))} · ${esc(I18N[LANG].chipHolds(Math.max(0,Math.floor(+t.holds||0))))}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
   $('lChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ lSel=+c.dataset.i; lLoadForm(); calcLead(); });
 }
 
@@ -607,7 +619,7 @@ function calcLead(){
   const pos=+ti.pos||null;
   const earliest = ref!==null ? ref+recMin*60 : null;
   const slotsAhead = recMin===0 ? 0 : Math.ceil(recMin/gap); // nachfolgende Athleten, die vorher starten
-  $('lResult').innerHTML=`<div class="sub">${t('recTitle')}${lTIs.length>1?' · TI '+ti.no:''}</div>
+  $('lResult').innerHTML=`<div class="sub">${t('recTitle')}${lTIs.length>1||ti.bib?' · '+esc(tiName(ti)):''}</div>
     <div class="big">${recMin} min</div>
     <div class="sub">${t('holds',holds)}${holds>20?t('capped'):''}</div>
     <dl class="kv">
@@ -633,7 +645,7 @@ function tickLead(){
   $('lCdList').classList.toggle('hidden', !multi);
   if(multi) $('lCdList').innerHTML=lTIs.map((x,i)=>{
     const tx=lCdText(x), state=x.cdTarget!==null?(tx===t('ready')?'':t('running')):(x.cdFrozen!==null?t('stopped'):t('notStarted'));
-    return `<li class="${i===lSel?'next':''}"><span>TI ${x.no}${x.pos?' · Pos '+esc(x.pos):''} <span class="hint">${state}</span></span><span class="t">${tx}</span></li>`;
+    return `<li class="${i===lSel?'next':''}"><span>${esc(tiName(x))}${x.pos?' · Pos '+esc(x.pos):''} <span class="hint">${state}</span></span><span class="t">${tx}</span></li>`;
   }).join('');
 }
 // Automatischer Takt nur für den sichtbaren Reiter und nur, wenn die Seite angezeigt wird
@@ -660,14 +672,14 @@ $('lAdd').onclick=()=>{
   lSel=lTIs.length-1; lLoadForm(); calcLead(); $('lHolds').focus();
 };
 $('lDel').onclick=()=>{
-  if(!confirm(t('confirmDel',lCur().no))) return;
+  if(!confirm(t('confirmDel',tiName(lCur())))) return;
   // Letzter TI: Formular wird mit einem leeren TI neu begonnen
   if(lTIs.length<2){ lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', cdTarget:null, cdFrozen:null}]; lNext=2; lSel=0; }
   else { lTIs.splice(lSel,1); lSel=Math.max(0,lSel-1); }
   if(wakeLock && !lTIs.some(t=>t.cdTarget!==null)){ wakeLock.release(); wakeLock=null; }
   lLoadForm(); calcLead();
 };
-['lHolds','lRef','lPos'].forEach(id=>$(id).addEventListener('input',()=>{ lReadForm(); if(lCur().cdTarget===null) lCur().cdFrozen=null; calcLead(); }));
+['lHolds','lRef','lPos','lBib'].forEach(id=>$(id).addEventListener('input',()=>{ lReadForm(); if(lCur().cdTarget===null) lCur().cdFrozen=null; calcLead(); }));
 $('lGap').addEventListener('input',calcLead);
 
 /* =========================================================
@@ -686,7 +698,7 @@ let bState=Object.assign({format:'fix'}, store.get('boulderState',{}));
    Jeder TI speichert seine Eingaben und sein berechnetes Ergebnis (res).
    Ergebnisse sind „fix“: Ändert/löscht man einen TI, bleiben die Slots der anderen unverändert.
    Nur bei geänderten Rundeneinstellungen wird alles neu berechnet (in Eingabereihenfolge = Vorrang). */
-const newBTI=no=>({no, B:1, remain:'3:00', resolved:false, gap:2, t0:'', pos:'', course:'A', res:null});
+const newBTI=no=>({no, B:1, remain:'3:00', resolved:false, gap:2, t0:'', pos:'', bib:'', course:'A', res:null});
 // Gespeichertes Ergebnis prüfen. G = Lücke an B1 (null, wenn der TI einen schon freien Slot nutzt), sid = Slot-Kennung
 function cleanRes(r){
   const int=v=>Number.isInteger(v);
@@ -706,7 +718,7 @@ if(!Array.isArray(bTIs)||!bTIs.length){
 bTIs=bTIs.filter(t=>t&&typeof t==='object').map((t,i)=>{
   const n=newBTI(Number.isInteger(t.no)&&t.no>0?t.no:i+1);
   n.B=Math.min(8,Math.max(1,Math.floor(+t.B||1))); n.remain=typeof t.remain==='string'?t.remain.slice(0,8):'3:00';
-  n.resolved=!!t.resolved; n.gap=t.gap===1?1:2; n.t0=timeStr(t.t0); n.pos=posStr(t.pos); n.course=t.course==='B'?'B':'A';
+  n.resolved=!!t.resolved; n.gap=t.gap===1?1:2; n.t0=timeStr(t.t0); n.pos=posStr(t.pos); n.bib=bibStr(t.bib); n.course=t.course==='B'?'B':'A';
   n.decidedAt=Number.isFinite(t.decidedAt)?t.decidedAt:null;
   // Fixe Ergebnisse übernehmen (nicht neu berechnen!), aber nur wenn sie gültig aussehen
   n.res=cleanRes(t.res);
@@ -719,7 +731,7 @@ const bCur=()=>bTIs[bSel];
 /* Geister-Slots: Wird ein TI geändert oder gelöscht, dessen Slot von einem anderen TI mitgenutzt wird,
    bleibt der alte Slot (seine Lücke an B1) als „Geist“ bestehen – sonst verlöre der andere TI seinen Platz. */
 let bGhosts=(store.get('boulderGhosts',[])||[]).filter(g=>g&&typeof g==='object').map(g=>({no:Number.isInteger(g.no)?g.no:0, ghost:true,
-  B:Math.min(8,Math.max(1,Math.floor(+g.B||1))), course:g.course==='B'?'B':'A', pos:'', t0:timeStr(g.t0), res:cleanRes(g.res)})).filter(g=>g.res && g.res.G!==null);
+  B:Math.min(8,Math.max(1,Math.floor(+g.B||1))), course:g.course==='B'?'B':'A', pos:'', bib:bibStr(g.bib), t0:timeStr(g.t0), res:cleanRes(g.res)})).filter(g=>g.res && g.res.G!==null);
 let bSid=Math.max(store.get('boulderSid',1)||1, ...bTIs.concat(bGhosts).map(t=>t.res&&t.res.sid||0).map(x=>x+1));
 // Ältere Ergebnisse ohne Slot-Kennung bekommen eine
 bTIs.concat(bGhosts).forEach(t=>{ if(t.res && t.res.G!==null && !t.res.reuse && t.res.sid===null) t.res.sid=bSid++; });
@@ -816,7 +828,7 @@ function withSid(res, old){
 function recomputeOne(i){
   const S=bSettings(), ti=bTIs[i], old=ti.res;
   const res=computeTI(ti, allSlots(), S, ti.gap, decided(ti));
-  if(old && !sameRes(old,res) && usersOf(old.sid).some(q=>q!==ti)) bGhosts.push({no:ti.no, ghost:true, B:ti.B, course:ti.course, pos:'', t0:ti.t0, res:old});
+  if(old && !sameRes(old,res) && usersOf(old.sid).some(q=>q!==ti)) bGhosts.push({no:ti.no, ghost:true, B:ti.B, course:ti.course, pos:'', bib:ti.bib, t0:ti.t0, res:old});
   ti.res=withSid(res, old); pruneGhosts();
 }
 function recomputeAll(){ const S=bSettings(); bGhosts=[]; bTIs.forEach(t=>t.res=null); bTIs.forEach(t=>{ t.res=withSid(computeTI(t, bTIs, S, t.gap, decided(t)), null); }); }
@@ -842,7 +854,7 @@ function settingsChanged(){
 }
 function bLoadForm(){
   const ti=bCur();
-  $('bRemain').value=ti.remain; $('bResolved').checked=!!ti.resolved; $('bT0').value=ti.t0||''; $('bPos').value=ti.pos||'';
+  $('bRemain').value=ti.remain; $('bResolved').checked=!!ti.resolved; $('bT0').value=ti.t0||''; $('bPos').value=ti.pos||''; $('bBib').value=ti.bib||'';
 }
 function tiChanged(){ recomputeOne(bSel); bSave(); renderBoulder(); }
 function renderBoulderButtons(n){
@@ -860,6 +872,8 @@ $('bRemain').addEventListener('input',()=>{ bCur().remain=$('bRemain').value; bS
 $('bResolved').addEventListener('change',()=>{ bCur().resolved=$('bResolved').checked; tiChanged(); });
 $('bT0').addEventListener('input',()=>{ bCur().t0=$('bT0').value; bCur().decidedAt=nowSec(); bOffset=0; requestWake(); tiChanged(); });
 $('bPos').addEventListener('input',()=>{ bCur().pos=posStr($('bPos').value); tiChanged(); });
+// Startnummer ändert nur den Namen, nicht die Berechnung
+$('bBib').addEventListener('input',()=>{ bCur().bib=bibStr($('bBib').value); bSave(); renderBoulder(); });
 ['bN','bRot','bChange'].forEach(id=>$(id).addEventListener('input',()=>{ if(id!=='bChange') $('bPreset').value='c'; settingsChanged(); }));
 $('bRestRot').addEventListener('change',settingsChanged);
 $('bAdd').onclick=()=>{
@@ -869,11 +883,11 @@ $('bAdd').onclick=()=>{
   $('bPosMain').scrollIntoView({block:'center'});
 };
 $('bDel').onclick=()=>{
-  if(!confirm(bTIs.length<2 ? t('confirmDel',bCur().no) : t('confirmDelMulti',bCur().no))) return;
+  if(!confirm(bTIs.length<2 ? t('confirmDel',tiName(bCur())) : t('confirmDelMulti',tiName(bCur())))) return;
   // Letzter TI: Formular wird mit einem leeren TI neu begonnen
   const gone=bCur();
   // Wird sein Slot von einem anderen TI mitgenutzt, bleibt die Lücke an B1 als Geist bestehen
-  if(gone.res && usersOf(gone.res.sid).some(q=>q!==gone)) bGhosts.push({no:gone.no, ghost:true, B:gone.B, course:gone.course, pos:'', t0:gone.t0, res:gone.res});
+  if(gone.res && usersOf(gone.res.sid).some(q=>q!==gone)) bGhosts.push({no:gone.no, ghost:true, B:gone.B, course:gone.course, pos:'', bib:gone.bib, t0:gone.t0, res:gone.res});
   if(bTIs.length<2){ bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); }
   else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
   pruneGhosts(); bSave(); bLoadForm(); renderBoulder();
@@ -897,13 +911,12 @@ function renderBoulder(){
   $('bCourseWrap').classList.toggle('hidden', !S.two);
   document.querySelectorAll('#bCourse button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===ti.course));
   $('bB1Wrap').classList.toggle('hidden', B!==1);
-  // Startposition: ab 2 TIs Pflicht und sichtbar im Formular
-  (multi ? $('bPosMain') : $('bClockWrap')).appendChild($('bPosBox'));
-  $('bPosReq').classList.toggle('hidden', !multi || !!ti.pos);
+  // Startposition ist immer Pflicht
+  $('bPosReq').classList.toggle('hidden', !!ti.pos);
   // Chips
   $('bChips').classList.toggle('hidden', !multi);
   if(multi){
-    $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">TI ${t.no} · B${t.B}${S.two?' · '+esc(t.course):''}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
+    $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">${esc(tiName(t))} · B${t.B}${S.two?' · '+esc(t.course):''} · Pos ${t.pos?esc(t.pos):'?'}</button>`).join('');
     $('bChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ bSel=+c.dataset.i; bSave(); bLoadForm(); renderBoulder(); });
   }
 
@@ -918,6 +931,14 @@ function renderBoulder(){
     bMilestones=[]; bTick(); return;
   }
 
+  // Startposition ist Pflicht: ohne sie kein Ergebnis (verhindert Verwechslungen in der Startliste)
+  $('bTimelineCard').classList.toggle('hidden', !r.P);
+  if(!r.P){
+    $('bGapWrap').classList.add('hidden');
+    $('bResult').innerHTML=`<div class="sub">${t('returnAt',B)}${(multi||ti.bib)?' · '+esc(tiName(ti)):''}</div>
+      <div class="big" style="font-size:24px">${t('needPos')}</div><div class="hint">${t('needPosHint')}</div>`;
+    renderGaps(S); buildMilestones(S, multi); bTl=null; bTick(); return;
+  }
   // +1/+2 nur zeigen, wenn die Wahl das Ergebnis ändert
   const now=nowSec();
   const alt1=computeTI(ti,allSlots(),S,1,decided(ti)), alt2=computeTI(ti,allSlots(),S,2,decided(ti));
@@ -930,12 +951,12 @@ function renderBoulder(){
   const sch=athleteSchedule(r.P, bTIs.filter(o=>o===ti||(r.P&&onAxis(o,ti,S))), S, ti);
   const lastBefore=sch.climbs.filter(c=>c.r<r.R && !(c.kind==='slot'&&c.self)).pop();
   const wait=r.R-r.L-1, iso=Math.max(0,wait-1);
-  const lastTxt=lastBefore ? (lastBefore.kind==='slot'?`Slot TI ${lastBefore.no}`:'B'+lastBefore.B) : 'B'+S.N;
+  const lastTxt=lastBefore ? (lastBefore.kind==='slot'?`Slot ${nameNo(lastBefore.no)}`:'B'+lastBefore.B) : 'B'+S.N;
   const isoTxt = r.scen1 ? t('isoSc1') : (iso>0 ? t('isoN',iso,lastTxt) : t('isoNone'));
   const gTime=r.G!==null?at(r.G):null, climb=at(r.R);
   const posTxt = r.reuse ? '' : (r.P ? t('beforePos',vorPos(ti,S)) : t('beforeKth',r.k));
   const notes = r.notes.map(noteText).filter(Boolean).map(n=>`<div class="note warn">${esc(n)}</div>`).join('') + (multi && !r.P ? `<div class="note warn">${t('noPos')}</div>` : '') + (remainOk?'':`<div class="note warn">${t('remainFmt')}</div>`);
-  $('bResult').innerHTML=`<div class="sub">${t('returnAt',B)}${multi?' · TI '+ti.no:''}</div>
+  $('bResult').innerHTML=`<div class="sub">${t('returnAt',B)}${(multi||ti.bib)?' · '+esc(tiName(ti)):''}</div>
     <div class="big">${r.scen1?t('nextInt'):t('plusK',r.k)}</div>
     ${climb&&remainOk?`<div class="sub">${t('wallStart',secToClock(timeOf(r.R,ti,S)+rest),award)}</div>`:''}
     <dl class="kv">
@@ -957,7 +978,7 @@ function renderBoulder(){
       const c=by.get(a);
       if(c){
         if(c.kind==='slot' && c.self) return ['slot','B'+c.B, x.scen1?t('tlCredit'):'Slot'];
-        if(c.kind==='slot') return ['slot','B'+c.B,'TI '+c.no];
+        if(c.kind==='slot') return ['slot','B'+c.B,esc(tiShort(bTIs.find(q=>q.no===c.no)||{no:c.no}))];
         return ['climb','B'+c.B,''];
       }
       const nx=by.get(a+1);
@@ -971,8 +992,8 @@ function renderBoulder(){
   const gapsHere=new Map();
   allSlots().forEach(o=>{ if(o.res && o.res.G!==null && (o===ti || (r.P && onAxis(o,ti,S)))) gapsHere.set(o.res.G,o); });
   const b1Cell=a=>{ const o=gapsHere.get(a); if(!o) return null;
-    if(many) return o.res.scen1?null:['gap',t('tlGap'),o.ghost?'Slot '+o.no:'TI '+o.no];
-    if(o===ti) return r.scen1?null:['gap',t('tlGap'),t('tlFree')]; return ['gapother',t('tlGap'),'TI '+o.no]; };
+    if(many) return o.res.scen1?null:['gap',t('tlGap'),esc(o.ghost?'Slot '+(o.bib?'#'+o.bib:o.no):tiShort(o))];
+    if(o===ti) return r.scen1?null:['gap',t('tlGap'),t('tlFree')]; return ['gapother',t('tlGap'),esc(tiShort(o))]; };
   const from=Math.min(...rows.map(x=>x.from)), end=Math.max(...rows.map(x=>x.to));
   const cell=c=>c?`<div class="tl ${c[0]}"><b>${c[1]}</b>${c[2]}</div>`:`<div class="tl" style="visibility:hidden"><b>&nbsp;</b>&nbsp;</div>`;
   let anyGap=false;
@@ -986,21 +1007,25 @@ function renderBoulder(){
     $('bTimeline').innerHTML=cols.join('');
   } else {
     // Mehrere TIs: Zeilen mit Beschriftung links, waagerecht scrollbar (nur innerhalb der Karte)
-    const labels=rows.map(x=>`<div class="lab${x.o===ti?' sel':''}">TI ${x.o.no} · B${x.o.B}</div>`).join('')+(anyGap?`<div class="lab">${t('tlB1Row')}</div>`:'');
+    const labels=rows.map(x=>`<div class="lab${x.o===ti?' sel':''}">${esc(tiName(x.o))} · B${x.o.B}</div>`).join('')+(anyGap?`<div class="lab">${t('tlB1Row')}</div>`:'');
     $('bTimeline').innerHTML=`<div class="tlwrap" id="bTlWrap"><div class="tlgrid"><div class="tlabels"><div class="idx"></div>${labels}</div>${cols.join('')}</div></div>`;
-    const wrap=$('bTlWrap'), col=wrap.querySelector(`.tcol[data-a="${r.t}"]`), lab=wrap.querySelector('.tlabels');
-    // Spalte des gewählten TI direkt rechts neben die feste Beschriftung scrollen
-    if(col) wrap.scrollLeft=Math.max(0, wrap.scrollLeft + col.getBoundingClientRect().left - wrap.getBoundingClientRect().left - lab.offsetWidth - 6);
+    bTlFocus=r.t; scrollTl();
   }
   // Für die Live-Markierung des laufenden Intervalls
   const tStart=timeOf(r.t,ti,S);
   bTl = tStart===null ? null : {start:tStart, t:r.t, cycle:S.cycle};
 
+  buildMilestones(S, multi);
+  bTick();
+}
+
+function buildMilestones(S, multi){
   // Live-Countdown über alle TIs
   bMilestones=[];
   bTIs.forEach(o=>{
     if(!o.res) return;
-    const x=o.res, tag=multi?`TI ${o.no}: `:'';
+    if(!o.res.P) return;   // ohne Startposition kein Ergebnis
+    const x=o.res, tag=(multi||o.bib)?`${tiName(o)}: `:'';
     const T=a=>timeOf(a,o,S); if(T(x.t)===null) return;
     let rm=parseMS(o.remain); const rs=isNaN(rm)?0:S.rot-Math.min(rm,S.rot), aw=isNaN(rm)?'?':fmtMS(Math.min(rm,S.rot));
     if(x.scen1){
@@ -1014,14 +1039,13 @@ function renderBoulder(){
     }
   });
   bMilestones.sort((a,b)=>a.t-b.t);
-  bTick();
 }
 
 function renderGaps(S){
   if(bTIs.length<2 && !bGhosts.length){ $('bGaps').innerHTML=''; return; }
   const courses = S.two ? ['A','B'] : [null];
   $('bGaps').innerHTML=courses.map(c=>{
-    const list=allSlots().filter(o=>o.res && o.res.G!==null && (!c || o.course===c)).sort((a,b)=>{
+    const list=allSlots().filter(o=>o.res && o.res.P && o.res.G!==null && (!c || o.course===c)).sort((a,b)=>{
       if(a.res.P && b.res.P) return a.res.G-b.res.G;
       const ta=timeOf(a.res.G,a,S), tb=timeOf(b.res.G,b,S); return (ta??1e9)-(tb??1e9);
     });
@@ -1031,8 +1055,8 @@ function renderGaps(S){
       const tm=timeOf(o.res.G,o,S);
       const when=tm!==null?secToClock(tm):t('intShort',o.res.G-o.res.t);
       const what=o.res.scen1?t('gSelf')+(o.res.P?t('posDot',vorPos(o,S)):''):(o.res.P?t('free')+t('posDot',vorPos(o,S)):t('freeNoPos'));
-      const users=usersOf(o.res.sid).map(q=>'TI '+q.no+' · B'+q.B);
-      const who=o.ghost ? t('ghostWho',o.no) : 'TI '+o.no+' · B'+o.B;
+      const users=usersOf(o.res.sid).map(q=>tiName(q)+' · B'+q.B);
+      const who=o.ghost ? t('ghostWho',tiName(o)) : tiName(o)+' · B'+o.B;
       return `<li><span class="when">${when}</span><span>${what}${users.length?'<br><span class="hint">'+esc(t('alsoUsed',users.join(', ')))+'</span>':''}</span><span class="who">${esc(who)}</span></li>`;
     }).join('');
     return `${c?`<label>${t('courseX',c)}</label>`:''}<ul class="gaplist">${items}</ul>
@@ -1041,7 +1065,13 @@ function renderGaps(S){
 }
 
 /* ---------- Boulder Live-Countdown ---------- */
-let bTl=null;
+let bTl=null, bTlFocus=null;
+// Spalte des gewählten TI direkt rechts neben die feste Beschriftung scrollen (auch nach einem Reiterwechsel)
+function scrollTl(){
+  const wrap=$('bTlWrap'); if(!wrap || bTlFocus===null || !wrap.offsetWidth) return;
+  const col=wrap.querySelector(`.tcol[data-a="${bTlFocus}"]`), lab=wrap.querySelector('.tlabels');
+  if(col) wrap.scrollLeft=Math.max(0, wrap.scrollLeft + col.getBoundingClientRect().left - wrap.getBoundingClientRect().left - lab.offsetWidth - 6);
+}
 // Grüner Rand um das Intervall, das laut Startzeit (+ Verschiebung) gerade läuft
 function markNow(){
   const cols=$('bTimeline').querySelectorAll('.tcol');
