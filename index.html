@@ -130,7 +130,7 @@ footer a{color:inherit}
   <div class="brand">
     <div>
       <h1 data-i18n-html="brand"><span>TI</span>-Rechner</h1>
-      <div class="sub" data-i18n-html="sub">Technischer Zwischenfall · Lead &amp; Boulder</div>
+      <div class="sub" data-i18n-html="sub">Technischer Zwischenfall</div>
     </div>
     <div style="display:flex;gap:6px"><button class="theme" id="langBtn" data-i18n-aria="langAria" aria-label="Switch to English">EN</button><button class="theme" id="themeBtn" data-i18n-aria="themeAria" aria-label="Hell/Dunkel umschalten">◐</button></div>
   </div>
@@ -382,7 +382,7 @@ function nowClock(){ const d=new Date(); return pad(d.getHours())+':'+pad(d.getM
 const pl=(n,a,b)=>n===1?a:b;
 const I18N={
 de:{
-  title:'TI-Rechner Klettern', brand:'<span>TI</span>-Rechner', sub:'Technischer Zwischenfall · Lead &amp; Boulder',
+  title:'TI-Rechner Klettern', brand:'<span>TI</span>-Rechner', sub:'Technischer Zwischenfall',
   themeAria:'Hell/Dunkel umschalten', langAria:'Switch to English', less:'weniger', more:'mehr',
   whereTI:'Wo war der TI?', lHolds:'Gewertete Griffe vor dem TI',
   lHoldsHint:'Höchster gewerteter Griff, der vor dem Zwischenfall benutzt wurde (z. B. 23 oder 23+ → 23). 1 Minute pro Griff, max. 20 Minuten.',
@@ -451,7 +451,7 @@ de:{
   gapReuse:no=>`keine neue Lücke – nutzt den Slot von ${nameNo(no)}`, alsoUsed:l=>`mitgenutzt von ${l}`, ghostWho:n=>`Slot ${n} (geändert/gelöscht)`,
 },
 en:{
-  title:'TI Calculator Climbing', brand:'<span>TI</span> Calculator', sub:'Technical Incident · Lead &amp; Boulder',
+  title:'TI Calculator Climbing', brand:'<span>TI</span> Calculator', sub:'Technical Incident',
   themeAria:'Toggle light/dark', langAria:'Auf Deutsch umschalten', less:'less', more:'more',
   whereTI:'Where was the TI?', lHolds:'Scoring holds before the TI',
   lHoldsHint:'Highest scoring hold used before the incident (e.g. 23 or 23+ → 23). 1 minute per hold, max. 20 minutes.',
