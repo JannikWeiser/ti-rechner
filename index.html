@@ -109,6 +109,15 @@ summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
 .countdown.done{color:var(--ok)}
 .refs{font-size:12.5px;color:var(--muted);margin-top:10px}
 .hidden{display:none!important}
+/* Aufklappbare Karte „Runde“ */
+.fold>summary{list-style:none;display:flex;align-items:center;gap:10px;cursor:pointer;min-height:28px}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary .foldtitle{font-size:16px;font-weight:700}
+.fold>summary .foldinfo{flex:1;text-align:right;color:var(--muted);font-size:13px;line-height:1.3}
+.fold>summary::after{content:'▾';color:var(--muted);font-size:14px;transition:transform .15s}
+.fold:not([open])>summary::after{transform:rotate(-90deg)}
+.fold[open]>summary{margin-bottom:12px}
+.btn.wide{width:100%;flex:1 1 100%}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
 .chip{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:999px;padding:8px 12px;font:600 14px/1.1 inherit;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -179,9 +188,10 @@ footer a{color:inherit}
       <button type="button" data-step="lPos" data-d="1" aria-label="mehr">+</button>
     </div>
     </details>
+    <div class="btns"><button type="button" class="btn wide" id="lAdd" data-i18n="addTI">+ weiterer TI</button></div>
     <div class="btns">
-      <button type="button" class="btn secondary" id="lAdd" data-i18n="addTI">+ weiterer TI</button>
       <button type="button" class="btn secondary" id="lDel" data-i18n="delTI">Diesen TI löschen</button>
+      <button type="button" class="btn secondary hidden" id="lReset" data-i18n="resetAll">Alle TIs löschen</button>
     </div>
   </div>
 
@@ -200,8 +210,8 @@ footer a{color:inherit}
 
 <!-- ======================= BOULDER ======================= -->
 <section id="boulder" class="hidden">
-  <div class="card">
-    <h2 data-i18n="round">Runde</h2>
+  <details class="card fold" id="bRoundCard" open>
+    <summary><span class="foldtitle" data-i18n="round">Runde</span><span class="foldinfo" id="bRoundInfo"></span></summary>
     <label data-i18n="format">Format</label>
     <div class="seg" id="bFormat">
       <button type="button" data-v="fix" aria-pressed="true" data-i18n="fmtFix">Intervall</button>
@@ -232,7 +242,7 @@ footer a{color:inherit}
       <button type="button" data-step="bRot" data-d="0.5" aria-label="mehr">+</button>
     </div></div>
     </div>
-    <div class="hint" data-i18n="twoCourse">Bei 2 Kursen: Anzahl Boulder je Kurs. Mit der Vorlage „Qualifikation B (Flash)“ wählst du pro TI den Kurs – Lücken und Verschiebungen betreffen nur diesen Kurs.</div>
+    <div class="hint hidden" id="bTwoHint" data-i18n="twoCourse">Bei 2 Kursen: Anzahl Boulder je Kurs. Mit der Vorlage „Qualifikation B (Flash)“ wählst du pro TI den Kurs – Lücken und Verschiebungen betreffen nur diesen Kurs.</div>
     <details>
       <summary data-i18n="moreSet">Weitere Einstellungen</summary>
       <div class="switch"><span data-i18n="restRot">Ruhe-Intervall zwischen zwei Bouldern</span><input type="checkbox" id="bRestRot" checked></div>
@@ -241,7 +251,7 @@ footer a{color:inherit}
       <input id="bChange" type="number" inputmode="numeric" min="0" max="120" value="15">
     </details>
     </div>
-  </div>
+  </details>
 
   <div class="card" id="bTiCard">
     <h2 data-i18n="whereTI">Wo war der TI?</h2>
@@ -290,9 +300,10 @@ footer a{color:inherit}
       <label for="bT0" data-i18n="t0">Startzeit des TI-Intervalls</label>
       <input id="bT0" type="time" step="1">
     </details>
+    <div class="btns"><button type="button" class="btn wide" id="bAdd" data-i18n="addTI">+ weiterer TI</button></div>
     <div class="btns">
-      <button type="button" class="btn secondary" id="bAdd" data-i18n="addTI">+ weiterer TI</button>
       <button type="button" class="btn secondary" id="bDel" data-i18n="delTI">Diesen TI löschen</button>
+      <button type="button" class="btn secondary hidden" id="bReset" data-i18n="resetAll">Alle TIs löschen</button>
     </div>
   </div>
 
@@ -301,7 +312,6 @@ footer a{color:inherit}
   <div class="card hidden" id="bGapsCard">
     <h2 data-i18n="gapsTitle">Lücken an Boulder 1</h2>
     <div id="bGaps"></div>
-    <button type="button" class="linkbtn" id="bReset" data-i18n="reset">Alle TIs der Runde zurücksetzen</button>
   </div>
 
   <div class="card" id="bCdCard">
@@ -385,33 +395,34 @@ de:{
   title:'TI-Rechner Klettern', brand:'<span>TI</span>-Rechner', sub:'Technischer Zwischenfall',
   themeAria:'Hell/Dunkel umschalten', langAria:'Switch to English', less:'weniger', more:'mehr',
   whereTI:'Wo war der TI?', lHolds:'Gewertete Griffe vor dem TI',
-  lHoldsHint:'Höchster gewerteter Griff, der vor dem Zwischenfall benutzt wurde (z. B. 23 oder 23+ → 23). 1 Minute pro Griff, max. 20 Minuten.',
+  lHoldsHint:'Höchster gewerteter Griff vor dem TI (23+ → 23). 1 min pro Griff, max. 20 min.',
   lRef:'Uhrzeit des Sturzes', now:'Jetzt', lRefHint:'Die Erholungszeit läuft ab dem Moment, in dem der Athlet rausfällt.',
   lOrder:'Startfolge (optional)', lGap:'Abstand zwischen zwei Starts (Minuten)',
   lGapHint:'Durchschnittlicher Takt der Runde, um die Startposition für den Neustart zu bestimmen.',
   lPos:'Startposition des TI-Athleten (optional)', eg12:'z. B. 12', eg17:'z. B. 17',
   addTI:'+ weiterer TI', delTI:'Diesen TI löschen',
-  cdTitle:'Countdown Erholungszeit', cdHint:'Beim Start wird die seit dem Sturz vergangene Zeit abgezogen.',
+  cdTitle:'Countdown Erholungszeit', cdHint:'Zählt ab der Uhrzeit des Sturzes.',
   cdStart:'Countdown starten', cdStop:'Countdown stoppen',
   round:'Runde', format:'Format', fmtFix:'Intervall', fmtMax:'World Series (Finals)', preset:'Vorlage',
   pq:'Qualifikation – 5 Boulder, 5 min fix', ps:'Halbfinale – 4 Boulder, 5 min fix',
   pjq:'Qualifikation B (Flash) – 2 Kurse à 3 Boulder, 4 min fix', pjf:'Finale im Intervall – 4 Boulder, 4 min fix', pc:'Eigene Einstellung',
   bN:'Anzahl Boulder', bRot:'Intervall (min)',
-  twoCourse:'Bei 2 Kursen: Anzahl Boulder je Kurs. Mit der Vorlage „Qualifikation B (Flash)“ wählst du pro TI den Kurs – Lücken und Verschiebungen betreffen nur diesen Kurs.',
+  twoCourse:'Anzahl Boulder je Kurs. Den Kurs wählst du beim TI.',
   moreSet:'Weitere Einstellungen', restRot:'Ruhe-Intervall zwischen zwei Bouldern',
   restRotHint:'Standard (Judge Guide): Klettern und Pause wechseln sich ab – pro Intervall rückt die Startliste um einen Athleten vor.',
   change:'Wechselpause nach jedem Intervall (Sekunden)', course:'Kurs', courseA:'Kurs A', courseB:'Kurs B', courseX:c=>'Kurs '+c, boulder:'Boulder',
-  remain:'Restzeit bei Versuchsbeginn', remainHint:'Restzeit auf der Uhr, als der vom TI betroffene Versuch begonnen hat.',
+  remain:'Restzeit bei Versuchsbeginn', remainHint:'Was auf der Uhr stand, als der betroffene Versuch begann.',
   resolved:'TI vor Ende des laufenden Intervalls behoben?', gapLabel:'Boulder 1 frei lassen',
   gap1:'nächstes Intervall (+1)', gap2:'übernächstes (+2)',
-  gapHint:'Entscheidung des JP in der Call Zone – ob der bereits aufgerufene nächste Athlet noch zurückgestellt werden kann.',
+  gapHint:'JP entscheidet: Kann der schon aufgerufene nächste Athlet noch warten?',
   clockSum:'Uhrzeit (optional)', t0:'Startzeit des TI-Intervalls', bPos:'Startposition des TI-Athleten',
-  posReq:'· Pflicht', bib:'Startnummer (Bib, optional)', bibShort:'Startnummer (Bib)', bPosShort:'Startposition', eg104:'z. B. 104', optional:'optional',
-  needPos:'Startposition eingeben', needPosHint:'Ohne Startposition kann der Rechner den Athleten nicht in die Startliste einordnen.', posHint:'Platz in der Startliste der Runde (Spalte „Order“), nicht die Startnummer.',
+  posReq:'· Pflicht', resetAll:'Alle TIs löschen', confirmResetLead:'Alle Lead-TIs löschen?',
+  roundInfo:(p,n,m)=>`${p?p+' · ':''}${n} Boulder · ${m} min`, pShort:{q:'Qualifikation',jq:'Qualifikation B (Flash)',s:'Halbfinale',jf:'Finale im Intervall'}, bib:'Startnummer (Bib, optional)', bibShort:'Startnummer (Bib)', bPosShort:'Startposition', eg104:'z. B. 104', optional:'optional',
+  needPos:'Startposition eingeben', needPosHint:'Ohne Startposition kann der Rechner den Athleten nicht in die Startliste einordnen.', posHint:'Platz in der Startliste („Order“), nicht die Startnummer.',
   gapsTitle:'Lücken an Boulder 1', reset:'Alle TIs der Runde zurücksetzen', liveCd:'Live-Countdown',
   cdEmpty:'Für den Countdown die Startzeit des TI-Intervalls eingeben.', cdSetT0:'Startzeit eingeben',
   shift:'Zeitplan verschieben', earlier:'15 Sekunden früher', later:'15 Sekunden später', offset:'Verschiebung',
-  shiftHint:'Wenn die Runde dem Plan hinterherläuft: in 15-Sekunden-Schritten verschieben (gilt nur für den Countdown).',
+  shiftHint:'Wenn die Runde hinterherläuft (gilt nur für den Countdown).',
   tlTitle:'Ablauf des Athleten', tlTitleMulti:'Ablauf aller TIs', tlB1Row:'B1 frei',
   tlHintMulti:'Jede Zeile ein TI (der gewählte ist orange beschriftet), letzte Zeile: Lücken an Boulder 1 – dort wird niemand aufgerufen. Waagerecht wischen für weitere Intervalle. Grüner Rand: Intervall, das gerade läuft.',
   tlHint:'Untere Reihe: Lücke an Boulder 1 – in diesem Intervall wird an B1 niemand aufgerufen. Grüner Rand: Intervall, das gerade läuft (aus der Startzeit des TI-Intervalls).',
@@ -454,33 +465,34 @@ en:{
   title:'TI Calculator Climbing', brand:'<span>TI</span> Calculator', sub:'Technical Incident',
   themeAria:'Toggle light/dark', langAria:'Auf Deutsch umschalten', less:'less', more:'more',
   whereTI:'Where was the TI?', lHolds:'Scoring holds before the TI',
-  lHoldsHint:'Highest scoring hold used before the incident (e.g. 23 or 23+ → 23). 1 minute per hold, max. 20 minutes.',
+  lHoldsHint:'Highest scoring hold before the TI (23+ → 23). 1 min per hold, max. 20 min.',
   lRef:'Time of the fall', now:'Now', lRefHint:'The recovery period starts the moment the athlete falls.',
   lOrder:'Start order (optional)', lGap:'Time between two starts (minutes)',
   lGapHint:'Average pace of the round, used to work out the start position for the restart.',
   lPos:'Start position of the TI athlete (optional)', eg12:'e.g. 12', eg17:'e.g. 17',
   addTI:'+ another TI', delTI:'Delete this TI',
-  cdTitle:'Recovery countdown', cdHint:'On start, the time elapsed since the fall is subtracted.',
+  cdTitle:'Recovery countdown', cdHint:'Counts from the time of the fall.',
   cdStart:'Start countdown', cdStop:'Stop countdown',
   round:'Round', format:'Format', fmtFix:'Rotation', fmtMax:'World Series (Finals)', preset:'Template',
   pq:'Qualification – 5 boulders, 5 min fixed', ps:'Semi-final – 4 boulders, 5 min fixed',
   pjq:'Qualification B (flash) – 2 courses of 3 boulders, 4 min fixed', pjf:'Final in rotation format – 4 boulders, 4 min fixed', pc:'Custom',
   bN:'Number of boulders', bRot:'Rotation (min)',
-  twoCourse:'With 2 courses: number of boulders per course. With the “Qualification B (flash)” template you choose the course for each TI – gaps and shifts only affect that course.',
+  twoCourse:'Number of boulders per course. You choose the course with the TI.',
   moreSet:'More settings', restRot:'Rest rotation between two boulders',
   restRotHint:'Default (Judge Guide): climbing and rest alternate – the start list moves on by one athlete per rotation.',
   change:'Changeover after each rotation (seconds)', course:'Course', courseA:'Course A', courseB:'Course B', courseX:c=>'Course '+c, boulder:'Boulder',
-  remain:'Time left when the attempt started', remainHint:'Time left on the clock when the attempt affected by the TI started.',
+  remain:'Time left when the attempt started', remainHint:'What the clock showed when the affected attempt started.',
   resolved:'TI fixed before the end of the current rotation?', gapLabel:'Keep boulder 1 free',
   gap1:'next rotation (+1)', gap2:'the one after (+2)',
-  gapHint:'Decision of the JP in the call zone – whether the next athlete, who has already been called, can still be held back.',
+  gapHint:'JP decides: can the next athlete, already called, still wait?',
   clockSum:'Time (optional)', t0:'Start time of the TI rotation', bPos:'Start position of the TI athlete',
-  posReq:'· required', bib:'Bib number (optional)', bibShort:'Bib number', bPosShort:'Start position', eg104:'e.g. 104', optional:'optional',
-  needPos:'Enter the start position', needPosHint:'Without the start position the calculator cannot place the athlete in the start list.', posHint:'Position in the round’s start list (column “Order”), not the bib number.',
+  posReq:'· required', resetAll:'Delete all TIs', confirmResetLead:'Delete all lead TIs?',
+  roundInfo:(p,n,m)=>`${p?p+' · ':''}${n} ${n===1?'boulder':'boulders'} · ${m} min`, pShort:{q:'Qualification',jq:'Qualification B (flash)',s:'Semi-final',jf:'Final in rotation format'}, bib:'Bib number (optional)', bibShort:'Bib number', bPosShort:'Start position', eg104:'e.g. 104', optional:'optional',
+  needPos:'Enter the start position', needPosHint:'Without the start position the calculator cannot place the athlete in the start list.', posHint:'Position in the start list (“Order”), not the bib number.',
   gapsTitle:'Gaps at boulder 1', reset:'Reset all TIs of this round', liveCd:'Live countdown',
   cdEmpty:'Enter the start time of the TI rotation to use the countdown.', cdSetT0:'Enter start time',
   shift:'Shift schedule', earlier:'15 seconds earlier', later:'15 seconds later', offset:'Shift',
-  shiftHint:'If the round is running behind schedule: shift in 15-second steps (affects the countdown only).',
+  shiftHint:'If the round is running late (countdown only).',
   tlTitle:'Athlete’s schedule', tlTitleMulti:'Schedule of all TIs', tlB1Row:'B1 free',
   tlHintMulti:'One row per TI (the selected one is labelled in orange), last row: gaps at boulder 1 – nobody is called there. Swipe sideways for more rotations. Green border: the rotation running right now.',
   tlHint:'Bottom row: gap at boulder 1 – nobody is called to B1 in this rotation. Green border: the rotation running right now (based on the start time of the TI rotation).',
@@ -606,6 +618,7 @@ function lReadForm(){ const ti=lCur(); ti.holds=Math.max(0,Math.floor(+$('lHolds
 function renderLeadChips(){
   const multi=lTIs.length>1;
   $('lChips').classList.toggle('hidden', !multi);
+  $('lReset').classList.toggle('hidden', !multi);
   if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">${esc(tiName(t))} · ${esc(I18N[LANG].chipHolds(Math.max(0,Math.floor(+t.holds||0))))}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
   $('lChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ lSel=+c.dataset.i; lLoadForm(); calcLead(); });
 }
@@ -677,6 +690,12 @@ $('lDel').onclick=()=>{
   if(lTIs.length<2){ lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', cdTarget:null, cdFrozen:null}]; lNext=2; lSel=0; }
   else { lTIs.splice(lSel,1); lSel=Math.max(0,lSel-1); }
   if(wakeLock && !lTIs.some(t=>t.cdTarget!==null)){ wakeLock.release(); wakeLock=null; }
+  lLoadForm(); calcLead();
+};
+$('lReset').onclick=()=>{
+  if(!confirm(t('confirmResetLead'))) return;
+  lTIs=[{no:1, holds:10, ref:nowClock(), pos:'', bib:'', cdTarget:null, cdFrozen:null}]; lNext=2; lSel=0;
+  if(wakeLock){ wakeLock.release(); wakeLock=null; }
   lLoadForm(); calcLead();
 };
 ['lHolds','lRef','lPos','lBib'].forEach(id=>$(id).addEventListener('input',()=>{ lReadForm(); if(lCur().cdTarget===null) lCur().cdFrozen=null; calcLead(); }));
@@ -892,6 +911,7 @@ $('bDel').onclick=()=>{
   else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
   pruneGhosts(); bSave(); bLoadForm(); renderBoulder();
 };
+$('bRoundCard').addEventListener('toggle',()=>store.set('roundOpen', $('bRoundCard').open));
 $('bReset').onclick=()=>{
   if(!confirm(t('confirmReset'))) return;
   bTIs=[newBTI(1)]; bNext=2; bSel=0; bGhosts=[]; recomputeOne(0); bSave(); bLoadForm(); renderBoulder();
@@ -907,6 +927,10 @@ function renderBoulder(){
   const r=ti.res, B=ti.B;
 
   ['bFixOnly','bFixSettings','bPresetWrap','bTiCard','bTimelineCard','bCdCard','bClockWrap'].forEach(id=>$(id).classList.toggle('hidden', !fix));
+  // Zusammenfassung im Kopf der Karte „Runde“ (sichtbar auch im zugeklappten Zustand)
+  $('bRoundInfo').textContent = fix ? t('roundInfo', (I18N[LANG].pShort||{})[$('bPreset').value]||'', S.N, String(S.rot/60).replace('.',',')) : t('fmtMax');
+  $('bTwoHint').classList.toggle('hidden', !S.two);
+  $('bReset').classList.toggle('hidden', !multi);
   $('bGapsCard').classList.toggle('hidden', !fix || (!multi && !bGhosts.length));
   $('bCourseWrap').classList.toggle('hidden', !S.two);
   document.querySelectorAll('#bCourse button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===ti.course));
@@ -1103,6 +1127,7 @@ setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidde
 /* ---------- Init ---------- */
 (function init(){
   applyStatic();
+  if(store.get('roundOpen',true)===false) $('bRoundCard').open=false;
   const lg=store.get('leadGap',null) ?? (store.get('lead',null)||{}).gap; if(lg) $('lGap').value=lg;
   // Einzelner TI ohne laufenden Countdown: Sturzzeit wie bisher mit „jetzt“ vorbelegen
   if(lTIs.length===1 && lTIs[0].cdTarget===null && lTIs[0].cdFrozen===null) lTIs[0].ref=nowClock();

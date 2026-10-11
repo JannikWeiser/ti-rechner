@@ -121,6 +121,9 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 
 ## UI-Entscheidungen
 
+- **Karte „Runde“ ist aufklappbar** (`<details id="bRoundCard">`). Im Kopf steht immer eine Zusammenfassung, z. B. „Qualifikation · 5 Boulder · 5 min“ oder „World Series (Finals)“. Der Klappzustand wird in `ti.roundOpen` gespeichert, beim ersten Besuch ist die Karte offen.
+- **Buttons im TI-Formular:** „+ weiterer TI“ groß und orange über die ganze Breite, darunter nebeneinander „Diesen TI löschen“ und „Alle TIs löschen“. Letzteres erscheint nur ab 2 TIs und hat eine Rückfrage. Das gilt für Lead und Boulder. Der frühere Link „Alle TIs der Runde zurücksetzen“ in der Lücken-Karte ist entfallen.
+- **Für stressige Momente vereinfacht:** Hinweistexte sind kurz gehalten (eine Zeile, wo möglich). Der 2-Kurs-Hinweis erscheint nur bei der Vorlage „Qualifikation B (Flash)“, die Auswahl +1/+2 nur, wenn sie etwas ändert. „Alle TIs löschen“ ist bei einem TI ausgeblendet. Header-Untertitel nur „Technischer Zwischenfall“ / „Technical Incident“.
 - Mobile first (375 px), helles und dunkles Theme (Button oben rechts, gespeichert in `ti.theme`)
 - **Orange Ergebniskästen zeigen nur berechnete Werte.** Keine To-Do-Listen, keine Angaben zur Wertung, keine Paragraphen-Verweise. Der Schiedsrichter kennt die Regeln und soll nicht verwirrt werden.
 - Formatnamen: **„Intervall“** (nicht „Intervall fix“) und **„World Series (Finals)“** (früher „World Series / Classic“, davor „Max-Rotation“)
