@@ -162,6 +162,13 @@ nach dem TI-Intervall ein Platz frei. In der Call Zone B1 wird dafür vor dem k-
 
 Uhrzeit: Ein Intervall dauert Kletterzeit + 15 s Wechselpause. Beispiel: 5:00 + 0:15 = 5:15.
 
+### Ende der Startliste
+Die Tabellen gehen davon aus, dass nach dem TI-Athleten noch genug Athleten kommen. Kurz vor Ende der Runde ist der TI-Boulder oft schon früher frei, weil niemand mehr nachkommt. Das Regelwerk regelt diesen Fall nicht eigens. Der Grundsatz ist „so früh wie praktikabel“ mit möglichst wenig Auswirkung auf die anderen (Annex C §8.2 B).
+- Ist im Rechner die **Zahl der Athleten in der Startliste** eingetragen, prüft er, ob Boulder B schon früher frei ist als laut Tabelle. Er ist frei, sobald der letzte Athlet ihn hinter sich hat. An B1 ist dann **keine Lücke nötig**.
+- Der Athlet hat trotzdem **mindestens 1 Intervall Pause** nach dem TI und nach seinem letzten Boulder (Call Zone).
+- Beispiel (5 Boulder, 40 Athleten): TI des letzten Athleten an B5 ergibt **+2** statt +10. TI an B5 bei Startposition 36 ergibt +5.
+- Ist der TI vor dem nächsten Intervall behoben, kann der Athlet ohnehin im laufenden Intervall weiterklettern, ohne Zusatzzeit (Annex C §8.2 A).
+
 ### Mehrere TIs in einer Runde
 Jeder Slot hält genau ein Intervall an Boulder 1 frei. Die Athleten dahinter rücken jeweils um ein Intervall nach. Das entspricht dem Beispiel im Judge Guide §5.2.3, bei dem „vor dem 6. nachfolgenden Athleten“ den bereits eingefügten Slot mitzählt.
 - Brauchen zwei TIs dieselbe Lücke an B1, bekommt sie **der zuerst eingetragene TI**. Der andere rückt 1 Intervall nach.
@@ -198,4 +205,5 @@ Der Judge Guide (§5.2) erwähnt als Alternative, den ganzen Kurs zu stoppen.
 | Boulder 1, Szenario 1 | Nächstes Intervall: Restzeit an B1, dann 1 Intervall Pause, dann B2 |
 | Runden mit 2 Kursen | Verschiebung nur auf dem betroffenen Kurs |
 | Lead-Quali mit 2 Routen | Kein Einfluss auf die Berechnung. Mindestens 50 min zwischen dem Ende des Neustarts an Route 1 und Route 2 (Anhang A §4.4) |
+| Ende der Startliste | Slot früher, sobald der TI-Boulder nach dem letzten Athleten frei ist; mindestens 1 Intervall Pause, keine Lücke an B1 |
 | World Series (Finals) | Wiedereinstieg immer nach Ende der laufenden Rotation, als einziger Athlet |

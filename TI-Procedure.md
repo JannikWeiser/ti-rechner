@@ -162,6 +162,13 @@ after the TI rotation, one place at B1 is left free. For this, the B1 call zone 
 
 Time of day: one rotation lasts the climbing time + 15 s changeover. Example: 5:00 + 0:15 = 5:15.
 
+### End of the start list
+The tables assume that enough athletes still follow the TI athlete. Near the end of the round, the TI boulder is often free earlier, because nobody comes after. The rules do not cover this case specifically. The principle is "as soon as practical" with minimal impact on the others (Annex C §8.2 B).
+- If the **number of athletes in the start list** is entered, the calculator checks whether boulder B is free earlier than the table says. It is free as soon as the last athlete has passed it. **No gap at B1** is needed then.
+- The athlete still gets **at least 1 rotation of rest** after the TI and after their last boulder (call zone).
+- Example (5 boulders, 40 athletes): a TI of the last athlete on B5 gives **+2** instead of +10. A TI on B5 at start position 36 gives +5.
+- If the TI is fixed before the next rotation, the athlete can continue in the current rotation anyway, without extra time (Annex C §8.2 A).
+
 ### Several TIs in one round
 Each slot keeps exactly one rotation free at boulder 1. The athletes behind it each move back by one rotation. This matches the example in Judge Guide §5.2.3, where "before the sixth following competitor" counts the slot that has already been inserted.
 - If two TIs need the same gap at B1, it goes to **the TI that was entered first**. The other moves back by 1 rotation.
@@ -198,4 +205,5 @@ The Judge Guide (§5.2) mentions stopping the whole course as an alternative.
 | Boulder 1, scenario 1 | Next rotation: remaining time on B1, then 1 rotation of rest, then B2 |
 | Rounds with 2 courses | Shift only on the affected course |
 | Lead qualification with 2 routes | No effect on the calculation. At least 50 min between the end of the restart on route 1 and route 2 (Annex A §4.4) |
+| End of the start list | Earlier slot as soon as the TI boulder is free after the last athlete; at least 1 rotation of rest, no gap at B1 |
 | World Series (Finals) | Return always after the end of the current rotation, as the only athlete |

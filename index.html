@@ -250,14 +250,18 @@ footer a{color:inherit}
       <button type="button" data-step="bRot" data-d="0.5" aria-label="mehr">+</button>
     </div></div>
     </div>
+    <label for="bAth" data-i18n="bAth">Athleten in der Startliste (optional)</label>
+    <div class="stepper">
+      <button type="button" data-step="bAth" data-d="-1" aria-label="weniger">−</button>
+      <input id="bAth" type="number" inputmode="numeric" min="1" max="9999" placeholder="z. B. 40" data-i18n-ph="eg40">
+      <button type="button" data-step="bAth" data-d="1" aria-label="mehr">+</button>
+    </div>
+    <div class="hint" data-i18n="bAthHint">Nur für TIs kurz vor Ende der Startliste – dann geht es oft früher.</div>
     <div class="hint hidden" id="bTwoHint" data-i18n="twoCourse">Bei 2 Kursen: Anzahl Boulder je Kurs. Mit der Vorlage „Qualifikation B (Flash)“ wählst du pro TI den Kurs – Lücken und Verschiebungen betreffen nur diesen Kurs.</div>
-    <details>
-      <summary data-i18n="moreSet">Weitere Einstellungen</summary>
       <div class="switch"><span data-i18n="restRot">Ruhe-Intervall zwischen zwei Bouldern</span><input type="checkbox" id="bRestRot" checked></div>
       <div class="hint" data-i18n="restRotHint">Standard (Judge Guide): Klettern und Pause wechseln sich ab – pro Intervall rückt die Startliste um einen Athleten vor.</div>
       <label for="bChange" data-i18n="change">Wechselpause nach jedem Intervall (Sekunden)</label>
       <input id="bChange" type="number" inputmode="numeric" min="0" max="120" value="15">
-    </details>
     </div>
   </details>
 
@@ -417,7 +421,8 @@ de:{
   pq:'Qualifikation – 5 Boulder, 5 min fix', ps:'Halbfinale – 4 Boulder, 5 min fix',
   pjq:'Qualifikation B (Flash) – 2 Kurse à 3 Boulder, 4 min fix', pjf:'Finale im Intervall – 4 Boulder, 4 min fix', pc:'Eigene Einstellung',
   bN:'Anzahl Boulder', bRot:'Intervall (min)',
-  twoCourse:'Anzahl Boulder je Kurs. Den Kurs wählst du beim TI.',
+  twoCourse:'Anzahl Boulder und Athleten je Kurs. Den Kurs wählst du beim TI.',
+  bAth:'Athleten in der Startliste (optional)', eg40:'z. B. 40', bAthHint:'Nur für TIs kurz vor Ende der Startliste – dann geht es oft früher.', gapEnd:'keine nötig – Ende der Startliste',
   moreSet:'Weitere Einstellungen', restRot:'Ruhe-Intervall zwischen zwei Bouldern',
   restRotHint:'Standard (Judge Guide): Klettern und Pause wechseln sich ab – pro Intervall rückt die Startliste um einen Athleten vor.',
   change:'Wechselpause nach jedem Intervall (Sekunden)', course:'Kurs', courseA:'Kurs A', courseB:'Kurs B', courseX:c=>'Kurs '+c, boulder:'Boulder',
@@ -428,7 +433,7 @@ de:{
   clockSum:'Uhrzeit (optional)', t0:'Startzeit des TI-Intervalls', bPos:'Startposition des TI-Athleten',
   routeLbl:'Route', onRoute:n=>` an Route ${n}`,
   posReq:'· Pflicht', resetAll:'Alle TIs löschen', confirmResetLead:'Alle Lead-TIs löschen?',
-  roundInfo:(p,n,m)=>`${p?p+' · ':''}${n} Boulder · ${m} min`, pShort:{q:'Qualifikation',jq:'Qualifikation B (Flash)',s:'Halbfinale',jf:'Finale im Intervall'}, bib:'Startnummer (Bib, optional)', bibShort:'Startnummer (Bib)', bPosShort:'Startposition', eg104:'z. B. 104', optional:'optional',
+  roundInfo:(p,n,m,a)=>`${p?p+' · ':''}${n} Boulder · ${m} min${a?' · '+a+' Athl.':''}`, pShort:{q:'Qualifikation',jq:'Qualifikation B (Flash)',s:'Halbfinale',jf:'Finale im Intervall'}, bib:'Startnummer (Bib, optional)', bibShort:'Startnummer (Bib)', bPosShort:'Startposition', eg104:'z. B. 104', optional:'optional',
   needPos:'Startposition eingeben', needPosHint:'Ohne Startposition kann der Rechner den Athleten nicht in die Startliste einordnen.', posHint:'Platz in der Startliste („Order“), nicht die Startnummer.',
   gapsTitle:'Lücken an Boulder 1', reset:'Alle TIs der Runde zurücksetzen', liveCd:'Live-Countdown',
   cdEmpty:'Für den Countdown die Startzeit des TI-Intervalls eingeben.', cdSetT0:'Startzeit eingeben',
@@ -488,7 +493,8 @@ en:{
   pq:'Qualification – 5 boulders, 5 min fixed', ps:'Semi-final – 4 boulders, 5 min fixed',
   pjq:'Qualification B (flash) – 2 courses of 3 boulders, 4 min fixed', pjf:'Final in rotation format – 4 boulders, 4 min fixed', pc:'Custom',
   bN:'Number of boulders', bRot:'Rotation (min)',
-  twoCourse:'Number of boulders per course. You choose the course with the TI.',
+  twoCourse:'Number of boulders and athletes per course. You choose the course with the TI.',
+  bAth:'Athletes in the start list (optional)', eg40:'e.g. 40', bAthHint:'Only for TIs near the end of the start list – often allows an earlier return.', gapEnd:'none needed – end of the start list',
   moreSet:'More settings', restRot:'Rest rotation between two boulders',
   restRotHint:'Default (Judge Guide): climbing and rest alternate – the start list moves on by one athlete per rotation.',
   change:'Changeover after each rotation (seconds)', course:'Course', courseA:'Course A', courseB:'Course B', courseX:c=>'Course '+c, boulder:'Boulder',
@@ -499,7 +505,7 @@ en:{
   clockSum:'Time (optional)', t0:'Start time of the TI rotation', bPos:'Start position of the TI athlete',
   routeLbl:'Route', onRoute:n=>` on route ${n}`,
   posReq:'· required', resetAll:'Delete all TIs', confirmResetLead:'Delete all lead TIs?',
-  roundInfo:(p,n,m)=>`${p?p+' · ':''}${n} ${n===1?'boulder':'boulders'} · ${m} min`, pShort:{q:'Qualification',jq:'Qualification B (flash)',s:'Semi-final',jf:'Final in rotation format'}, bib:'Bib number (optional)', bibShort:'Bib number', bPosShort:'Start position', eg104:'e.g. 104', optional:'optional',
+  roundInfo:(p,n,m,a)=>`${p?p+' · ':''}${n} ${n===1?'boulder':'boulders'} · ${m} min${a?' · '+a+' athl.':''}`, pShort:{q:'Qualification',jq:'Qualification B (flash)',s:'Semi-final',jf:'Final in rotation format'}, bib:'Bib number (optional)', bibShort:'Bib number', bPosShort:'Start position', eg104:'e.g. 104', optional:'optional',
   needPos:'Enter the start position', needPosHint:'Without the start position the calculator cannot place the athlete in the start list.', posHint:'Position in the start list (“Order”), not the bib number.',
   gapsTitle:'Gaps at boulder 1', reset:'Reset all TIs of this round', liveCd:'Live countdown',
   cdEmpty:'Enter the start time of the TI rotation to use the countdown.', cdSetT0:'Enter start time',
@@ -793,7 +799,7 @@ function bSettings(){
   const N=Math.min(8,Math.max(1,Math.floor(+$('bN').value||4)));
   const rot=Math.max(0.5,+$('bRot').value||5)*60;
   const change=Math.max(0,+$('bChange').value||0);
-  return { N, rot, change, cycle:rot+change, p:$('bRestRot').checked?2:1, two:$('bPreset').value==='jq' };
+  return { N, rot, change, cycle:rot+change, p:$('bRestRot').checked?2:1, two:$('bPreset').value==='jq', A:posInt($('bAth').value) };
 }
 
 /* ---------- Rechenkern ----------
@@ -843,6 +849,16 @@ function computeTI(ti, all, S, g, now){
   let R=Math.max(L+p, Math.max(t,cur)+g+p*(B-1)), G=R-p*(B-1);
   const pushedBy=[];
   while(reserved.has(G)){ pushedBy.push(reserved.get(G).no); G++; R++; }
+  // Ende der Startliste (nur mit bekannter Athletenzahl): Liegt die Lücke hinter dem B1-Intervall des letzten Athleten,
+  // ruft dort ohnehin niemand mehr auf – Boulder B ist dann frei, sobald alle Athleten ihn hinter sich haben.
+  // Der Athlet braucht trotzdem mindestens 1 Intervall Pause nach dem TI und nach seinem letzten Boulder.
+  if(S.A && P){
+    const lastB1=b1Start(Math.max(S.A, P, ...others.map(o=>o.res.P)), reserved);
+    for(let Re=Math.max(L+p, Math.max(t,cur)+2); Re<R; Re++){
+      const Ge=Re-p*(B-1);
+      if(Ge>lastB1 && !reserved.has(Ge)){ R=Re; G=Ge; pushedBy.length=0; break; }
+    }
+  }
   // b) Schon vorhandenen Slot mitnutzen: Der Slot eines anderen TI zieht ab seiner Lücke G' alle p Intervalle
   //    einen Boulder weiter (Boulder B im Intervall G'+p·(B−1)) und ist nur am Boulder seines eigenen TI belegt.
   //    Bedingungen: Boulder B dort noch frei, Athlet hatte nach dem TI mindestens 1 Intervall Pause,
@@ -881,6 +897,12 @@ function recomputeOne(i){
   ti.res=withSid(res, old); pruneGhosts();
 }
 function recomputeAll(){ const S=bSettings(); bGhosts=[]; bTIs.forEach(t=>t.res=null); bTIs.forEach(t=>{ t.res=withSid(computeTI(t, bTIs, S, t.gap, decided(t)), null); }); }
+// Slot hinter dem letzten Athleten der Startliste: keine echte Lücke an B1 (live, weil spätere Lücken die Liste verschieben)
+function isEnd(o, S){
+  const x=o.res; if(!S.A || !x || !x.P || x.G===null || x.scen1) return false;
+  const ax=allSlots().filter(q=>q!==o && q.res && q.res.P && (!S.two || q.course===o.course));
+  return x.G > b1Start(Math.max(S.A, x.P, ...ax.map(q=>q.res.P)), reservedOf(ax));
+}
 // „vor Startposition X“: wer ohne Lücke in Intervall G an B1 gewesen wäre (live aus allen Lücken des Kurses)
 function vorPos(ti, S){ const r=ti.res; const n=allSlots().filter(o=>o.res && o.res.P && o.res.G!==null && (o===ti||onAxis(o,ti,S)) && o.res.G<r.G).length; return r.G-n+1; }
 // Uhrzeit eines Achsen-Intervalls: aus der eigenen Startzeit, sonst aus einem anderen TI auf derselben Achse
@@ -897,7 +919,7 @@ document.querySelectorAll('#bFormat button').forEach(b=>b.onclick=()=>{ setForma
 $('bPreset').onchange=()=>{ const p=presets[$('bPreset').value]; if(p){ setFormat(p.f); $('bN').value=p.n; $('bRot').value=p.r; } settingsChanged(); };
 function settingsChanged(){
   const S=bSettings();
-  store.set('boulderInputs',{preset:$('bPreset').value,n:S.N,rot:$('bRot').value,change:S.change,p:S.p});
+  store.set('boulderInputs',{preset:$('bPreset').value,n:S.N,rot:$('bRot').value,change:S.change,p:S.p,a:S.A});
   bTIs.forEach(t=>{ if(t.B>S.N) t.B=S.N; });
   recomputeAll(); bSave(); renderBoulder();
 }
@@ -925,6 +947,7 @@ $('bPos').addEventListener('input',()=>{ bCur().pos=posStr($('bPos').value); tiC
 $('bBib').addEventListener('input',()=>{ bCur().bib=bibStr($('bBib').value); bSave(); renderBoulder(); });
 ['bN','bRot','bChange'].forEach(id=>$(id).addEventListener('input',()=>{ if(id!=='bChange') $('bPreset').value='c'; settingsChanged(); }));
 $('bRestRot').addEventListener('change',settingsChanged);
+$('bAth').addEventListener('input',settingsChanged);
 $('bAdd').onclick=()=>{
   const prev=bCur(), t=newBTI(bNext++);
   t.course=prev.course; t.remain=prev.remain;
@@ -957,7 +980,7 @@ function renderBoulder(){
 
   ['bFixOnly','bFixSettings','bPresetWrap','bTiCard','bTimelineCard','bCdCard','bClockWrap'].forEach(id=>$(id).classList.toggle('hidden', !fix));
   // Zusammenfassung im Kopf der Karte „Runde“ (sichtbar auch im zugeklappten Zustand)
-  $('bRoundInfo').textContent = fix ? t('roundInfo', (I18N[LANG].pShort||{})[$('bPreset').value]||'', S.N, String(S.rot/60).replace('.',',')) : t('fmtMax');
+  $('bRoundInfo').textContent = fix ? t('roundInfo', (I18N[LANG].pShort||{})[$('bPreset').value]||'', S.N, String(S.rot/60).replace('.',','), S.A) : t('fmtMax');
   $('bTwoHint').classList.toggle('hidden', !S.two);
   $('bReset').classList.toggle('hidden', !multi);
   $('bGapsCard').classList.toggle('hidden', !fix || (!multi && !bGhosts.length));
@@ -1014,7 +1037,7 @@ function renderBoulder(){
     ${climb&&remainOk?`<div class="sub">${t('wallStart',secToClock(timeOf(r.R,ti,S)+rest),award)}</div>`:''}
     <dl class="kv">
       <dt>${t('credit')}</dt><dd>${awardTxt}</dd>
-      <dt>${t('gapB1')}</dt><dd>${r.reuse ? t('gapReuse', r.reuseNo) : `${r.scen1?t('gapSelf'):t('gapInt',r.G-r.t)}${gTime?t('atClock',gTime):''}<br>
+      <dt>${t('gapB1')}</dt><dd>${r.reuse ? t('gapReuse', r.reuseNo) : isEnd(ti,S) ? t('gapEnd') : `${r.scen1?t('gapSelf'):t('gapInt',r.G-r.t)}${gTime?t('atClock',gTime):''}<br>
         <span class="hint">${t('czLine', r.scen1 ? t('beforeNext')+(r.P?t('posShort',vorPos(ti,S)):'') : posTxt)}</span>`}</dd>
       <dt>${t('iso')}</dt><dd>${isoTxt}</dd>
     </dl>${notes}`;
@@ -1043,7 +1066,7 @@ function renderBoulder(){
   const rows=[ti, ...bTIs.filter(o=>o!==ti && o.res && r.P && onAxis(o,ti,S))].sort((a,b)=>a.no-b.no).map(rowFor);
   const many=rows.length>1;
   const gapsHere=new Map();
-  allSlots().forEach(o=>{ if(o.res && o.res.G!==null && (o===ti || (r.P && onAxis(o,ti,S)))) gapsHere.set(o.res.G,o); });
+  allSlots().forEach(o=>{ if(o.res && o.res.G!==null && !isEnd(o,S) && (o===ti || (r.P && onAxis(o,ti,S)))) gapsHere.set(o.res.G,o); });
   const b1Cell=a=>{ const o=gapsHere.get(a); if(!o) return null;
     if(many) return o.res.scen1?null:['gap',t('tlGap'),esc(o.ghost?'Slot '+(o.bib?'#'+o.bib:o.no):tiShort(o))];
     if(o===ti) return r.scen1?null:['gap',t('tlGap'),t('tlFree')]; return ['gapother',t('tlGap'),esc(tiShort(o))]; };
@@ -1085,7 +1108,7 @@ function buildMilestones(S, multi){
       bMilestones.push({t:T(x.G), label:tag+t('msSc1')});
       bMilestones.push({t:T(x.G)+rs, label:tag+t('msWall',1,aw)});
     } else {
-      if(x.G!==null) bMilestones.push({t:T(x.G), label:tag+t('msGap')});
+      if(x.G!==null && !isEnd(o,S)) bMilestones.push({t:T(x.G), label:tag+t('msGap')});
       if(x.R-x.L-1>=1) bMilestones.push({t:T(x.R-1), label:tag+t('msCZ',o.B)});
       bMilestones.push({t:T(x.R), label:tag+t('msSlot')});
       bMilestones.push({t:T(x.R)+rs, label:tag+t('msWall',o.B,aw)});
@@ -1098,7 +1121,7 @@ function renderGaps(S){
   if(bTIs.length<2 && !bGhosts.length){ $('bGaps').innerHTML=''; return; }
   const courses = S.two ? ['A','B'] : [null];
   $('bGaps').innerHTML=courses.map(c=>{
-    const list=allSlots().filter(o=>o.res && o.res.P && o.res.G!==null && (!c || o.course===c)).sort((a,b)=>{
+    const list=allSlots().filter(o=>o.res && o.res.P && o.res.G!==null && !isEnd(o,S) && (!c || o.course===c)).sort((a,b)=>{
       if(a.res.P && b.res.P) return a.res.G-b.res.G;
       const ta=timeOf(a.res.G,a,S), tb=timeOf(b.res.G,b,S); return (ta??1e9)-(tb??1e9);
     });
@@ -1162,7 +1185,7 @@ setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidde
   lLoadForm();
   const bi=store.get('boulderInputs',null);
   if(bi){ $('bPreset').value=(presets[bi.preset]||bi.preset==='c')?bi.preset:'c'; $('bN').value=bi.n; $('bRot').value=bi.rot; $('bChange').value=bi.change;
-    $('bRestRot').checked=bi.p!==1; }
+    $('bRestRot').checked=bi.p!==1; $('bAth').value=posStr(bi.a); }
   setFormat(bState.format);
   calcLead();
   // Nur fehlende Ergebnisse berechnen – vorhandene bleiben fix
