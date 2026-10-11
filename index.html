@@ -104,6 +104,11 @@ summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .btn{flex:1 1 140px;appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font:700 16px/1 inherit;padding:14px;border-radius:12px;cursor:pointer}
+.dlg{border:1px solid var(--line);border-radius:var(--radius);background:var(--card);color:var(--text);padding:18px;max-width:340px;width:calc(100% - 32px)}
+.dlg::backdrop{background:rgba(0,0,0,.45)}
+.dlg h3{margin:0 0 8px;font-size:17px}
+.dlg p{margin:0 0 4px;font-size:14px}
+.dlg .btn{flex-basis:100%}
 .btn.secondary{background:var(--card);color:var(--text);border:1px solid var(--line)}
 .countdown{font-variant-numeric:tabular-nums;font-size:44px;font-weight:800;text-align:center;margin:8px 0 0}
 .countdown.done{color:var(--ok)}
@@ -311,7 +316,16 @@ footer a{color:inherit}
       <summary data-i18n-html="clockSum">Uhrzeit (optional)</summary>
       <label for="bT0" data-i18n="t0">Startzeit des TI-Intervalls</label>
       <input id="bT0" class="timefield" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="hh:mm:ss">
+      <div class="switch hidden" id="bLateWrap"><span data-i18n="lateSw">Späte Entscheidung (Lücke erst ab jetzt)</span><input type="checkbox" id="bLate"></div>
     </details>
+    <dialog class="dlg" id="bLateDlg">
+      <h3 data-i18n="lateQ">Späte Entscheidung?</h3>
+      <p id="bLateTxt"></p>
+      <div class="btns">
+        <button type="button" class="btn" id="bLateYes" data-i18n="lateYes">Ja – Lücke ab jetzt</button>
+        <button type="button" class="btn secondary" id="bLateNo" data-i18n="lateNo">Nein – wie im TI-Intervall geplant</button>
+      </div>
+    </dialog>
     <div class="btns"><button type="button" class="btn wide" id="bAdd" data-i18n="addTI">+ weiterer TI</button></div>
     <div class="btns">
       <button type="button" class="btn secondary" id="bDel" data-i18n="delTI">Diesen TI löschen</button>
@@ -430,6 +444,8 @@ de:{
   resolved:'TI vor Ende des laufenden Intervalls behoben?', gapLabel:'Boulder 1 frei lassen',
   gap1:'nächstes Intervall (+1)', gap2:'übernächstes (+2)',
   gapHint:'JP entscheidet: Kann der schon aufgerufene nächste Athlet noch warten?',
+  lateSw:'Späte Entscheidung (Lücke erst ab jetzt)', lateQ:'Späte Entscheidung?', lateYes:'Ja – Lücke ab jetzt', lateNo:'Nein – wie im TI-Intervall geplant',
+  lateTxt:(m,n)=>`Das TI-Intervall hat vor ${m} min begonnen, jetzt läuft Intervall +${n}. Wird der TI erst jetzt entschieden? Dann zählt die Lücke ab dem laufenden Intervall.`,
   clockSum:'Uhrzeit (optional)', t0:'Startzeit des TI-Intervalls', bPos:'Startposition des TI-Athleten',
   routeLbl:'Route', onRoute:n=>` an Route ${n}`,
   posReq:'· Pflicht', resetAll:'Alle TIs löschen', confirmResetLead:'Alle Lead-TIs löschen?',
@@ -502,6 +518,8 @@ en:{
   resolved:'TI fixed before the end of the current rotation?', gapLabel:'Keep boulder 1 free',
   gap1:'next rotation (+1)', gap2:'the one after (+2)',
   gapHint:'JP decides: can the next athlete, already called, still wait?',
+  lateSw:'Late decision (gap only from now)', lateQ:'Late decision?', lateYes:'Yes – gap from now', lateNo:'No – as planned in the TI rotation',
+  lateTxt:(m,n)=>`The TI rotation started ${m} min ago, rotation +${n} is running now. Is the TI only being decided now? Then the gap counts from the current rotation.`,
   clockSum:'Time (optional)', t0:'Start time of the TI rotation', bPos:'Start position of the TI athlete',
   routeLbl:'Route', onRoute:n=>` on route ${n}`,
   posReq:'· required', resetAll:'Delete all TIs', confirmResetLead:'Delete all lead TIs?',
@@ -753,7 +771,9 @@ let bState=Object.assign({format:'fix'}, store.get('boulderState',{}));
    Jeder TI speichert seine Eingaben und sein berechnetes Ergebnis (res).
    Ergebnisse sind „fix“: Ändert/löscht man einen TI, bleiben die Slots der anderen unverändert.
    Nur bei geänderten Rundeneinstellungen wird alles neu berechnet (in Eingabereihenfolge = Vorrang). */
-const newBTI=no=>({no, B:1, remain:'3:00', resolved:false, gap:2, t0:'', pos:'', bib:'', course:'A', res:null});
+const newBTI=no=>({no, B:1, remain:'3:00', resolved:false, gap:2, t0:'', pos:'', bib:'', course:'A', late:false, res:null});
+// Neuer TI im Formular: Startzeit des TI-Intervalls mit „jetzt“ vorbelegen (wie die Sturzzeit bei Lead)
+const freshBTI=no=>Object.assign(newBTI(no), {t0:nowClock(), decidedAt:nowSec()});
 // Gespeichertes Ergebnis prüfen. G = Lücke an B1 (null, wenn der TI einen schon freien Slot nutzt), sid = Slot-Kennung
 function cleanRes(r){
   const int=v=>Number.isInteger(v);
@@ -765,7 +785,7 @@ function cleanRes(r){
 }
 let bTIs=store.get('boulderTIs',null);
 if(!Array.isArray(bTIs)||!bTIs.length){
-  const t=newBTI(1), bi=store.get('boulderInputs',null);
+  const t=freshBTI(1), bi=store.get('boulderInputs',null);
   if(bi&&bi.remain) t.remain=bi.remain;
   if(bState.boulder) t.B=bState.boulder;
   bTIs=[t];
@@ -775,11 +795,15 @@ bTIs=bTIs.filter(t=>t&&typeof t==='object').map((t,i)=>{
   n.B=Math.min(8,Math.max(1,Math.floor(+t.B||1))); n.remain=typeof t.remain==='string'?t.remain.slice(0,8):'3:00';
   n.resolved=!!t.resolved; n.gap=t.gap===1?1:2; n.t0=timeStr(t.t0); n.pos=posStr(t.pos); n.bib=bibStr(t.bib); n.course=t.course==='B'?'B':'A';
   n.decidedAt=Number.isFinite(t.decidedAt)?t.decidedAt:null;
+  // Früher galt die späte Entscheidung automatisch – alte Einträge behalten das
+  n.late=typeof t.late==='boolean'?t.late:true;
   // Fixe Ergebnisse übernehmen (nicht neu berechnen!), aber nur wenn sie gültig aussehen
   n.res=cleanRes(t.res);
   return n;
 });
-if(!bTIs.length) bTIs=[newBTI(1)];
+if(!bTIs.length) bTIs=[freshBTI(1)];
+// Nur ein TI: Startzeit beim Neuladen wie bei Lead auf „jetzt“ setzen (bei mehreren bleiben die Uhrzeiten)
+else if(bTIs.length===1){ bTIs[0].t0=nowClock(); bTIs[0].decidedAt=nowSec(); }
 let bNext=Math.max(...bTIs.map(t=>t.no))+1;
 let bSel=Math.min(store.get('boulderSel',0), bTIs.length-1);
 const bCur=()=>bTIs[bSel];
@@ -837,7 +861,7 @@ function computeTI(ti, all, S, g, now){
   // Späte Entscheidung: welches Intervall läuft gerade?
   let cur=t; const t0=timeToSec(ti.t0);
   // Nur bis 3 h nach Beginn des TI-Intervalls – sonst ist es eine nachträgliche Eingabe, keine späte Entscheidung
-  if(t0!==null && now!=null){ const el=wrapDiff(now-t0); if(el>0 && el<=3*3600) cur=t+Math.floor(el/S.cycle); }
+  if(ti.late && t0!==null && now!=null){ const el=wrapDiff(now-t0); if(el>0 && el<=3*3600) cur=t+Math.floor(el/S.cycle); }
   if(B===1 && ti.resolved && !inSlot){
     const G=t+1;
     if(!reserved.has(G) && cur<=t) return {P, t, s0:sch.s0, G, R:G, k:1, L, scen1:true, notes};
@@ -941,7 +965,25 @@ document.querySelectorAll('#bGap button').forEach(b=>b.onclick=()=>{ bCur().gap=
 document.querySelectorAll('#bCourse button').forEach(b=>b.onclick=()=>{ bCur().course=b.dataset.v; tiChanged(); });
 $('bRemain').addEventListener('input',()=>{ bCur().remain=$('bRemain').value; bSave(); renderBoulder(); });
 $('bResolved').addEventListener('change',()=>{ bCur().resolved=$('bResolved').checked; tiChanged(); });
-$('bT0').addEventListener('input',()=>{ bCur().t0=$('bT0').value; bCur().decidedAt=nowSec(); bOffset=0; requestWake(); tiChanged(); });
+$('bT0').addEventListener('input',()=>{ const ti=bCur(); ti.t0=$('bT0').value; ti.decidedAt=nowSec(); ti.late=false; bOffset=0; requestWake(); tiChanged(); });
+// Späte Entscheidung: Liegt die eingegebene Startzeit mehr als 1 Intervall (bis 3 h) zurück, wird gefragt – nicht automatisch angewendet
+function lateInfo(ti){
+  const t0=timeToSec(ti.t0); if(t0===null || ti.decidedAt==null) return null;
+  const S=bSettings(), el=wrapDiff(ti.decidedAt-t0);
+  return el>=S.cycle && el<=3*3600 ? {min:Math.floor(el/60), n:Math.floor(el/S.cycle)} : null;
+}
+let bLateAsked='';
+$('bT0').addEventListener('blur',()=>{
+  const ti=bCur(), li=lateInfo(ti), key=ti.no+'|'+ti.t0;
+  if(!li || bLateAsked===key || bState.format!=='fix') return;
+  bLateAsked=key;
+  $('bLateTxt').textContent=t('lateTxt', li.min, li.n);
+  try{ $('bLateDlg').showModal(); }catch(e){ if(confirm(t('lateTxt', li.min, li.n))){ ti.late=true; tiChanged(); } }
+});
+const lateAnswer=v=>{ $('bLateDlg').close(); const ti=bCur(); if(ti.late!==v){ ti.late=v; tiChanged(); } };
+$('bLateYes').onclick=()=>lateAnswer(true);
+$('bLateNo').onclick=()=>lateAnswer(false);
+$('bLate').addEventListener('change',()=>{ bCur().late=$('bLate').checked; tiChanged(); });
 $('bPos').addEventListener('input',()=>{ bCur().pos=posStr($('bPos').value); tiChanged(); });
 // Startnummer ändert nur den Namen, nicht die Berechnung
 $('bBib').addEventListener('input',()=>{ bCur().bib=bibStr($('bBib').value); bSave(); renderBoulder(); });
@@ -949,7 +991,7 @@ $('bBib').addEventListener('input',()=>{ bCur().bib=bibStr($('bBib').value); bSa
 $('bRestRot').addEventListener('change',settingsChanged);
 $('bAth').addEventListener('input',settingsChanged);
 $('bAdd').onclick=()=>{
-  const prev=bCur(), t=newBTI(bNext++);
+  const prev=bCur(), t=freshBTI(bNext++);
   t.course=prev.course; t.remain=prev.remain;
   bTIs.push(t); bSel=bTIs.length-1; recomputeOne(bSel); bSave(); bLoadForm(); renderBoulder();
   $('bPosMain').scrollIntoView({block:'center'});
@@ -960,13 +1002,13 @@ $('bDel').onclick=()=>{
   const gone=bCur();
   // Wird sein Slot von einem anderen TI mitgenutzt, bleibt die Lücke an B1 als Geist bestehen
   if(gone.res && usersOf(gone.res.sid).some(q=>q!==gone)) bGhosts.push({no:gone.no, ghost:true, B:gone.B, course:gone.course, pos:'', bib:gone.bib, t0:gone.t0, res:gone.res});
-  if(bTIs.length<2){ bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); }
+  if(bTIs.length<2){ bTIs=[freshBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); }
   else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
   pruneGhosts(); bSave(); bLoadForm(); renderBoulder();
 };
 $('bReset').onclick=()=>{
   if(!confirm(t('confirmReset'))) return;
-  bTIs=[newBTI(1)]; bNext=2; bSel=0; bGhosts=[]; recomputeOne(0); bSave(); bLoadForm(); renderBoulder();
+  bTIs=[freshBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); bSave(); bLoadForm(); renderBoulder();
 };
 
 /* ---------- Anzeige ---------- */
@@ -987,6 +1029,7 @@ function renderBoulder(){
   $('bCourseWrap').classList.toggle('hidden', !S.two);
   document.querySelectorAll('#bCourse button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===ti.course));
   $('bB1Wrap').classList.toggle('hidden', B!==1);
+  $('bLateWrap').classList.toggle('hidden', !lateInfo(ti)); $('bLate').checked=!!ti.late;
   // Startposition ist immer Pflicht
   $('bPosReq').classList.toggle('hidden', !!ti.pos);
   // Chips
