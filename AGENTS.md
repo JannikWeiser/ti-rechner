@@ -123,10 +123,8 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 
 - **Karte „Runde“ ist aufklappbar** (`<details id="bRoundCard">`). Im Kopf steht immer eine Zusammenfassung, z. B. „Qualifikation · 5 Boulder · 5 min“ oder „World Series (Finals)“. Der Klappzustand wird in `ti.roundOpen` gespeichert, beim ersten Besuch ist die Karte offen.
 - **Buttons im TI-Formular:** „+ weiterer TI“ groß und orange über die ganze Breite, darunter nebeneinander „Diesen TI löschen“ und „Alle TIs löschen“. Letzteres erscheint nur ab 2 TIs und hat eine Rückfrage. Das gilt für Lead und Boulder. Der frühere Link „Alle TIs der Runde zurücksetzen“ in der Lücken-Karte ist entfallen.
-- **Feste Ergebnisleiste unten** (`#resBar`): Sie erscheint, sobald der orange Kasten des aktuellen Reiters nicht im Bild ist. Gemessen wird direkt per `getBoundingClientRect` beim Scrollen, ohne IntersectionObserver. Antippen springt zum Ergebnis.
-  - Boulder: „+8 Intervalle · B1 frei 10:10 · vor Pos. 25“, bei Mitnutzung „+6 Intervalle · nutzt Slot von Bib 104“, bei Szenario 1 „Nächstes Intervall · Restzeit an B1“. Ohne Startposition und bei World Series gibt es keine Leiste.
-  - Lead: „Bib 106 an Route 1: 12 min · Neustart 10:35“, bei laufendem Countdown mit „· ⏱ 6:58“.
-- **Lead: Route** (–/1/2) neben der Startnummer, **nur zur Benennung**: `leadName()` ergibt „Bib 106 an Route 1“. Sie steht in Ergebnis, Reiter („R1“), über dem großen Countdown, in der Countdown-Liste, in der Leiste und in der Löschabfrage. Auf die Berechnung hat sie keinen Einfluss.
+- **Keine feste Ergebnisleiste.** Sie wurde getestet und auf Wunsch wieder entfernt, weil sie verwirrend war.
+- **Lead: Route** ist ein freies Eingabefeld neben der Startnummer (keine Auswahl-Buttons). Es dient **nur zur Benennung**: `leadName()` ergibt „Bib 106 an Route 1“. Ein vorangestelltes „Route“ wird weggelassen (`routeStr`, höchstens 12 Zeichen: Buchstaben, Ziffern, Leerzeichen, Bindestrich). Die Route steht in Ergebnis, Reiter („R1“), über dem großen Countdown, in der Countdown-Liste und in der Löschabfrage.
 - **Für stressige Momente vereinfacht:** Hinweistexte sind kurz gehalten (eine Zeile, wo möglich). Der 2-Kurs-Hinweis erscheint nur bei der Vorlage „Qualifikation B (Flash)“, die Auswahl +1/+2 nur, wenn sie etwas ändert. „Alle TIs löschen“ ist bei einem TI ausgeblendet. Header-Untertitel nur „Technischer Zwischenfall“ / „Technical Incident“.
 - Mobile first (375 px), helles und dunkles Theme (Button oben rechts, gespeichert in `ti.theme`)
 - **Orange Ergebniskästen zeigen nur berechnete Werte.** Keine To-Do-Listen, keine Angaben zur Wertung, keine Paragraphen-Verweise. Der Schiedsrichter kennt die Regeln und soll nicht verwirrt werden.
@@ -142,6 +140,13 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - `manifest.webmanifest`: Name „TI-Rechner“, standalone, Farbe #f97316, Icons 192/512 (maskable) und `apple-touch-icon.png` (180). Die Icons sind mit ImageMagick erzeugt (orange Fläche, weißes „TI“ in Arial Bold).
 - `sw.js`: **Network first.** Mit Internet kommt immer die neueste Version, ohne Internet die Version aus dem Cache. Bei neuen Dateien die Liste `FILES` ergänzen. Den Cache-Namen (`ti-rechner-vN`) erhöhen, wenn alte Caches entfernt werden sollen.
 - Registriert in `index.html`, `impressum.html` und `datenschutz.html`.
+
+## Uhrzeit-Eingabe
+
+- **Kein `<input type="time">`.** iOS-Safari bietet dort keine Sekunden an (`step` wird ignoriert), das wäre für die Startzeit zu ungenau. Stattdessen gibt es Textfelder `.timefield` mit Ziffernblock (`inputmode="numeric"`, Platzhalter `hh:mm:ss`).
+- Beim Tippen setzt der Rechner die Doppelpunkte automatisch (102330 → 10:23:30). „10:23“ wird beim Verlassen des Felds zu „10:23:00“. Ungültige Zeiten wie 25:61:00 werden rot umrandet und nicht verwendet (`timeStr` prüft 0–23 / 0–59 / 0–59).
+- Der Formatierungs-Listener wird vor den Berechnungs-Listenern registriert.
+- Betroffen sind die Felder „Uhrzeit des Sturzes“ (Lead) und „Startzeit des TI-Intervalls“ (Boulder).
 
 ## Sicherheit & Robustheit
 
