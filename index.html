@@ -330,6 +330,10 @@ footer a{color:inherit}
     <div class="hint" data-i18n="posHint">Platz in der Startliste der Runde (Spalte „Order“), nicht die Startnummer.</div>
     <label data-i18n="boulder">Boulder</label>
     <div class="seg" id="bBoulder"></div>
+    <label for="bT0"><span data-i18n="t0">Startzeit des TI-Intervalls</span> <span class="req" id="bT0Req" data-i18n="posReq">· Pflicht</span></label>
+    <input id="bT0" class="timefield" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="hh:mm:ss">
+    <div class="hint" data-i18n="t0Hint">Uhrzeit, zu der das Intervall an diesem Boulder begonnen hat.</div>
+    <div class="switch hidden" id="bLateWrap"><span data-i18n="lateSw">Späte Entscheidung (Lücke erst ab jetzt)</span><input type="checkbox" id="bLate"></div>
     <label for="bRemain" data-i18n="remain">Restzeit bei Versuchsbeginn</label>
     <div class="stepper">
       <button type="button" data-step="bRemain" data-time="1" data-d="-15" aria-label="weniger">−</button>
@@ -348,12 +352,6 @@ footer a{color:inherit}
         <div class="hint" data-i18n="gapHint">Entscheidung des JP in der Call Zone – ob der bereits aufgerufene nächste Athlet noch zurückgestellt werden kann.</div>
       </div>
     </div>
-    <details id="bClockWrap" open>
-      <summary data-i18n-html="clockSum">Uhrzeit (optional)</summary>
-      <label for="bT0" data-i18n="t0">Startzeit des TI-Intervalls</label>
-      <input id="bT0" class="timefield" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="hh:mm:ss">
-      <div class="switch hidden" id="bLateWrap"><span data-i18n="lateSw">Späte Entscheidung (Lücke erst ab jetzt)</span><input type="checkbox" id="bLate"></div>
-    </details>
    </div>
    <div class="foot">
     <div class="prev" id="bPrev"></div>
@@ -467,7 +465,7 @@ de:{
   lGapHint:'Durchschnittlicher Takt der Runde, um die Startposition für den Neustart zu bestimmen.',
   lPos:'Startposition des TI-Athleten (optional)', eg12:'z. B. 12', eg17:'z. B. 17',
   addTI:'+ weiterer TI', delTI:'Löschen', editTI:'Bearbeiten', tiNew:'TI anlegen', tiEditTitle:'TI bearbeiten', save:'Speichern', cancel:'Abbrechen', noTI:'Noch kein TI angelegt.',
-  needPosB:'Startposition und Boulder eingeben.', needHoldsErr:'Gewertete Griffe eingeben.', preview:'Ergebnis',
+  needPosB:'Startposition und Boulder eingeben.', needT0:'Startzeit des TI-Intervalls eingeben.', t0Hint:'Uhrzeit, zu der das Intervall an diesem Boulder begonnen hat.', needHoldsErr:'Gewertete Griffe eingeben.', preview:'Ergebnis',
   cdTitle:'Countdown Erholungszeit', cdHint:'Zählt ab der Uhrzeit des Sturzes.',
   cdStart:'Countdown starten', cdStop:'Countdown stoppen',
   round:'Runde', format:'Format', fmtFix:'Intervall', fmtMax:'World Series (Finals)', preset:'Vorlage',
@@ -547,7 +545,7 @@ en:{
   lGapHint:'Average pace of the round, used to work out the start position for the restart.',
   lPos:'Start position of the TI athlete (optional)', eg12:'e.g. 12', eg17:'e.g. 17',
   addTI:'+ another TI', delTI:'Delete', editTI:'Edit', tiNew:'Add TI', tiEditTitle:'Edit TI', save:'Save', cancel:'Cancel', noTI:'No TI added yet.',
-  needPosB:'Enter start position and boulder.', needHoldsErr:'Enter the scoring holds.', preview:'Result',
+  needPosB:'Enter start position and boulder.', needT0:'Enter the start time of the TI rotation.', t0Hint:'Time at which the rotation on this boulder started.', needHoldsErr:'Enter the scoring holds.', preview:'Result',
   cdTitle:'Recovery countdown', cdHint:'Counts from the time of the fall.',
   cdStart:'Start countdown', cdStop:'Stop countdown',
   round:'Round', format:'Format', fmtFix:'Rotation', fmtMax:'World Series (Finals)', preset:'Template',
@@ -1126,6 +1124,7 @@ function renderBForm(){
   $('bB1Wrap').classList.toggle('hidden', d.B!==1);
   $('bLateWrap').classList.toggle('hidden', !lateInfo(d)); $('bLate').checked=!!d.late;
   $('bPosReq').classList.toggle('hidden', !!d.pos);
+  $('bT0Req').classList.toggle('hidden', !!timeStr(d.t0));
   const ok=d.pos && d.B, ctx=ok?previewCtx(d):null;
   if(ok) d.shift=computeShift(d, ctx);
   const r=ok?computeTI(d, ctx, S, d.gap, decided(d)):null;
@@ -1150,6 +1149,7 @@ $('bCancel').onclick=()=>$('bDlg').close();
 $('bOk').onclick=()=>{
   const d=bDraft; if(!d) return;
   if(!d.pos || !d.B){ $('bErr').textContent=t('needPosB'); $('bErr').classList.remove('hidden'); return; }
+  if(!timeStr(d.t0)){ $('bErr').textContent=t('needT0'); $('bErr').classList.remove('hidden'); $('bT0').focus(); return; }
   let f, t0new;
   if(bDraftIdx<0){
     d.res=null; d.shift=computeShift(d, allSlots()); bTIs.push(d); bNext=Math.max(bNext,d.no+1); bSel=bTIs.length-1;
@@ -1440,7 +1440,7 @@ function bTick(){
 function bShift(d){ bOffset+=d; bTick(); requestWake(); }
 $('bCdMinus').onclick=()=>bShift(-15);
 $('bCdPlus').onclick=()=>bShift(15);
-$('bCdSetT0').onclick=()=>{ if(!bTIs.length) return; openB(bSel); $('bClockWrap').open=true; $('bT0').focus(); };
+$('bCdSetT0').onclick=()=>{ if(!bTIs.length) return; openB(bSel); $('bT0').focus(); };
 setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidden')) bTick(); },500);
 
 /* ---------- Init ---------- */
