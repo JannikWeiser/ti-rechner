@@ -496,7 +496,7 @@ de:{
   shift:'Zeitplan verschieben', earlier:'15 Sekunden früher', later:'15 Sekunden später', offset:'Verschiebung',
   shiftHint:'Wenn die Runde hinterherläuft (gilt nur für den Countdown).',
   tlTitle:'Ablauf des Athleten', tlTitleMulti:'Ablauf aller TIs', tlB1Row:'B1 frei',
-  tlHintMulti:'Jede Zeile ein TI (der gewählte ist orange beschriftet), letzte Zeile: Lücken an Boulder 1 – dort wird niemand aufgerufen. Waagerecht wischen für weitere Intervalle. Grüner Rand: Intervall, das gerade läuft.',
+  tlHintMulti:'Jede Zeile ein TI, ±0 = Intervall des gewählten TI, letzte Zeile: Lücken an Boulder 1 – dort wird niemand aufgerufen. Waagerecht wischen für weitere Intervalle. Grüner Rand: Intervall, das gerade läuft.',
   tlHint:'Untere Reihe: Lücke an Boulder 1 – in diesem Intervall wird an B1 niemand aufgerufen. Grüner Rand: Intervall, das gerade läuft (aus der Startzeit des TI-Intervalls).',
   lgIso:'Sek. Isolation', lgCZ:'Call Zone (nächster Boulder)', lgSlot:'TI-Slot', lgGap:'Lücke B1',
   footer:'Der Rechner ist eine Hilfe – die Entscheidung trifft der Jury-Präsident.',
@@ -576,7 +576,7 @@ en:{
   shift:'Shift schedule', earlier:'15 seconds earlier', later:'15 seconds later', offset:'Shift',
   shiftHint:'If the round is running late (countdown only).',
   tlTitle:'Athlete’s schedule', tlTitleMulti:'Schedule of all TIs', tlB1Row:'B1 free',
-  tlHintMulti:'One row per TI (the selected one is labelled in orange), last row: gaps at boulder 1 – nobody is called there. Swipe sideways for more rotations. Green border: the rotation running right now.',
+  tlHintMulti:'One row per TI, ±0 = rotation of the selected TI, last row: gaps at boulder 1 – nobody is called there. Swipe sideways for more rotations. Green border: the rotation running right now.',
   tlHint:'Bottom row: gap at boulder 1 – nobody is called to B1 in this rotation. Green border: the rotation running right now (based on the start time of the TI rotation).',
   lgIso:'Secondary isolation', lgCZ:'Call zone (next boulder)', lgSlot:'TI slot', lgGap:'Gap B1',
   footer:'This calculator is an aid – the decision is made by the Jury President.',
@@ -1350,13 +1350,17 @@ function renderBoulder(){
     $('bTimeline').innerHTML=cols.join('');
   } else {
     // Mehrere TIs: Zeilen mit Beschriftung links, waagerecht scrollbar (nur innerhalb der Karte)
-    const labels=rows.map(x=>`<div class="lab${x.o===ti?' sel':''}">${esc(tiName(x.o))} · B${x.o.B}</div>`).join('')+(anyGap?`<div class="lab">${t('tlB1Row')}</div>`:'');
+    const labels=rows.map(x=>`<div class="lab">${esc(tiName(x.o))} · B${x.o.B}</div>`).join('')+(anyGap?`<div class="lab">${t('tlB1Row')}</div>`:'');
     $('bTimeline').innerHTML=`<div class="tlwrap" id="bTlWrap"><div class="tlgrid"><div class="tlabels"><div class="idx"></div>${labels}</div>${cols.join('')}</div></div>`;
-    bTlFocus=r.t; scrollTl();
   }
   // Für die Live-Markierung des laufenden Intervalls
   const tStart=timeOf(r.t,ti,S);
   bTl = tStart===null ? null : {start:tStart, t:r.t, cycle:S.cycle};
+  if(many){
+    // Automatisch zum Intervall springen, das gerade läuft (sonst zur Spalte ±0 des gewählten TI)
+    const a=curInterval();
+    bTlFocus = a!==null && a>=from && a<=end ? a : r.t; scrollTl();
+  }
 
   buildMilestones(S, multi);
   bTick();
@@ -1416,10 +1420,13 @@ function scrollTl(){
   if(col) wrap.scrollLeft=Math.max(0, wrap.scrollLeft + col.getBoundingClientRect().left - wrap.getBoundingClientRect().left - lab.offsetWidth - 6);
 }
 // Grüner Rand um das Intervall, das laut Startzeit (+ Verschiebung) gerade läuft
+function curInterval(){
+  if(!bTl) return null;
+  const el=wrapDiff(nowSec()-(bTl.start+bOffset)); return el>=0 ? bTl.t+Math.floor(el/bTl.cycle) : null;
+}
 function markNow(){
   const cols=$('bTimeline').querySelectorAll('.tcol');
-  let a=null;
-  if(bTl){ const el=wrapDiff(nowSec()-(bTl.start+bOffset)); if(el>=0) a=bTl.t+Math.floor(el/bTl.cycle); }
+  const a=curInterval();
   cols.forEach(c=>c.classList.toggle('now', a!==null && +c.dataset.a===a));
 }
 function bTick(){
