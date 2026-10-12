@@ -792,7 +792,7 @@ function cleanRes(r){
   const okNote=x=>typeof x==='string' || (x && typeof x.k==='string' && ['sc1Blocked','sc1Late','late','pushed','inSlot','reuse'].includes(x.k)
     && (x.k!=='pushed' || (int(x.n) && Array.isArray(x.l) && x.l.every(int))) && (!('no' in x) || int(x.no)));
   return {P:r.P, t:r.t, s0:r.s0, G:r.G, R:r.R, k:r.k, L:r.L, scen1:!!r.scen1, reuse:!!r.reuse,
-    sid:int(r.sid)?r.sid:null, reuseSid:int(r.reuseSid)?r.reuseSid:null, reuseNo:int(r.reuseNo)?r.reuseNo:null, notes:r.notes.filter(okNote)};
+    sid:int(r.sid)?r.sid:null, reuseSid:int(r.reuseSid)?r.reuseSid:null, reuseNo:int(r.reuseNo)?r.reuseNo:null, seq:int(r.seq)?r.seq:0, notes:r.notes.filter(okNote)};
 }
 let bTIs=store.get('boulderTIs',null);
 if(!Array.isArray(bTIs)||!bTIs.length){
@@ -821,11 +821,22 @@ const bCur=()=>bTIs[bSel];
 let bGhosts=(store.get('boulderGhosts',[])||[]).filter(g=>g&&typeof g==='object').map(g=>({no:Number.isInteger(g.no)?g.no:0, ghost:true,
   B:Math.min(8,Math.max(1,Math.floor(+g.B||1))), course:g.course==='B'?'B':'A', pos:'', bib:bibStr(g.bib), t0:timeStr(g.t0), res:cleanRes(g.res)})).filter(g=>g.res && g.res.G!==null);
 let bSid=Math.max(store.get('boulderSid',1)||1, ...bTIs.concat(bGhosts).map(t=>t.res&&t.res.sid||0).map(x=>x+1));
+// Reihenfolge der Berechnung (seq): welche Lücken beim Berechnen eines Slots schon eingeplant waren
+let bSeq=Math.max(0, ...bTIs.concat(bGhosts).map(t=>t.res&&t.res.seq||0));
 // Ältere Ergebnisse ohne Slot-Kennung bekommen eine
 bTIs.concat(bGhosts).forEach(t=>{ if(t.res && t.res.G!==null && !t.res.reuse && t.res.sid===null) t.res.sid=bSid++; });
 const allSlots=()=>bTIs.concat(bGhosts);
 const usersOf=sid=>sid==null?[]:bTIs.filter(q=>q.res && q.res.reuse && q.res.reuseSid===sid);
-function pruneGhosts(){ bGhosts=bGhosts.filter(g=>usersOf(g.res.sid).length>0); }
+// Eine Lücke bleibt als Geist, solange sie gebraucht wird: ein anderer TI nutzt den Slot mit, ein anderer Slot wurde
+// berechnet, als die Lücke schon eingeplant war (seq), oder ein TI-Athlet startet erst nach der Lücke.
+function needsGap(g){
+  const x=g.res; if(!x || !x.P || x.G===null) return false;
+  if(usersOf(x.sid).length) return true;   // auch wenn der TI nach einer Änderung seinen eigenen alten Slot nutzt
+  const two=$('bPreset').value==='jq';
+  return bTIs.some(q=>q.no!==g.no && q.res && q.res.P && (!two || q.course===g.course) && (q.res.s0>x.G || (x.seq && q.res.seq>x.seq)));
+}
+const ghostOf=t=>({no:t.no, ghost:true, B:t.B, course:t.course, pos:'', bib:t.bib, t0:t.t0, res:t.res});
+function pruneGhosts(){ bGhosts=bGhosts.filter(needsGap); }
 const bSave=()=>{ store.set('boulderTIs',bTIs); store.set('boulderSel',bSel); store.set('boulderGhosts',bGhosts); store.set('boulderSid',bSid); };
 
 function bSettings(){
@@ -872,15 +883,19 @@ function computeTI(ti, all, S, g, now){
   let cur=t; const t0=timeToSec(ti.t0);
   // Nur bis 3 h nach Beginn des TI-Intervalls – sonst ist es eine nachträgliche Eingabe, keine späte Entscheidung
   if(ti.late && t0!==null && now!=null){ const el=wrapDiff(now-t0); if(el>0 && el<=3*3600) cur=t+Math.floor(el/S.cycle); }
+  // Eine neue Lücke darf keinen schon eingeplanten TI-Athleten mehr verschieben (dessen fixer Slot hängt von seinem Start ab).
+  // Greift nur, wenn ein älterer TI nachträglich geändert oder ein TI außer der Reihe eingetragen wird.
+  const minG=Math.max(-Infinity, ...others.filter(o=>!o.ghost && Number.isInteger(o.res.s0)).map(o=>o.res.s0+1));
   if(B===1 && ti.resolved && !inSlot){
     const G=t+1;
-    if(!reserved.has(G) && cur<=t) return {P, t, s0:sch.s0, G, R:G, k:1, L, scen1:true, notes};
+    if(!reserved.has(G) && cur<=t && G>=minG) return {P, t, s0:sch.s0, G, R:G, k:1, L, scen1:true, notes};
     notes.push(reserved.has(G) ? {k:'sc1Blocked', no:reserved.get(G).no} : {k:'sc1Late'});
   }
   if(cur>t) notes.push({k:'late', g});
   if(inSlot) notes.push({k:'inSlot', no:inSlot.no});
   // a) Neuer Slot (Lücke an B1)
   let R=Math.max(L+p, Math.max(t,cur)+g+p*(B-1)), G=R-p*(B-1);
+  if(G<minG){ R+=minG-G; G=minG; }
   const pushedBy=[];
   while(reserved.has(G)){ pushedBy.push(reserved.get(G).no); G++; R++; }
   // Ende der Startliste (nur mit bekannter Athletenzahl): Liegt die Lücke hinter dem B1-Intervall des letzten Athleten,
@@ -890,7 +905,7 @@ function computeTI(ti, all, S, g, now){
     const lastB1=b1Start(Math.max(S.A, P, ...others.map(o=>o.res.P)), reserved);
     for(let Re=Math.max(L+p, Math.max(t,cur)+2); Re<R; Re++){
       const Ge=Re-p*(B-1);
-      if(Ge>lastB1 && !reserved.has(Ge)){ R=Re; G=Ge; pushedBy.length=0; break; }
+      if(Ge>lastB1 && Ge>=minG && !reserved.has(Ge)){ R=Re; G=Ge; pushedBy.length=0; break; }
     }
   }
   // b) Schon vorhandenen Slot mitnutzen: Der Slot eines anderen TI zieht ab seiner Lücke G' alle p Intervalle
@@ -920,16 +935,19 @@ function computeTI(ti, all, S, g, now){
 const decided=t=>t.decidedAt ?? null;
 const sameRes=(a,b)=>a&&b&&a.t===b.t&&a.G===b.G&&a.R===b.R&&a.reuseSid===b.reuseSid&&a.scen1===b.scen1;
 function withSid(res, old){
-  if(res.G!==null && !res.reuse) res.sid = old && sameRes(old,res) && old.sid!=null ? old.sid : bSid++;
+  const same=old && sameRes(old,res);
+  if(res.G!==null && !res.reuse) res.sid = same && old.sid!=null ? old.sid : bSid++;
+  res.seq = same && old.seq ? old.seq : ++bSeq;
   return res;
 }
 // Einen TI neu berechnen. Ändert sich sein Slot und nutzt ein anderer TI diesen Slot, bleibt der alte als Geist bestehen.
 function recomputeOne(i){
   const S=bSettings(), ti=bTIs[i], old=ti.res;
   let res=computeTI(ti, allSlots(), S, ti.gap, decided(ti));
-  if(old && !sameRes(old,res) && usersOf(old.sid).some(q=>q!==ti)){
+  const gh=old && !sameRes(old,res) ? {...ghostOf(ti), res:old} : null;
+  if(gh && needsGap(gh)){
     // Der alte Slot bleibt als Geist mit seiner Lücke – der neue darf diese Lücke nicht noch einmal belegen
-    bGhosts.push({no:ti.no, ghost:true, B:ti.B, course:ti.course, pos:'', bib:ti.bib, t0:ti.t0, res:old});
+    bGhosts.push(gh);
     res=computeTI(ti, allSlots(), S, ti.gap, decided(ti));
   }
   ti.res=withSid(res, old); pruneGhosts();
@@ -1014,8 +1032,8 @@ $('bDel').onclick=()=>{
   if(!confirm(bTIs.length<2 ? t('confirmDel',tiName(bCur())) : t('confirmDelMulti',tiName(bCur())))) return;
   // Letzter TI: Formular wird mit einem leeren TI neu begonnen
   const gone=bCur();
-  // Wird sein Slot von einem anderen TI mitgenutzt, bleibt die Lücke an B1 als Geist bestehen
-  if(gone.res && usersOf(gone.res.sid).some(q=>q!==gone)) bGhosts.push({no:gone.no, ghost:true, B:gone.B, course:gone.course, pos:'', bib:gone.bib, t0:gone.t0, res:gone.res});
+  // Wird seine Lücke noch gebraucht (Slot mitgenutzt oder spätere TI-Athleten starten danach), bleibt sie als Geist bestehen
+  if(needsGap(ghostOf(gone))) bGhosts.push(ghostOf(gone));
   if(bTIs.length<2){ bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); }
   else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
   pruneGhosts(); bSave(); bLoadForm(); renderBoulder();
