@@ -129,6 +129,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **Keine feste Ergebnisleiste.** Sie wurde getestet und auf Wunsch wieder entfernt, weil sie verwirrend war.
 - **Lead: Route** ist ein freies Eingabefeld neben der Startnummer (keine Auswahl-Buttons). Es dient **nur zur Benennung**: `leadName()` ergibt „Bib 106 an Route 1“. Ein vorangestelltes „Route“ wird weggelassen (`routeStr`, höchstens 12 Zeichen: Buchstaben, Ziffern, Leerzeichen, Bindestrich). Die Route steht in Ergebnis, Reiter („R1“), über dem großen Countdown, in der Countdown-Liste und in der Löschabfrage.
 - **Für stressige Momente vereinfacht:** Hinweistexte sind kurz gehalten (eine Zeile, wo möglich). Der 2-Kurs-Hinweis erscheint nur bei der Vorlage „Qualifikation B (Flash)“, die Auswahl +1/+2 nur, wenn sie etwas ändert. „Alle TIs löschen“ ist bei einem TI ausgeblendet. Header-Untertitel nur „Technischer Zwischenfall“ / „Technical Incident“.
+- **Farben (Variante 3, vom Projektinhaber gewählt):** Bedienelemente (Reiter, Buttons, Auswahl, Chips, Fokus) in Dunkelgrau `--accent:#374151` (dunkles Theme: helles Grau `#e5e7eb` mit dunkler Schrift). Orange nur noch als Markenfarbe `--brand:#ea7a35` (Logo „TI“, gewählter TI in der Grafik, nächster Schritt im Countdown) und als Rand des Ergebniskastens `--result-line:#f0a66e` mit Hintergrund `--accent-soft:#fff6ee`. Boulder-Kacheln in der Grafik (`--climb`) und App-Icon bleiben orange. `theme-color` = Hintergrundfarbe (hell/dunkel).
 - Mobile first (375 px), helles und dunkles Theme (Button oben rechts, gespeichert in `ti.theme`)
 - **Orange Ergebniskästen zeigen nur berechnete Werte.** Keine To-Do-Listen, keine Angaben zur Wertung, keine Paragraphen-Verweise. Der Schiedsrichter kennt die Regeln und soll nicht verwirrt werden.
 - Formatnamen: **„Intervall“** (nicht „Intervall fix“) und **„World Series (Finals)“** (früher „World Series / Classic“, davor „Max-Rotation“)
@@ -140,7 +141,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 
 ## PWA / Offline
 
-- `manifest.webmanifest`: Name „TI-Rechner“, standalone, Farbe #f97316, Icons 192/512 (maskable) und `apple-touch-icon.png` (180). Die Icons sind mit ImageMagick erzeugt (orange Fläche, weißes „TI“ in Arial Bold).
+- `manifest.webmanifest`: Name „TI-Rechner“, standalone, `theme_color` #f4f5f7 (Icon orange #f97316), Icons 192/512 (maskable) und `apple-touch-icon.png` (180). Die Icons sind mit ImageMagick erzeugt (orange Fläche, weißes „TI“ in Arial Bold).
 - `sw.js`: **Network first.** Mit Internet kommt immer die neueste Version, ohne Internet die Version aus dem Cache. Bei neuen Dateien die Liste `FILES` ergänzen. Den Cache-Namen (`ti-rechner-vN`) erhöhen, wenn alte Caches entfernt werden sollen.
 - Registriert in `index.html`, `impressum.html` und `datenschutz.html`.
 
@@ -160,7 +161,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **CSP** per Meta-Tag in allen drei Seiten: nur eigene Quellen, keine externen Skripte, `object-src 'none'`, `base-uri 'none'`, `form-action 'none'`. Dazu `referrer: no-referrer`.
 - `b1Start` läuft ohne feste Obergrenze und endet nach spätestens P + (Anzahl Lücken) Schritten. Früher brach die Schleife nach 5000 Schritten ab und lieferte falsch 0.
 - **Takt:** Der 500-ms-Takt aktualisiert nur den sichtbaren Reiter und pausiert bei verstecktem Browser-Tab. Eingaben aktualisieren die Anzeige **immer sofort** (`tickLead()`/`bTick()` direkt, ohne Sichtbarkeitsprüfung).
-- **Service Worker:** network first mit **3 s Zeitlimit**. Bei schlechtem Hallen-WLAN kommt dann die gespeicherte Version. Gespeichert werden nur eigene, vollständige Antworten (`res.type === 'basic'`). Cache-Name derzeit `ti-rechner-v17`.
+- **Service Worker:** network first mit **3 s Zeitlimit**. Bei schlechtem Hallen-WLAN kommt dann die gespeicherte Version. Gespeichert werden nur eigene, vollständige Antworten (`res.type === 'basic'`). Cache-Name derzeit `ti-rechner-v18`.
 
 ## Impressum / Datenschutz
 
