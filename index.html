@@ -106,6 +106,17 @@ summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .btn{flex:1 1 140px;appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font:700 16px/1 inherit;padding:14px;border-radius:12px;cursor:pointer}
+.sheet{border:0;padding:0;width:100%;max-width:640px;height:100%;max-height:100%;margin:auto;background:var(--card);color:var(--text)}
+.sheet::backdrop{background:rgba(0,0,0,.45)}
+.sheet[open]{display:flex;flex-direction:column}
+.sheet .in{flex:1 0 auto}
+.sheet h2:focus{outline:none}
+.sheet .in{padding:calc(14px + env(safe-area-inset-top)) 16px 8px}
+.sheet h2{font-size:18px;margin:0 0 12px}
+.sheet .foot{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
+.sheet .foot .btns{margin-top:8px}
+.prev{font-weight:700;font-size:15px}
+@media (min-width:700px){ .sheet{height:auto;max-height:92vh;border-radius:var(--radius)} }
 .dlg{border:1px solid var(--line);border-radius:var(--radius);background:var(--card);color:var(--text);padding:18px;max-width:340px;width:calc(100% - 32px)}
 .dlg::backdrop{background:rgba(0,0,0,.45)}
 .dlg h3{margin:0 0 8px;font-size:17px}
@@ -162,9 +173,20 @@ footer a{color:inherit}
 <main>
 <!-- ======================= LEAD ======================= -->
 <section id="lead">
-  <div class="card">
-    <h2 data-i18n="whereTI">Wo war der TI?</h2>
+  <div class="card" id="lListCard">
     <div class="chips hidden" id="lChips"></div>
+    <div class="hint hidden" id="lEmpty" data-i18n="noTI">Noch kein TI angelegt.</div>
+    <div class="btns"><button type="button" class="btn wide" id="lAdd">+ weiterer TI</button></div>
+    <div class="btns" id="lActs">
+      <button type="button" class="btn secondary" id="lEdit" data-i18n="editTI">Bearbeiten</button>
+      <button type="button" class="btn secondary" id="lDel" data-i18n="delTI">Löschen</button>
+      <button type="button" class="btn secondary hidden" id="lReset" data-i18n="resetAll">Alle TIs löschen</button>
+    </div>
+  </div>
+
+  <dialog class="sheet" id="lDlg" aria-labelledby="lDlgTitle">
+   <div class="in">
+    <h2 id="lDlgTitle" tabindex="-1" autofocus>TI anlegen</h2>
     <div class="row">
       <div><label for="lBib" data-i18n="bibShort">Startnummer (Bib)</label>
         <input id="lBib" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="optional" data-i18n-ph="optional"></div>
@@ -202,16 +224,18 @@ footer a{color:inherit}
       <button type="button" data-step="lPos" data-d="1" aria-label="mehr">+</button>
     </div>
     </details>
-    <div class="btns"><button type="button" class="btn wide" id="lAdd" data-i18n="addTI">+ weiterer TI</button></div>
-    <div class="btns">
-      <button type="button" class="btn secondary" id="lDel" data-i18n="delTI">Diesen TI löschen</button>
-      <button type="button" class="btn secondary hidden" id="lReset" data-i18n="resetAll">Alle TIs löschen</button>
-    </div>
-  </div>
+   </div>
+   <div class="foot">
+    <div class="prev" id="lPrev"></div>
+    <div class="note warn hidden" id="lErr"></div>
+    <div class="btns"><button type="button" class="btn wide" id="lOk">TI anlegen</button></div>
+    <div class="btns"><button type="button" class="btn secondary" id="lCancel" data-i18n="cancel">Abbrechen</button></div>
+   </div>
+  </dialog>
 
   <div class="card result" id="lResult"></div>
 
-  <div class="card">
+  <div class="card" id="lCdCard">
     <h2 data-i18n="cdTitle">Countdown Erholungszeit</h2>
     <div class="cdname hidden" id="lCdName"></div>
     <div class="countdown" id="lCountdown">--:--</div>
@@ -272,9 +296,20 @@ footer a{color:inherit}
     </div>
   </details>
 
-  <div class="card" id="bTiCard">
-    <h2 data-i18n="whereTI">Wo war der TI?</h2>
+  <div class="card" id="bListCard">
     <div class="chips hidden" id="bChips"></div>
+    <div class="hint hidden" id="bEmpty" data-i18n="noTI">Noch kein TI angelegt.</div>
+    <div class="btns"><button type="button" class="btn wide" id="bAdd">+ weiterer TI</button></div>
+    <div class="btns" id="bActs">
+      <button type="button" class="btn secondary" id="bEdit" data-i18n="editTI">Bearbeiten</button>
+      <button type="button" class="btn secondary" id="bDel" data-i18n="delTI">Löschen</button>
+      <button type="button" class="btn secondary hidden" id="bReset" data-i18n="resetAll">Alle TIs löschen</button>
+    </div>
+  </div>
+
+  <dialog class="sheet" id="bDlg" aria-labelledby="bDlgTitle">
+   <div class="in" id="bTiCard">
+    <h2 id="bDlgTitle" tabindex="-1" autofocus>TI anlegen</h2>
     <div id="bCourseWrap" class="hidden">
       <label data-i18n="course">Kurs</label>
       <div class="seg" id="bCourse">
@@ -293,7 +328,6 @@ footer a{color:inherit}
         </div></div>
     </div>
     <div class="hint" data-i18n="posHint">Platz in der Startliste der Runde (Spalte „Order“), nicht die Startnummer.</div>
-    <div id="bPosMain"></div>
     <label data-i18n="boulder">Boulder</label>
     <div class="seg" id="bBoulder"></div>
     <label for="bRemain" data-i18n="remain">Restzeit bei Versuchsbeginn</label>
@@ -320,20 +354,22 @@ footer a{color:inherit}
       <input id="bT0" class="timefield" type="text" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="hh:mm:ss">
       <div class="switch hidden" id="bLateWrap"><span data-i18n="lateSw">Späte Entscheidung (Lücke erst ab jetzt)</span><input type="checkbox" id="bLate"></div>
     </details>
-    <dialog class="dlg" id="bLateDlg">
+   </div>
+   <div class="foot">
+    <div class="prev" id="bPrev"></div>
+    <div class="note warn hidden" id="bErr"></div>
+    <div class="btns"><button type="button" class="btn wide" id="bOk">TI anlegen</button></div>
+    <div class="btns"><button type="button" class="btn secondary" id="bCancel" data-i18n="cancel">Abbrechen</button></div>
+   </div>
+  </dialog>
+  <dialog class="dlg" id="bLateDlg">
       <h3 data-i18n="lateQ">Späte Entscheidung?</h3>
       <p id="bLateTxt"></p>
       <div class="btns">
         <button type="button" class="btn" id="bLateYes" data-i18n="lateYes">Ja – Lücke ab jetzt</button>
         <button type="button" class="btn secondary" id="bLateNo" data-i18n="lateNo">Nein – wie im TI-Intervall geplant</button>
       </div>
-    </dialog>
-    <div class="btns"><button type="button" class="btn wide" id="bAdd" data-i18n="addTI">+ weiterer TI</button></div>
-    <div class="btns">
-      <button type="button" class="btn secondary" id="bDel" data-i18n="delTI">Diesen TI löschen</button>
-      <button type="button" class="btn secondary hidden" id="bReset" data-i18n="resetAll">Alle TIs löschen</button>
-    </div>
-  </div>
+  </dialog>
 
   <div class="card result" id="bResult"></div>
 
@@ -430,7 +466,8 @@ de:{
   lOrder:'Startfolge (optional)', lGap:'Abstand zwischen zwei Starts (Minuten)',
   lGapHint:'Durchschnittlicher Takt der Runde, um die Startposition für den Neustart zu bestimmen.',
   lPos:'Startposition des TI-Athleten (optional)', eg12:'z. B. 12', eg17:'z. B. 17',
-  addTI:'+ weiterer TI', delTI:'Diesen TI löschen',
+  addTI:'+ weiterer TI', delTI:'Löschen', editTI:'Bearbeiten', tiNew:'TI anlegen', tiEditTitle:'TI bearbeiten', save:'Speichern', cancel:'Abbrechen', noTI:'Noch kein TI angelegt.',
+  needPosB:'Startposition und Boulder eingeben.', needHoldsErr:'Gewertete Griffe eingeben.', preview:'Ergebnis',
   cdTitle:'Countdown Erholungszeit', cdHint:'Zählt ab der Uhrzeit des Sturzes.',
   cdStart:'Countdown starten', cdStop:'Countdown stoppen',
   round:'Runde', format:'Format', fmtFix:'Intervall', fmtMax:'World Series (Finals)', preset:'Vorlage',
@@ -507,7 +544,8 @@ en:{
   lOrder:'Start order (optional)', lGap:'Time between two starts (minutes)',
   lGapHint:'Average pace of the round, used to work out the start position for the restart.',
   lPos:'Start position of the TI athlete (optional)', eg12:'e.g. 12', eg17:'e.g. 17',
-  addTI:'+ another TI', delTI:'Delete this TI',
+  addTI:'+ another TI', delTI:'Delete', editTI:'Edit', tiNew:'Add TI', tiEditTitle:'Edit TI', save:'Save', cancel:'Cancel', noTI:'No TI added yet.',
+  needPosB:'Enter start position and boulder.', needHoldsErr:'Enter the scoring holds.', preview:'Result',
   cdTitle:'Recovery countdown', cdHint:'Counts from the time of the fall.',
   cdStart:'Start countdown', cdStop:'Stop countdown',
   round:'Round', format:'Format', fmtFix:'Rotation', fmtMax:'World Series (Finals)', preset:'Template',
@@ -591,7 +629,7 @@ function applyStatic(){
   $('manifestLink').href = LANG==='de' ? 'manifest.webmanifest' : 'manifest-en.webmanifest';
   $('appTitle').content = LANG==='de' ? 'TI-Rechner' : 'TI Calculator';
 }
-function setLang(l){ LANG=l; store.set('lang',l); applyStatic(); calcLead(); renderBoulder(); }
+function setLang(l){ LANG=l; store.set('lang',l); applyStatic(); calcLead(); renderBoulder(); if(lDraft) lRenderForm(); if(bDraft) renderBForm(); }
 
 /* ---------- Uhrzeit-Felder ----------
    iOS-Safari bietet bei <input type="time"> keine Sekunden an. Deshalb ein Textfeld mit Ziffernblock:
@@ -653,10 +691,7 @@ const wrapDiff=d=>{ if(d<-43200) d+=86400; if(d>43200) d-=86400; return d; };
 const newLTI=no=>({no, holds:null, ref:'', pos:'', bib:'', route:'', cdTarget:null, cdFrozen:null});
 const holdsVal=v=>v===null||v===undefined||v===''?null:Math.max(0,Math.floor(+v||0));
 let lTIs=store.get('leadTIs',null), lSel=0, lNext=1;
-if(!Array.isArray(lTIs)||!lTIs.length){
-  const l=store.get('lead',null);
-  lTIs=[{no:1, holds:l?l.holds:null, ref:'', pos:l?(l.pos||''):'', cdTarget:null, cdFrozen:null}];
-}
+if(!Array.isArray(lTIs)) lTIs=[];
 const today=new Date().toDateString();
 lTIs=lTIs.filter(t=>t&&typeof t==='object').map((t,i)=>({no:Number.isInteger(t.no)&&t.no>0?t.no:i+1,
   holds:holdsVal(t.holds), ref:timeStr(t.ref), pos:posStr(t.pos), bib:bibStr(t.bib), route:routeStr(t.route),
@@ -664,28 +699,66 @@ lTIs=lTIs.filter(t=>t&&typeof t==='object').map((t,i)=>({no:Number.isInteger(t.n
   cdTarget: t.cdDay===today && Number.isFinite(t.cdTarget) ? t.cdTarget : null,
   // eingefrorener Stand in Sekunden (ältere Versionen speicherten Text wie „6:58“ oder „Bereit ✓“)
   cdFrozen: t.cdDay!==today ? null : Number.isFinite(t.cdFrozen) ? Math.max(0,t.cdFrozen) : typeof t.cdFrozen==='string' ? (isNaN(parseMS(t.cdFrozen))?0:parseMS(t.cdFrozen)) : null,
-  cdStartedAt: Number.isFinite(t.cdStartedAt)?t.cdStartedAt:null, cdDay:t.cdDay}));
-if(!lTIs.length) lTIs=[newLTI(1)];
-lNext=Math.max(...lTIs.map(t=>t.no))+1;
-lSel=Math.min(store.get('leadSel',0), lTIs.length-1);
+  cdStartedAt: Number.isFinite(t.cdStartedAt)?t.cdStartedAt:null, cdDay:t.cdDay}))
+  // Leere TIs aus älteren Versionen (vor dem Anlegen per Fenster) verwerfen
+  .filter(t=>t.holds!==null || t.ref || t.bib || t.route || t.cdTarget!==null || t.cdFrozen!==null);
+lNext=Math.max(0,...lTIs.map(t=>t.no))+1;
+lSel=Math.max(0, Math.min(store.get('leadSel',0), lTIs.length-1));
 const lCur=()=>lTIs[lSel];
 // Name eines Lead-TI: „Bib 106 an Route 1“
 const leadName=o=>tiName(o)+(o.route?t('onRoute',o.route):'');
 const lSave=()=>{ store.set('leadTIs',lTIs); store.set('leadSel',lSel); store.set('leadGap',$('lGap').value); };
 const lRec=ti=>Math.min(Math.max(0,Math.floor(+ti.holds||0)),20)*60;
 
-function lLoadForm(){ const ti=lCur(); $('lHolds').value=ti.holds??''; $('lRef').value=ti.ref||''; $('lPos').value=ti.pos||''; $('lBib').value=ti.bib||''; $('lRoute').value=ti.route||''; }
-function lReadForm(){ const ti=lCur(); ti.holds=holdsVal($('lHolds').value); ti.ref=timeStr($('lRef').value); ti.pos=posStr($('lPos').value); ti.bib=bibStr($('lBib').value); ti.route=routeStr($('lRoute').value); }
+/* ---------- Eingabefenster: Ein TI wird erst mit „TI anlegen“ bzw. „Speichern“ übernommen ---------- */
+let lDraft=null, lDraftIdx=-1;
+function lLoadForm(){ const ti=lDraft; $('lHolds').value=ti.holds??''; $('lRef').value=ti.ref||''; $('lPos').value=ti.pos||''; $('lBib').value=ti.bib||''; $('lRoute').value=ti.route||''; }
+function lReadForm(){ const ti=lDraft; if(!ti) return; ti.holds=holdsVal($('lHolds').value); ti.ref=timeStr($('lRef').value); ti.pos=posStr($('lPos').value); ti.bib=bibStr($('lBib').value); ti.route=routeStr($('lRoute').value); }
+function lRenderForm(){
+  const d=lDraft; if(!d) return;
+  $('lDlgTitle').textContent=t(lDraftIdx<0?'tiNew':'tiEditTitle');
+  $('lOk').textContent=t(lDraftIdx<0?'tiNew':'save');
+  const ref=timeToSec(d.ref), rec=lRec(d)/60;
+  $('lPrev').textContent = d.holds===null ? '' : `${t('preview')}: ${rec} min${ref!==null?' · '+t('earliest')+' '+t('clock',secToClock(ref+rec*60)):''}`;
+}
+function openL(idx){
+  lDraftIdx=idx; lDraft = idx<0 ? newLTI(lNext) : {...lTIs[idx]};
+  lLoadForm(); lRenderForm(); $('lErr').classList.add('hidden');
+  try{ $('lDlg').showModal(); }catch(e){ $('lDlg').setAttribute('open',''); }
+  $('lDlg').scrollTop=0;
+}
+$('lDlg').addEventListener('close',()=>{ lDraft=null; });
+$('lCancel').onclick=()=>$('lDlg').close();
+$('lOk').onclick=()=>{
+  lReadForm(); const d=lDraft;
+  if(d.holds===null){ $('lErr').textContent=t('needHoldsErr'); $('lErr').classList.remove('hidden'); $('lHolds').focus(); return; }
+  if(lDraftIdx<0){ lTIs.push(d); lNext=Math.max(lNext,d.no+1); lSel=lTIs.length-1; }
+  else {
+    const ti=lTIs[lDraftIdx];
+    // Geänderte Griffe/Sturzzeit: ein gestoppter Countdown zeigt wieder die volle Erholungszeit
+    if((ti.holds!==d.holds || ti.ref!==d.ref) && ti.cdTarget===null) ti.cdFrozen=null;
+    ['holds','ref','pos','bib','route'].forEach(k=>ti[k]=d[k]);
+  }
+  $('lDlg').close(); calcLead();
+};
 
 function renderLeadChips(){
   const multi=lTIs.length>1;
   $('lChips').classList.toggle('hidden', !multi);
   $('lReset').classList.toggle('hidden', !multi);
   if(multi) $('lChips').innerHTML=lTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===lSel}">${esc(tiName(t))}${t.route?' · R'+esc(t.route):''} · ${t.holds===null?'? Gr.':esc(I18N[LANG].chipHolds(t.holds))}${t.pos?' · Pos '+esc(t.pos):''}</button>`).join('');
-  $('lChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ lSel=+c.dataset.i; lLoadForm(); calcLead(); });
+  $('lChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ lSel=+c.dataset.i; calcLead(); });
 }
 
 function calcLead(){
+  const none=!lTIs.length;
+  $('lEmpty').classList.toggle('hidden', !none);
+  $('lActs').classList.toggle('hidden', none);
+  $('lResult').classList.toggle('hidden', none);
+  $('lCdCard').classList.toggle('hidden', none);
+  $('lAdd').textContent=t(none?'tiNew':'addTI');
+  renderLeadChips();
+  if(none){ lSave(); return; }
   const ti=lCur();
   const holds=Math.max(0, Math.floor(+ti.holds||0));
   const recMin=lRec(ti)/60;
@@ -697,7 +770,7 @@ function calcLead(){
   if(ti.holds===null){
     $('lResult').innerHTML=`<div class="sub">${t('recTitle')}${lTIs.length>1||ti.bib||ti.route?' · '+esc(leadName(ti)):''}</div><div class="big" style="font-size:24px">${t('needHolds')}</div>`;
     if(ti.cdTarget!==null) ti.cdTarget=(ref!==null?ref:ti.cdStartedAt);
-    renderLeadChips(); lSave(); tickLead(); return;
+    lSave(); tickLead(); return;
   }
   $('lResult').innerHTML=`<div class="sub">${t('recTitle')}${lTIs.length>1||ti.bib||ti.route?' · '+esc(leadName(ti)):''}</div>
     <div class="big">${recMin} min</div>
@@ -708,7 +781,7 @@ function calcLead(){
     </dl>`;
   // Läuft der Countdown, passt sich das Ziel an geänderte Eingaben an
   if(ti.cdTarget!==null) ti.cdTarget=(ref!==null?ref:ti.cdStartedAt)+lRec(ti);
-  renderLeadChips(); lSave(); tickLead();
+  lSave(); tickLead();
 }
 
 // Verbleibende Sekunden (0 = bereit); gestoppt: eingefrorener Stand
@@ -718,6 +791,7 @@ function lCdLeft(ti){
 }
 const lCdText=ti=>{ if(ti.holds===null && ti.cdTarget===null && ti.cdFrozen===null) return '--:--'; const d=lCdLeft(ti); return d<=0 && (ti.cdTarget!==null||ti.cdFrozen!==null) ? t('ready') : fmtMS(d); };
 function tickLead(){
+  if(!lTIs.length) return;
   const ti=lCur(), el=$('lCountdown'), txt=lCdText(ti);
   el.textContent=txt; el.classList.toggle('done', txt===t('ready'));
   // Name über dem großen Countdown, z. B. „Bib 106 an Route 1“
@@ -733,42 +807,37 @@ function tickLead(){
 // Automatischer Takt nur für den sichtbaren Reiter und nur, wenn die Seite angezeigt wird
 setInterval(()=>{ if(!document.hidden && !$('lead').classList.contains('hidden')) tickLead(); },500);
 
-$('lNow').onclick=()=>{ $('lRef').value=nowClock(); lReadForm(); if(lCur().cdTarget===null) lCur().cdFrozen=null; calcLead(); };
+$('lNow').onclick=()=>{ $('lRef').value=nowClock(); $('lRef').classList.remove('bad'); lReadForm(); lRenderForm(); };
 let wakeLock=null;
 function requestWake(){ try{ if(!wakeLock && navigator.wakeLock) navigator.wakeLock.request('screen').then(w=>{ wakeLock=w; w.addEventListener('release',()=>wakeLock=null); }).catch(()=>{}); }catch(e){} }
 $('lStart').onclick=()=>{
-  const ti=lCur();
+  const ti=lCur(); if(!ti) return;
   if(ti.cdTarget!==null){ // Stopp: auf aktuellem Stand stehen bleiben
     ti.cdFrozen=lCdLeft(ti); ti.cdTarget=null; ti.cdDay=new Date().toDateString(); lSave(); tickLead();
     if(wakeLock && !lTIs.some(t=>t.cdTarget!==null)){ wakeLock.release(); wakeLock=null; } return;
   }
-  if(ti.holds===null){ $('lHolds').focus(); return; }   // ohne Griffe keine Erholungszeit
+  if(ti.holds===null){ openL(lSel); return; }   // ohne Griffe keine Erholungszeit
   // Start: Ziel = Uhrzeit des Sturzes + Erholungszeit (die eingegebene Uhrzeit bleibt unverändert)
   ti.cdStartedAt=nowSec(); ti.cdFrozen=null; ti.cdDay=new Date().toDateString();
   const ref=timeToSec(ti.ref);
   ti.cdTarget=(ref!==null?ref:ti.cdStartedAt)+lRec(ti);
   lSave(); tickLead(); requestWake();
 };
-$('lAdd').onclick=()=>{
-  lReadForm();
-  lTIs.push(newLTI(lNext++));
-  lSel=lTIs.length-1; lLoadForm(); calcLead(); $('lHolds').focus();
-};
+$('lAdd').onclick=()=>openL(-1);
+$('lEdit').onclick=()=>{ if(lTIs.length) openL(lSel); };
 $('lDel').onclick=()=>{
-  if(!confirm(t('confirmDel',leadName(lCur())))) return;
-  // Letzter TI: Formular wird mit einem leeren TI neu begonnen
-  if(lTIs.length<2){ lTIs=[newLTI(1)]; lNext=2; lSel=0; }
-  else { lTIs.splice(lSel,1); lSel=Math.max(0,lSel-1); }
+  if(!lTIs.length || !confirm(t('confirmDel',leadName(lCur())))) return;
+  lTIs.splice(lSel,1); lSel=Math.max(0,Math.min(lSel,lTIs.length-1)); if(!lTIs.length) lNext=1;
   if(wakeLock && !lTIs.some(t=>t.cdTarget!==null)){ wakeLock.release(); wakeLock=null; }
-  lLoadForm(); calcLead();
+  calcLead();
 };
 $('lReset').onclick=()=>{
   if(!confirm(t('confirmResetLead'))) return;
-  lTIs=[newLTI(1)]; lNext=2; lSel=0;
+  lTIs=[]; lNext=1; lSel=0;
   if(wakeLock){ wakeLock.release(); wakeLock=null; }
-  lLoadForm(); calcLead();
+  calcLead();
 };
-['lHolds','lRef','lPos','lBib','lRoute'].forEach(id=>$(id).addEventListener('input',()=>{ lReadForm(); if(lCur().cdTarget===null) lCur().cdFrozen=null; calcLead(); }));
+['lHolds','lRef','lPos','lBib','lRoute'].forEach(id=>$(id).addEventListener('input',()=>{ lReadForm(); lRenderForm(); }));
 $('lGap').addEventListener('input',calcLead);
 
 /* =========================================================
@@ -799,12 +868,7 @@ function cleanRes(r){
     sid:int(r.sid)?r.sid:null, reuseSid:int(r.reuseSid)?r.reuseSid:null, reuseNo:int(r.reuseNo)?r.reuseNo:null, seq:int(r.seq)?r.seq:0, notes:r.notes.filter(okNote)};
 }
 let bTIs=store.get('boulderTIs',null);
-if(!Array.isArray(bTIs)||!bTIs.length){
-  const t=newBTI(1), bi=store.get('boulderInputs',null);
-  if(bi&&bi.remain) t.remain=bi.remain;
-  if(bState.boulder) t.B=bState.boulder;
-  bTIs=[t];
-}
+if(!Array.isArray(bTIs)) bTIs=[];
 bTIs=bTIs.filter(t=>t&&typeof t==='object').map((t,i)=>{
   const n=newBTI(Number.isInteger(t.no)&&t.no>0?t.no:i+1);
   n.B=t.B==null||t.B===''?null:Math.min(8,Math.max(1,Math.floor(+t.B||1))); n.remain=typeof t.remain==='string'?t.remain.slice(0,8):'';
@@ -815,10 +879,10 @@ bTIs=bTIs.filter(t=>t&&typeof t==='object').map((t,i)=>{
   // Fixe Ergebnisse übernehmen (nicht neu berechnen!), aber nur wenn sie gültig aussehen
   n.res=cleanRes(t.res);
   return n;
-});
-if(!bTIs.length) bTIs=[newBTI(1)];
-let bNext=Math.max(...bTIs.map(t=>t.no))+1;
-let bSel=Math.min(store.get('boulderSel',0), bTIs.length-1);
+// Leere TIs aus älteren Versionen (vor dem Anlegen per Fenster) verwerfen
+}).filter(t=>t.pos || t.B || t.bib || t.t0);
+let bNext=Math.max(0,...bTIs.map(t=>t.no))+1;
+let bSel=Math.max(0, Math.min(store.get('boulderSel',0), bTIs.length-1));
 const bCur=()=>bTIs[bSel];
 /* Geister-Slots: Wird ein TI geändert oder gelöscht, dessen Slot von einem anderen TI mitgenutzt wird,
    bleibt der alte Slot (seine Lücke an B1) als „Geist“ bestehen – sonst verlöre der andere TI seinen Platz. */
@@ -990,10 +1054,61 @@ function settingsChanged(){
   bTIs.forEach(t=>{ if(t.B>S.N) t.B=S.N; });
   recomputeAll(); bSave(); renderBoulder();
 }
+/* ---------- Eingabefenster: Ein TI wird erst mit „TI anlegen“ bzw. „Speichern“ übernommen und berechnet ---------- */
+let bDraft=null, bDraftIdx=-1;
+const bF=()=>bDraft;
+const B_FIELDS=['B','remain','resolved','gap','t0','pos','bib','course','late','decidedAt'];
 function bLoadForm(){
-  const ti=bCur();
-  $('bRemain').value=ti.remain; $('bResolved').checked=!!ti.resolved; $('bT0').value=ti.t0||''; $('bPos').value=ti.pos||''; $('bBib').value=ti.bib||'';
+  const ti=bDraft;
+  $('bRemain').value=ti.remain||''; $('bResolved').checked=!!ti.resolved; $('bT0').value=ti.t0||''; $('bPos').value=ti.pos||''; $('bBib').value=ti.bib||'';
+  ['bT0'].forEach(id=>$(id).classList.remove('bad'));
 }
+// Vorschau im Fenster: wie der TI gerechnet würde (beim Bearbeiten ohne die bisherige Fassung desselben TI)
+const previewCtx=d=>ctxFor(d).filter(q=>q===d || q.ghost || q.no!==d.no);
+function renderBForm(){
+  const d=bDraft; if(!d) return;
+  const S=bSettings();
+  renderBoulderButtons(S.N);
+  $('bDlgTitle').textContent=t(bDraftIdx<0?'tiNew':'tiEditTitle');
+  $('bOk').textContent=t(bDraftIdx<0?'tiNew':'save');
+  $('bCourseWrap').classList.toggle('hidden', !S.two);
+  document.querySelectorAll('#bCourse button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===d.course));
+  $('bB1Wrap').classList.toggle('hidden', d.B!==1);
+  $('bLateWrap').classList.toggle('hidden', !lateInfo(d)); $('bLate').checked=!!d.late;
+  $('bPosReq').classList.toggle('hidden', !!d.pos);
+  const ok=d.pos && d.B, ctx=ok?previewCtx(d):null;
+  const r=ok?computeTI(d, ctx, S, d.gap, decided(d)):null;
+  // +1/+2 nur zeigen, wenn die Wahl das Ergebnis ändert
+  const a1=ok?computeTI(d, ctx, S, 1, decided(d)):null, a2=ok?computeTI(d, ctx, S, 2, decided(d)):null;
+  $('bGapWrap').classList.toggle('hidden', !ok || r.scen1 || a1.R===a2.R);
+  document.querySelectorAll('#bGap button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===d.gap));
+  $('bPrev').textContent = r && r.P ? `${t('preview')}: ${r.scen1?t('nextInt'):t('plusK',r.k)}${r.reuse?' · '+t('gapReuse',r.reuseNo):''}` : '';
+}
+function openB(idx){
+  bDraftIdx=idx;
+  const cur=bCur();
+  bDraft = idx<0 ? Object.assign(newBTI(bNext), {course:cur?cur.course:'A'}) : {...bTIs[idx], res:null};
+  bLateAsked=''; bLoadForm(); renderBForm(); $('bErr').classList.add('hidden');
+  try{ $('bDlg').showModal(); }catch(e){ $('bDlg').setAttribute('open',''); }
+  $('bDlg').scrollTop=0;
+}
+$('bDlg').addEventListener('close',()=>{ bDraft=null; });
+$('bCancel').onclick=()=>$('bDlg').close();
+$('bOk').onclick=()=>{
+  const d=bDraft; if(!d) return;
+  if(!d.pos || !d.B){ $('bErr').textContent=t('needPosB'); $('bErr').classList.remove('hidden'); return; }
+  let f, t0new;
+  if(bDraftIdx<0){
+    d.res=null; bTIs.push(d); bNext=Math.max(bNext,d.no+1); bSel=bTIs.length-1;
+    t0new=!!d.t0; recomputeOne(bSel); f=repairStale(d.no);
+  } else {
+    const ti=bTIs[bDraftIdx]; t0new=ti.t0!==d.t0;
+    B_FIELDS.forEach(k=>ti[k]=d[k]);
+    bSel=bDraftIdx; recomputeOne(bSel); f=repairStale(ti.no);
+  }
+  if(t0new){ bOffset=0; requestWake(); }
+  $('bDlg').close(); bSave(); renderBoulder(); warnRecalc(f);
+};
 // Sicherheitsnetz: Passt das gespeicherte TI-Intervall eines anderen TI nicht mehr zur aktuellen Startliste
 // (z. B. weil ein älterer TI korrigiert oder gelöscht wurde), wird dieser TI neu berechnet und deutlich markiert.
 function repairStale(causeNo){
@@ -1017,21 +1132,20 @@ function repairStale(causeNo){
   return fixed;
 }
 function warnRecalc(list){ if(list.length) alert(t('recalcAlert', list.map(tiName).join(', '))); }
-function tiChanged(){ recomputeOne(bSel); const f=repairStale(bCur().no); bSave(); renderBoulder(); warnRecalc(f); }
 function renderBoulderButtons(n){
   const wrap=$('bBoulder');
   if(wrap.childElementCount!==n){
     wrap.innerHTML='';
     for(let i=1;i<=n;i++){ const b=document.createElement('button'); b.type='button'; b.textContent='B'+i; b.dataset.v=i;
-      b.onclick=()=>{ bCur().B=i; tiChanged(); }; wrap.appendChild(b); }
+      b.onclick=()=>{ if(!bF()) return; bF().B=i; if(i!==1) bF().resolved=false, $('bResolved').checked=false; renderBForm(); }; wrap.appendChild(b); }
   }
-  wrap.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===bCur().B));
+  wrap.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed', !!bF() && +b.dataset.v===bF().B));
 }
-document.querySelectorAll('#bGap button').forEach(b=>b.onclick=()=>{ bCur().gap=+b.dataset.v; tiChanged(); });
-document.querySelectorAll('#bCourse button').forEach(b=>b.onclick=()=>{ bCur().course=b.dataset.v; tiChanged(); });
-$('bRemain').addEventListener('input',()=>{ bCur().remain=$('bRemain').value; bSave(); renderBoulder(); });
-$('bResolved').addEventListener('change',()=>{ bCur().resolved=$('bResolved').checked; tiChanged(); });
-$('bT0').addEventListener('input',()=>{ const ti=bCur(); ti.t0=$('bT0').value; ti.decidedAt=nowSec(); ti.late=false; bOffset=0; requestWake(); tiChanged(); });
+document.querySelectorAll('#bGap button').forEach(b=>b.onclick=()=>{ bF().gap=+b.dataset.v; renderBForm(); });
+document.querySelectorAll('#bCourse button').forEach(b=>b.onclick=()=>{ bF().course=b.dataset.v; renderBForm(); });
+$('bRemain').addEventListener('input',()=>{ bF().remain=$('bRemain').value; renderBForm(); });
+$('bResolved').addEventListener('change',()=>{ bF().resolved=$('bResolved').checked; renderBForm(); });
+$('bT0').addEventListener('input',()=>{ const ti=bF(); ti.t0=timeStr($('bT0').value); ti.decidedAt=nowSec(); ti.late=false; renderBForm(); });
 // Späte Entscheidung: Liegt die eingegebene Startzeit mehr als 1 Intervall (bis 3 h) zurück, wird gefragt – nicht automatisch angewendet
 function lateInfo(ti){
   const t0=timeToSec(ti.t0); if(t0===null || ti.decidedAt==null) return null;
@@ -1040,69 +1154,58 @@ function lateInfo(ti){
 }
 let bLateAsked='';
 $('bT0').addEventListener('blur',()=>{
-  const ti=bCur(), li=lateInfo(ti), key=ti.no+'|'+ti.t0;
+  const ti=bF(); if(!ti) return;
+  const li=lateInfo(ti), key=ti.no+'|'+ti.t0;
   if(!li || bLateAsked===key || bState.format!=='fix') return;
   bLateAsked=key;
   $('bLateTxt').textContent=t('lateTxt', li.min, li.n);
-  try{ $('bLateDlg').showModal(); }catch(e){ if(confirm(t('lateTxt', li.min, li.n))){ ti.late=true; tiChanged(); } }
+  try{ $('bLateDlg').showModal(); }catch(e){ if(confirm(t('lateTxt', li.min, li.n))){ ti.late=true; renderBForm(); } }
 });
-const lateAnswer=v=>{ $('bLateDlg').close(); const ti=bCur(); if(ti.late!==v){ ti.late=v; tiChanged(); } };
+const lateAnswer=v=>{ $('bLateDlg').close(); const ti=bF(); if(ti && ti.late!==v){ ti.late=v; renderBForm(); } };
 $('bLateYes').onclick=()=>lateAnswer(true);
 $('bLateNo').onclick=()=>lateAnswer(false);
-$('bLate').addEventListener('change',()=>{ bCur().late=$('bLate').checked; tiChanged(); });
-$('bPos').addEventListener('input',()=>{ bCur().pos=posStr($('bPos').value); tiChanged(); });
+$('bLate').addEventListener('change',()=>{ bF().late=$('bLate').checked; renderBForm(); });
+$('bPos').addEventListener('input',()=>{ bF().pos=posStr($('bPos').value); renderBForm(); });
 // Startnummer ändert nur den Namen, nicht die Berechnung
-$('bBib').addEventListener('input',()=>{ bCur().bib=bibStr($('bBib').value); bSave(); renderBoulder(); });
+$('bBib').addEventListener('input',()=>{ bF().bib=bibStr($('bBib').value); });
 ['bN','bRot','bChange'].forEach(id=>$(id).addEventListener('input',()=>{ if(id!=='bChange') $('bPreset').value='c'; settingsChanged(); }));
 $('bRestRot').addEventListener('change',settingsChanged);
 $('bAth').addEventListener('input',settingsChanged);
-$('bAdd').onclick=()=>{
-  const prev=bCur(), t=newBTI(bNext++);
-  t.course=prev.course;
-  bTIs.push(t); bSel=bTIs.length-1; recomputeOne(bSel); bSave(); bLoadForm(); renderBoulder();
-  $('bPosMain').scrollIntoView({block:'center'});
-};
+$('bAdd').onclick=()=>openB(-1);
+$('bEdit').onclick=()=>{ if(bTIs.length) openB(bSel); };
 $('bDel').onclick=()=>{
+  if(!bTIs.length) return;
   if(!confirm(bTIs.length<2 ? t('confirmDel',tiName(bCur())) : t('confirmDelMulti',tiName(bCur())))) return;
-  // Letzter TI: Formular wird mit einem leeren TI neu begonnen
   const gone=bCur();
   // Wird seine Lücke noch gebraucht (Slot mitgenutzt oder spätere TI-Athleten starten danach), bleibt sie als Geist bestehen
-  if(needsGap(ghostOf(gone))) bGhosts.push(ghostOf(gone));
-  if(bTIs.length<2){ bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); }
-  else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
-  pruneGhosts(); const f=repairStale(gone.no); bSave(); bLoadForm(); renderBoulder(); warnRecalc(f);
+  if(bTIs.length<2){ bTIs=[]; bNext=1; bSel=0; bOffset=0; bGhosts=[]; }
+  else { if(needsGap(ghostOf(gone))) bGhosts.push(ghostOf(gone)); bTIs.splice(bSel,1); bSel=Math.max(0,Math.min(bSel,bTIs.length-1)); }
+  pruneGhosts(); const f=repairStale(gone.no); bSave(); renderBoulder(); warnRecalc(f);
 };
 $('bReset').onclick=()=>{
   if(!confirm(t('confirmReset'))) return;
-  bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); bSave(); bLoadForm(); renderBoulder();
+  bTIs=[]; bNext=1; bSel=0; bGhosts=[]; bOffset=0; bSave(); renderBoulder();
 };
 
 /* ---------- Anzeige ---------- */
 let bMilestones=[], bOffset=0;
 function renderBoulder(){
-  const S=bSettings(), fix=bState.format==='fix', multi=bTIs.length>1;
-  renderBoulderButtons(S.N);
-  const ti=bCur();
-  if(!ti.res) recomputeOne(bSel);
-  const r=ti.res, B=ti.B;
-
-  ['bFixOnly','bFixSettings','bPresetWrap','bTiCard','bTimelineCard','bCdCard','bClockWrap'].forEach(id=>$(id).classList.toggle('hidden', !fix));
+  const S=bSettings(), fix=bState.format==='fix', multi=bTIs.length>1, none=!bTIs.length;
+  ['bFixSettings','bPresetWrap','bListCard','bTimelineCard','bCdCard'].forEach(id=>$(id).classList.toggle('hidden', !fix));
+  $('bEmpty').classList.toggle('hidden', !none);
+  $('bActs').classList.toggle('hidden', none);
+  $('bAdd').textContent=t(none?'tiNew':'addTI');
+  $('bResult').classList.toggle('hidden', fix && none);
   // Zusammenfassung im Kopf der Karte „Runde“ (sichtbar auch im zugeklappten Zustand)
   $('bRoundInfo').textContent = fix ? t('roundInfo', (I18N[LANG].pShort||{})[$('bPreset').value]||'', S.N, String(S.rot/60).replace('.',','), S.A) : t('fmtMax');
   $('bTwoHint').classList.toggle('hidden', !S.two);
   $('bReset').classList.toggle('hidden', !multi);
   $('bGapsCard').classList.toggle('hidden', !fix || (!multi && !bGhosts.length));
-  $('bCourseWrap').classList.toggle('hidden', !S.two);
-  document.querySelectorAll('#bCourse button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===ti.course));
-  $('bB1Wrap').classList.toggle('hidden', B!==1);
-  $('bLateWrap').classList.toggle('hidden', !lateInfo(ti)); $('bLate').checked=!!ti.late;
-  // Startposition ist immer Pflicht
-  $('bPosReq').classList.toggle('hidden', !!ti.pos);
   // Chips
   $('bChips').classList.toggle('hidden', !multi);
   if(multi){
     $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">${t.res&&t.res.notes.some(n=>n.k==='recalc')?'⚠ ':''}${esc(tiName(t))} · B${t.B||'?'}${S.two?' · '+esc(t.course):''} · Pos ${t.pos?esc(t.pos):'?'}</button>`).join('');
-    $('bChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ bSel=+c.dataset.i; bSave(); bLoadForm(); renderBoulder(); });
+    $('bChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ bSel=+c.dataset.i; bSave(); renderBoulder(); });
   }
 
   if(!fix){
@@ -1115,11 +1218,15 @@ function renderBoulder(){
       </dl>`;
     bMilestones=[]; bTick(); return;
   }
+  // Noch kein TI: nur der Button „TI anlegen“
+  if(none){ ['bGapsCard','bCdCard','bTimelineCard'].forEach(id=>$(id).classList.add('hidden')); bMilestones=[]; bTl=null; $('bTimeline').innerHTML=''; bTick(); return; }
+  const ti=bCur();
+  if(!ti.res) recomputeOne(bSel);
+  const r=ti.res, B=ti.B;
 
   // Startposition ist Pflicht: ohne sie kein Ergebnis (verhindert Verwechslungen in der Startliste)
   $('bTimelineCard').classList.toggle('hidden', !r.P);
   if(!r.P){
-    $('bGapWrap').classList.add('hidden');
     const need=!ti.B&&!ti.pos?'needBoth':!ti.B?'needB':'needPos';
     $('bResult').innerHTML=`<div class="sub">${B?t('returnAt',B):t('returnAtQ')}${(multi||ti.bib)?' · '+esc(tiName(ti)):''}</div>
       <div class="big" style="font-size:24px">${t(need)}</div>${ti.pos?'':`<div class="hint">${t('needPosHint')}</div>`}`;
@@ -1127,9 +1234,6 @@ function renderBoulder(){
   }
   // +1/+2 nur zeigen, wenn die Wahl das Ergebnis ändert
   const now=nowSec();
-  const alt1=computeTI(ti,ctxFor(ti),S,1,decided(ti)), alt2=computeTI(ti,ctxFor(ti),S,2,decided(ti));
-  $('bGapWrap').classList.toggle('hidden', r.scen1 || alt1.R===alt2.R);
-  document.querySelectorAll('#bGap button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===ti.gap));
 
   let remain=parseMS(ti.remain); const remainOk=!isNaN(remain), remainEmpty=!String(ti.remain||'').trim(); if(remainOk) remain=Math.min(remain,S.rot);
   const award=remainOk?fmtMS(remain):'?', awardTxt=remainEmpty?t('enterRemain'):t('approx',award), rest=remainOk?S.rot-remain:0;
@@ -1283,14 +1387,13 @@ function bTick(){
 function bShift(d){ bOffset+=d; bTick(); requestWake(); }
 $('bCdMinus').onclick=()=>bShift(-15);
 $('bCdPlus').onclick=()=>bShift(15);
-$('bCdSetT0').onclick=()=>{ $('bClockWrap').open=true; $('bT0').focus(); };
+$('bCdSetT0').onclick=()=>{ if(!bTIs.length) return; openB(bSel); $('bClockWrap').open=true; $('bT0').focus(); };
 setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidden')) bTick(); },500);
 
 /* ---------- Init ---------- */
 (function init(){
   applyStatic();
   const lg=store.get('leadGap',null) ?? (store.get('lead',null)||{}).gap; if(lg) $('lGap').value=lg;
-  lLoadForm();
   const bi=store.get('boulderInputs',null);
   if(bi){ $('bPreset').value=(presets[bi.preset]||bi.preset==='c')?bi.preset:'c'; $('bN').value=bi.n; $('bRot').value=bi.rot; $('bChange').value=bi.change;
     $('bRestRot').checked=bi.p!==1; $('bAth').value=posStr(bi.a); }
@@ -1298,7 +1401,7 @@ setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidde
   calcLead();
   // Nur fehlende Ergebnisse berechnen – vorhandene bleiben fix
   { const S=bSettings(); bTIs.forEach(t=>{ if(!t.res) t.res=withSid(computeTI(t, ctxFor(t), S, t.gap, decided(t)), null); }); pruneGhosts(); }
-  bLoadForm(); renderBoulder();
+  renderBoulder();
   showTab(store.get('tab','lead'));
 })();
 </script>
