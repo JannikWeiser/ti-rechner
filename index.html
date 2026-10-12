@@ -494,6 +494,8 @@ de:{
   n_pushed:x=>`${x.n} ${pl(x.n,'Intervall','Intervalle')} später wegen ${x.l.map(nameNo).join(', ')} (gleiche Lücke an B1).`,
   n_inSlot:x=>`TI im Nachhol-Slot von ${nameNo(x.no)}.`,
   n_reuse:x=>`Nutzt den schon freien Slot von ${nameNo(x.no)} – keine neue Lücke an B1 nötig.`,
+  n_recalc:x=>`Neu berechnet, weil ${nameNo(x.no)} geändert oder gelöscht wurde – neuen Slot durchgeben!`,
+  recalcAlert:l=>`Achtung: ${l} neu berechnet, weil sich die Startliste geändert hat. Neuen Slot prüfen und durchgeben.`,
   gapReuse:no=>`keine neue Lücke – nutzt den Slot von ${nameNo(no)}`, alsoUsed:l=>`mitgenutzt von ${l}`, ghostWho:n=>`Slot ${n} (geändert/gelöscht)`,
 },
 en:{
@@ -567,6 +569,8 @@ en:{
   n_pushed:x=>`${x.n} ${pl(x.n,'rotation','rotations')} later because of ${x.l.map(nameNo).join(', ')} (same gap at B1).`,
   n_inSlot:x=>`TI in the make-up slot of ${nameNo(x.no)}.`,
   n_reuse:x=>`Uses the already free slot of ${nameNo(x.no)} – no new gap at B1 needed.`,
+  n_recalc:x=>`Recalculated because ${nameNo(x.no)} was changed or deleted – communicate the new slot!`,
+  recalcAlert:l=>`Attention: ${l} recalculated because the start list changed. Check and communicate the new slot.`,
   gapReuse:no=>`no new gap – uses the slot of ${nameNo(no)}`, alsoUsed:l=>`also used by ${l}`, ghostWho:n=>`Slot ${n} (changed/deleted)`,
 }};
 const detectLang=()=>{ const l=(navigator.languages&&navigator.languages[0])||navigator.language||'en'; return /^de\b/i.test(l)?'de':'en'; };
@@ -789,7 +793,7 @@ const newBTI=no=>({no, B:null, remain:'', resolved:false, gap:2, t0:'', pos:'', 
 function cleanRes(r){
   const int=v=>Number.isInteger(v);
   if(!(r && int(r.t) && int(r.s0) && (int(r.G)||(r.reuse && r.G===null)) && int(r.R) && int(r.k) && int(r.L) && (r.P===null||int(r.P)) && Array.isArray(r.notes))) return null;
-  const okNote=x=>typeof x==='string' || (x && typeof x.k==='string' && ['sc1Blocked','sc1Late','late','pushed','inSlot','reuse'].includes(x.k)
+  const okNote=x=>typeof x==='string' || (x && typeof x.k==='string' && ['sc1Blocked','sc1Late','late','pushed','inSlot','reuse','recalc'].includes(x.k)
     && (x.k!=='pushed' || (int(x.n) && Array.isArray(x.l) && x.l.every(int))) && (!('no' in x) || int(x.no)));
   return {P:r.P, t:r.t, s0:r.s0, G:r.G, R:r.R, k:r.k, L:r.L, scen1:!!r.scen1, reuse:!!r.reuse,
     sid:int(r.sid)?r.sid:null, reuseSid:int(r.reuseSid)?r.reuseSid:null, reuseNo:int(r.reuseNo)?r.reuseNo:null, seq:int(r.seq)?r.seq:0, notes:r.notes.filter(okNote)};
@@ -826,6 +830,10 @@ let bSeq=Math.max(0, ...bTIs.concat(bGhosts).map(t=>t.res&&t.res.seq||0));
 // Ältere Ergebnisse ohne Slot-Kennung bekommen eine
 bTIs.concat(bGhosts).forEach(t=>{ if(t.res && t.res.G!==null && !t.res.reuse && t.res.sid===null) t.res.sid=bSid++; });
 const allSlots=()=>bTIs.concat(bGhosts);
+// Rechen-Umfeld eines TI: Spätere TIs desselben Athleten gab es zum Zeitpunkt dieses TI noch nicht. Sie zählen nur mit
+// ihrer Lücke (wie ein Geist), nicht für den Ablauf des Athleten – sonst hielte der Rechner ihren Slot für den eigenen Nachhol-Slot.
+const ctxFor=ti=>allSlots().map(q=>(q!==ti && !q.ghost && ti.pos && q.pos===ti.pos && q.course===ti.course && q.no>ti.no && q.res)
+  ? {no:q.no, ghost:true, B:q.B, course:q.course, pos:'', bib:q.bib, t0:q.t0, res:q.res} : q);
 const usersOf=sid=>sid==null?[]:bTIs.filter(q=>q.res && q.res.reuse && q.res.reuseSid===sid);
 // Eine Lücke bleibt als Geist, solange sie gebraucht wird: ein anderer TI nutzt den Slot mit, ein anderer Slot wurde
 // berechnet, als die Lücke schon eingeplant war (seq), oder ein TI-Athlet startet erst nach der Lücke.
@@ -886,9 +894,12 @@ function computeTI(ti, all, S, g, now){
   // Eine neue Lücke darf keinen schon eingeplanten TI-Athleten mehr verschieben (dessen fixer Slot hängt von seinem Start ab).
   // Greift nur, wenn ein älterer TI nachträglich geändert oder ein TI außer der Reihe eingetragen wird.
   const minG=Math.max(-Infinity, ...others.filter(o=>!o.ghost && Number.isInteger(o.res.s0)).map(o=>o.res.s0+1));
+  // Szenario 1 verschiebt den ganzen weiteren Ablauf des Athleten – nicht mehr möglich, wenn für ihn schon ein
+  // späterer TI eingeplant ist (TI an B1 außer der Reihe nachgetragen)
+  const ownLater=others.some(o=>!o.ghost && +o.pos===P && o.res && o.res.t>t);
   if(B===1 && ti.resolved && !inSlot){
     const G=t+1;
-    if(!reserved.has(G) && cur<=t && G>=minG) return {P, t, s0:sch.s0, G, R:G, k:1, L, scen1:true, notes};
+    if(!reserved.has(G) && cur<=t && G>=minG && !ownLater) return {P, t, s0:sch.s0, G, R:G, k:1, L, scen1:true, notes};
     notes.push(reserved.has(G) ? {k:'sc1Blocked', no:reserved.get(G).no} : {k:'sc1Late'});
   }
   if(cur>t) notes.push({k:'late', g});
@@ -943,12 +954,12 @@ function withSid(res, old){
 // Einen TI neu berechnen. Ändert sich sein Slot und nutzt ein anderer TI diesen Slot, bleibt der alte als Geist bestehen.
 function recomputeOne(i){
   const S=bSettings(), ti=bTIs[i], old=ti.res;
-  let res=computeTI(ti, allSlots(), S, ti.gap, decided(ti));
+  let res=computeTI(ti, ctxFor(ti), S, ti.gap, decided(ti));
   const gh=old && !sameRes(old,res) ? {...ghostOf(ti), res:old} : null;
   if(gh && needsGap(gh)){
     // Der alte Slot bleibt als Geist mit seiner Lücke – der neue darf diese Lücke nicht noch einmal belegen
     bGhosts.push(gh);
-    res=computeTI(ti, allSlots(), S, ti.gap, decided(ti));
+    res=computeTI(ti, ctxFor(ti), S, ti.gap, decided(ti));
   }
   ti.res=withSid(res, old); pruneGhosts();
 }
@@ -983,7 +994,30 @@ function bLoadForm(){
   const ti=bCur();
   $('bRemain').value=ti.remain; $('bResolved').checked=!!ti.resolved; $('bT0').value=ti.t0||''; $('bPos').value=ti.pos||''; $('bBib').value=ti.bib||'';
 }
-function tiChanged(){ recomputeOne(bSel); bSave(); renderBoulder(); }
+// Sicherheitsnetz: Passt das gespeicherte TI-Intervall eines anderen TI nicht mehr zur aktuellen Startliste
+// (z. B. weil ein älterer TI korrigiert oder gelöscht wurde), wird dieser TI neu berechnet und deutlich markiert.
+function repairStale(causeNo){
+  const S=bSettings(), fixed=[], cause=bTIs.find(o=>o.no===causeNo);
+  // Spätere TIs desselben Athleten wurden ohne die neue Fassung des geänderten TI berechnet → immer neu
+  const forced=new Set(cause && cause.pos ? bTIs.filter(o=>o.no>cause.no && o.pos===cause.pos && o.course===cause.course && o.res && o.res.P) : []);
+  for(let round=0; round<=bTIs.length+1; round++){
+    let changed=false;
+    bTIs.forEach((ti,i)=>{
+      if(ti.no===causeNo || !ti.res || !ti.res.P) return;
+      const must=forced.delete(ti);
+      if(!must && computeTI(ti, ctxFor(ti), S, ti.gap, decided(ti)).t===ti.res.t) return;
+      const before=ti.res;
+      recomputeOne(i);
+      if(sameRes(before, ti.res)) return;   // gleiches Ergebnis: nichts neu durchzugeben
+      ti.res.notes.push({k:'recalc', no:causeNo}); changed=true;
+      if(!fixed.includes(ti)) fixed.push(ti);
+    });
+    if(!changed) break;
+  }
+  return fixed;
+}
+function warnRecalc(list){ if(list.length) alert(t('recalcAlert', list.map(tiName).join(', '))); }
+function tiChanged(){ recomputeOne(bSel); const f=repairStale(bCur().no); bSave(); renderBoulder(); warnRecalc(f); }
 function renderBoulderButtons(n){
   const wrap=$('bBoulder');
   if(wrap.childElementCount!==n){
@@ -1036,7 +1070,7 @@ $('bDel').onclick=()=>{
   if(needsGap(ghostOf(gone))) bGhosts.push(ghostOf(gone));
   if(bTIs.length<2){ bTIs=[newBTI(1)]; bNext=2; bSel=0; bOffset=0; bGhosts=[]; recomputeOne(0); }
   else { bTIs.splice(bSel,1); bSel=Math.max(0,bSel-1); }
-  pruneGhosts(); bSave(); bLoadForm(); renderBoulder();
+  pruneGhosts(); const f=repairStale(gone.no); bSave(); bLoadForm(); renderBoulder(); warnRecalc(f);
 };
 $('bReset').onclick=()=>{
   if(!confirm(t('confirmReset'))) return;
@@ -1067,7 +1101,7 @@ function renderBoulder(){
   // Chips
   $('bChips').classList.toggle('hidden', !multi);
   if(multi){
-    $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">${esc(tiName(t))} · B${t.B||'?'}${S.two?' · '+esc(t.course):''} · Pos ${t.pos?esc(t.pos):'?'}</button>`).join('');
+    $('bChips').innerHTML=bTIs.map((t,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===bSel}">${t.res&&t.res.notes.some(n=>n.k==='recalc')?'⚠ ':''}${esc(tiName(t))} · B${t.B||'?'}${S.two?' · '+esc(t.course):''} · Pos ${t.pos?esc(t.pos):'?'}</button>`).join('');
     $('bChips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ bSel=+c.dataset.i; bSave(); bLoadForm(); renderBoulder(); });
   }
 
@@ -1093,7 +1127,7 @@ function renderBoulder(){
   }
   // +1/+2 nur zeigen, wenn die Wahl das Ergebnis ändert
   const now=nowSec();
-  const alt1=computeTI(ti,allSlots(),S,1,decided(ti)), alt2=computeTI(ti,allSlots(),S,2,decided(ti));
+  const alt1=computeTI(ti,ctxFor(ti),S,1,decided(ti)), alt2=computeTI(ti,ctxFor(ti),S,2,decided(ti));
   $('bGapWrap').classList.toggle('hidden', r.scen1 || alt1.R===alt2.R);
   document.querySelectorAll('#bGap button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===ti.gap));
 
@@ -1263,7 +1297,7 @@ setInterval(()=>{ if(!document.hidden && !$('boulder').classList.contains('hidde
   setFormat(bState.format);
   calcLead();
   // Nur fehlende Ergebnisse berechnen – vorhandene bleiben fix
-  { const S=bSettings(); bTIs.forEach(t=>{ if(!t.res) t.res=withSid(computeTI(t, allSlots(), S, t.gap, decided(t)), null); }); pruneGhosts(); }
+  { const S=bSettings(); bTIs.forEach(t=>{ if(!t.res) t.res=withSid(computeTI(t, ctxFor(t), S, t.gap, decided(t)), null); }); pruneGhosts(); }
   bLoadForm(); renderBoulder();
   showTab(store.get('tab','lead'));
 })();
