@@ -926,8 +926,12 @@ function withSid(res, old){
 // Einen TI neu berechnen. Ändert sich sein Slot und nutzt ein anderer TI diesen Slot, bleibt der alte als Geist bestehen.
 function recomputeOne(i){
   const S=bSettings(), ti=bTIs[i], old=ti.res;
-  const res=computeTI(ti, allSlots(), S, ti.gap, decided(ti));
-  if(old && !sameRes(old,res) && usersOf(old.sid).some(q=>q!==ti)) bGhosts.push({no:ti.no, ghost:true, B:ti.B, course:ti.course, pos:'', bib:ti.bib, t0:ti.t0, res:old});
+  let res=computeTI(ti, allSlots(), S, ti.gap, decided(ti));
+  if(old && !sameRes(old,res) && usersOf(old.sid).some(q=>q!==ti)){
+    // Der alte Slot bleibt als Geist mit seiner Lücke – der neue darf diese Lücke nicht noch einmal belegen
+    bGhosts.push({no:ti.no, ghost:true, B:ti.B, course:ti.course, pos:'', bib:ti.bib, t0:ti.t0, res:old});
+    res=computeTI(ti, allSlots(), S, ti.gap, decided(ti));
+  }
   ti.res=withSid(res, old); pruneGhosts();
 }
 function recomputeAll(){ const S=bSettings(); bGhosts=[]; bTIs.forEach(t=>t.res=null); bTIs.forEach(t=>{ t.res=withSid(computeTI(t, bTIs, S, t.gap, decided(t)), null); }); }
