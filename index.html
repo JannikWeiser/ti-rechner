@@ -490,6 +490,8 @@ de:{
   posReq:'· Pflicht', resetAll:'Alle TIs löschen', confirmResetLead:'Alle Lead-TIs löschen?',
   roundInfo:(p,n,m,a)=>`${p?p+' · ':''}${n} Boulder · ${m} min${a?' · '+a+' Athl.':''}`, pShort:{q:'Qualifikation',jq:'Qualifikation B (Flash)',s:'Halbfinale',jf:'Finale im Intervall'}, bib:'Startnummer (Bib, optional)', bibShort:'Startnummer (Bib)', bPosShort:'Startposition', eg104:'z. B. 104', optional:'optional',
   needB:'Boulder wählen', needBoth:'Startposition und Boulder eingeben', returnAtQ:'Wiedereinstieg', enterRemain:'Restzeit eingeben', needHolds:'Griffe eingeben',
+  orderNote:(n,a,b)=>`⚠ Uhrzeit passt nicht zur Startliste: Laut Uhrzeit wären Pos. ${b} und Pos. ${a} (${n}) nicht in der Reihenfolge der Startliste an B1. Startposition und Uhrzeit prüfen.`,
+  shiftNote:n=>`Laut Uhrzeit ${Math.abs(n)} ${pl(Math.abs(n),'Startplatz','Startplätze')} ${n<0?'früher':'später'} dran als laut Startliste – die Uhrzeit gilt (Startliste verschoben, z. B. ${n<0?'Nichtstarter, alle aufgerückt':'Pause'}).`, shiftShort:n=>`Startliste laut Uhrzeit ${n>0?'+':'−'}${Math.abs(n)}`,
   needPos:'Startposition eingeben', needPosHint:'Ohne Startposition kann der Rechner den Athleten nicht in die Startliste einordnen.', posHint:'Platz in der Startliste („Order“), nicht die Startnummer.',
   gapsTitle:'Lücken an Boulder 1', reset:'Alle TIs der Runde zurücksetzen', liveCd:'Live-Countdown',
   cdEmpty:'Für den Countdown die Startzeit des TI-Intervalls eingeben.', cdSetT0:'Startzeit eingeben',
@@ -568,6 +570,8 @@ en:{
   posReq:'· required', resetAll:'Delete all TIs', confirmResetLead:'Delete all lead TIs?',
   roundInfo:(p,n,m,a)=>`${p?p+' · ':''}${n} ${n===1?'boulder':'boulders'} · ${m} min${a?' · '+a+' athl.':''}`, pShort:{q:'Qualification',jq:'Qualification B (flash)',s:'Semi-final',jf:'Final in rotation format'}, bib:'Bib number (optional)', bibShort:'Bib number', bPosShort:'Start position', eg104:'e.g. 104', optional:'optional',
   needB:'Choose the boulder', needBoth:'Enter start position and boulder', returnAtQ:'Return', enterRemain:'Enter the time left', needHolds:'Enter the holds',
+  orderNote:(n,a,b)=>`⚠ Time does not fit the start list: by the clock, pos. ${b} and pos. ${a} (${n}) would not be at B1 in start-list order. Check start position and time.`,
+  shiftNote:n=>`By the clock ${Math.abs(n)} start ${pl(Math.abs(n),'place','places')} ${n<0?'earlier':'later'} than by the start list – the time applies (start list shifted, e.g. ${n<0?'non-starters, everyone moved up':'a break'}).`, shiftShort:n=>`start list by the clock ${n>0?'+':'−'}${Math.abs(n)}`,
   needPos:'Enter the start position', needPosHint:'Without the start position the calculator cannot place the athlete in the start list.', posHint:'Position in the start list (“Order”), not the bib number.',
   gapsTitle:'Gaps at boulder 1', reset:'Reset all TIs of this round', liveCd:'Live countdown',
   cdEmpty:'Enter the start time of the TI rotation to use the countdown.', cdSetT0:'Enter start time',
@@ -876,6 +880,7 @@ bTIs=bTIs.filter(t=>t&&typeof t==='object').map((t,i)=>{
   n.decidedAt=Number.isFinite(t.decidedAt)?t.decidedAt:null;
   // Früher galt die späte Entscheidung automatisch – alte Einträge behalten das
   n.late=typeof t.late==='boolean'?t.late:true;
+  n.shift=Number.isInteger(t.shift)?t.shift:0;
   // Fixe Ergebnisse übernehmen (nicht neu berechnen!), aber nur wenn sie gültig aussehen
   n.res=cleanRes(t.res);
   return n;
@@ -907,7 +912,7 @@ function needsGap(g){
   const two=$('bPreset').value==='jq';
   return bTIs.some(q=>q.no!==g.no && q.res && q.res.P && (!two || q.course===g.course) && (q.res.s0>x.G || (x.seq && q.res.seq>x.seq)));
 }
-const ghostOf=t=>({no:t.no, ghost:true, B:t.B, course:t.course, pos:'', bib:t.bib, t0:t.t0, res:t.res});
+const ghostOf=t=>({no:t.no, ghost:true, B:t.B, course:t.course, pos:'', bib:t.bib, t0:t.t0, shift:t.shift||0, res:t.res});
 function pruneGhosts(){ bGhosts=bGhosts.filter(needsGap); }
 const bSave=()=>{ store.set('boulderTIs',bTIs); store.set('boulderSel',bSel); store.set('boulderGhosts',bGhosts); store.set('boulderSid',bSid); };
 
@@ -930,7 +935,7 @@ function b1Start(P, reserved){ let n=0; for(let i=0;i<=P+reserved.size;i++){ if(
 function athleteSchedule(P, list, S, self){
   const others=list.filter(o=>o!==self);
   const s0 = P ? b1Start(P, reservedOf(others)) : 0;
-  const own = list.filter(o=>o.res && (o===self || (P && +o.pos===P)));
+  const own = list.filter(o=>o.res && (o===self || (P && o.pos && effPos(o)===P)));
   const sc1 = own.find(o=>o.res.scen1);
   const base = sc1 ? sc1.res.G : s0;
   const climbs=[{r:s0, B:1, kind:'reg'}];
@@ -940,9 +945,53 @@ function athleteSchedule(P, list, S, self){
   climbs.sort((a,b)=>a.r-b.r);
   return {s0, base, climbs};
 }
+/* ---------- Uhrzeit gilt (Entscheidung des Projektinhabers 12.10.2026) ----------
+   Passt die Startzeit eines TI nicht zu seiner Startposition (gemessen am zuerst eingetragenen TI mit Uhrzeit),
+   hat sich die Startliste in der Halle verschoben (z. B. Nichtstarter, alle aufgerückt, Pause). Der TI bekommt eine
+   Verschiebung `shift` (in Startplätzen): gerechnet wird mit der zeitlich passenden Position effPos = Startposition + shift.
+   „vor Startposition X“ wird wieder in echte Startpositionen umgerechnet (effToReal). TIs ohne Uhrzeit übernehmen die
+   Verschiebung ihrer Umgebung in der Startliste. */
+const effPos=o=>+o.pos+(o.shift||0);
+// Verschiebung an einer echten Startposition: wie beim TI mit der größten Startposition ≤ P (sonst wie beim ersten)
+function shiftAt(P, list){
+  const tis=list.filter(o=>o && !o.ghost && o.pos && o.res && o.res.P).sort((a,b)=>+a.pos-+b.pos);
+  if(!tis.length) return 0;
+  let s=tis[0].shift||0; tis.forEach(o=>{ if(+o.pos<=P) s=o.shift||0; }); return s;
+}
+// Effektive Position (Platz im zeitlichen Ablauf) → echte Startposition
+function effToReal(X, list){
+  const tis=list.filter(o=>o && !o.ghost && o.pos && o.res && o.res.P).sort((a,b)=>a.res.P-b.res.P);
+  if(!tis.length) return X;
+  let s=tis[0].shift||0; tis.forEach(o=>{ if(o.res.P<=X) s=o.shift||0; }); return X-s;
+}
+// Widerspruch: laut Uhrzeit wäre die Reihenfolge zweier Athleten anders als in der Startliste
+function orderConflict(ti, P, list){
+  return list.find(o=>o!==ti && o.no!==ti.no && !o.ghost && o.pos && o.res && o.res.P && o.pos!==ti.pos && (+o.pos<+ti.pos)!==(o.res.P<P) && o.res.P!==P)
+      || list.find(o=>o!==ti && o.no!==ti.no && !o.ghost && o.pos && o.res && o.res.P===P && o.pos!==ti.pos);
+}
+function computeShift(ti, all){
+  if(!ti.B || !posInt(ti.pos)) return 0;
+  const S=bSettings(), P=+ti.pos;
+  const ax=all.filter(o=>o!==ti && o.no!==ti.no && o.res && o.res.P && (!S.two || o.course===ti.course));
+  const tis=ax.filter(o=>!o.ghost && o.pos);
+  // Derselbe Athlet hatte schon einen TI: dessen Verschiebung gilt weiter
+  const same=tis.filter(o=>+o.pos===P && o.no<ti.no).sort((a,b)=>a.no-b.no);
+  if(same.length) return same[0].shift||0;
+  // Zwei verschiedene Athleten können nie gleichzeitig an B1 sein: belegte Position → nächster freier Platz
+  const taken=new Set(tis.filter(o=>+o.pos!==P).map(o=>o.res.P));
+  const free=Pe=>{ for(let d=0;;d++){ for(const c of [Pe+d, Pe-d]) if(c>=1 && !taken.has(c)) return c-P; } };
+  const t0=timeToSec(ti.t0), anchors=tis.filter(o=>timeToSec(o.t0)!==null);
+  if(t0===null || !anchors.length) return free(P+shiftAt(P, tis));
+  // Uhr der Runde: der zuerst eingetragene TI mit Uhrzeit
+  const ref=anchors.reduce((a,b)=>a.no<b.no?a:b);
+  const a=ref.res.t+Math.round(wrapDiff(t0-timeToSec(ref.t0))/S.cycle);   // Achsen-Intervall des TI laut Uhrzeit
+  const s0=a-S.p*(ti.B-1);                                                  // dann war der Athlet in diesem Intervall an B1
+  const reserved=reservedOf(ax); let n=0; reserved.forEach((v,g)=>{ if(g<s0) n++; });
+  return free(Math.max(1, s0+1-n));
+}
 function computeTI(ti, all, S, g, now){
   // Ohne Startposition oder Boulder kein Ergebnis (P=null)
-  const P=ti.B ? (+ti.pos||null) : null;
+  const P=ti.B && +ti.pos ? effPos(ti) : null;
   const others = P ? all.filter(o=>onAxis(o,ti,S)) : [];
   const reserved=reservedOf(others);
   const sch=athleteSchedule(P, others, S, null);
@@ -960,7 +1009,7 @@ function computeTI(ti, all, S, g, now){
   const minG=Math.max(-Infinity, ...others.filter(o=>!o.ghost && Number.isInteger(o.res.s0)).map(o=>o.res.s0+1));
   // Szenario 1 verschiebt den ganzen weiteren Ablauf des Athleten – nicht mehr möglich, wenn für ihn schon ein
   // späterer TI eingeplant ist (TI an B1 außer der Reihe nachgetragen)
-  const ownLater=others.some(o=>!o.ghost && +o.pos===P && o.res && o.res.t>t);
+  const ownLater=others.some(o=>!o.ghost && o.pos && effPos(o)===P && o.res && o.res.t>t);
   if(B===1 && ti.resolved && !inSlot){
     const G=t+1;
     if(!reserved.has(G) && cur<=t && G>=minG && !ownLater) return {P, t, s0:sch.s0, G, R:G, k:1, L, scen1:true, notes};
@@ -977,7 +1026,7 @@ function computeTI(ti, all, S, g, now){
   // ruft dort ohnehin niemand mehr auf – Boulder B ist dann frei, sobald alle Athleten ihn hinter sich haben.
   // Der Athlet braucht trotzdem mindestens 1 Intervall Pause nach dem TI und nach seinem letzten Boulder.
   if(S.A && P){
-    const lastB1=b1Start(Math.max(S.A, P, ...others.map(o=>o.res.P)), reserved);
+    const lastB1=b1Start(Math.max(S.A+shiftAt(S.A, [ti,...others]), P, ...others.map(o=>o.res.P)), reserved);
     for(let Re=Math.max(L+p, Math.max(t,cur)+2); Re<R; Re++){
       const Ge=Re-p*(B-1);
       if(Ge>lastB1 && Ge>=minG && !reserved.has(Ge)){ R=Re; G=Ge; pushedBy.length=0; break; }
@@ -1027,15 +1076,16 @@ function recomputeOne(i){
   }
   ti.res=withSid(res, old); pruneGhosts();
 }
-function recomputeAll(){ const S=bSettings(); bGhosts=[]; bTIs.forEach(t=>t.res=null); bTIs.forEach(t=>{ t.res=withSid(computeTI(t, bTIs, S, t.gap, decided(t)), null); }); }
+function recomputeAll(){ const S=bSettings(); bGhosts=[]; bTIs.forEach(t=>t.res=null); bTIs.forEach(t=>{ t.shift=computeShift(t, bTIs); t.res=withSid(computeTI(t, bTIs, S, t.gap, decided(t)), null); }); }
 // Slot hinter dem letzten Athleten der Startliste: keine echte Lücke an B1 (live, weil spätere Lücken die Liste verschieben)
 function isEnd(o, S){
   const x=o.res; if(!S.A || !x || !x.P || x.G===null || x.scen1) return false;
   const ax=allSlots().filter(q=>q!==o && q.res && q.res.P && (!S.two || q.course===o.course));
-  return x.G > b1Start(Math.max(S.A, x.P, ...ax.map(q=>q.res.P)), reservedOf(ax));
+  return x.G > b1Start(Math.max(S.A+shiftAt(S.A, [o,...ax]), x.P, ...ax.map(q=>q.res.P)), reservedOf(ax));
 }
 // „vor Startposition X“: wer ohne Lücke in Intervall G an B1 gewesen wäre (live aus allen Lücken des Kurses)
-function vorPos(ti, S){ const r=ti.res; const n=allSlots().filter(o=>o.res && o.res.P && o.res.G!==null && (o===ti||onAxis(o,ti,S)) && o.res.G<r.G).length; return r.G-n+1; }
+function vorPos(ti, S){ const r=ti.res; const n=allSlots().filter(o=>o.res && o.res.P && o.res.G!==null && (o===ti||onAxis(o,ti,S)) && o.res.G<r.G).length;
+  return effToReal(r.G-n+1, [ti, ...bTIs.filter(o=>o!==ti && onAxis(o,ti,S))]); }
 // Uhrzeit eines Achsen-Intervalls: aus der eigenen Startzeit, sonst aus einem anderen TI auf derselben Achse
 function timeOf(a, ti, S){
   const own=timeToSec(ti.t0); if(own!==null && ti.res) return own+(a-ti.res.t)*S.cycle;
@@ -1077,12 +1127,15 @@ function renderBForm(){
   $('bLateWrap').classList.toggle('hidden', !lateInfo(d)); $('bLate').checked=!!d.late;
   $('bPosReq').classList.toggle('hidden', !!d.pos);
   const ok=d.pos && d.B, ctx=ok?previewCtx(d):null;
+  if(ok) d.shift=computeShift(d, ctx);
   const r=ok?computeTI(d, ctx, S, d.gap, decided(d)):null;
   // +1/+2 nur zeigen, wenn die Wahl das Ergebnis ändert
   const a1=ok?computeTI(d, ctx, S, 1, decided(d)):null, a2=ok?computeTI(d, ctx, S, 2, decided(d)):null;
   $('bGapWrap').classList.toggle('hidden', !ok || r.scen1 || a1.R===a2.R);
   document.querySelectorAll('#bGap button').forEach(b=>b.setAttribute('aria-pressed', +b.dataset.v===d.gap));
-  $('bPrev').textContent = r && r.P ? `${t('preview')}: ${r.scen1?t('nextInt'):t('plusK',r.k)}${r.reuse?' · '+t('gapReuse',r.reuseNo):''}` : '';
+  $('bPrev').textContent = r && r.P ? `${t('preview')}: ${r.scen1?t('nextInt'):t('plusK',r.k)}${r.reuse?' · '+t('gapReuse',r.reuseNo):''}${d.shift?' · '+t('shiftShort',d.shift):''}` : '';
+  const oc=r && r.P ? orderConflict(d, r.P, ctx.filter(o=>o.res && o.res.P && (!S.two || o.course===d.course))) : null;
+  $('bErr').textContent = oc ? t('orderNote', tiName(oc), oc.pos, d.pos) : ''; $('bErr').classList.toggle('hidden', !oc);
 }
 function openB(idx){
   bDraftIdx=idx;
@@ -1099,11 +1152,11 @@ $('bOk').onclick=()=>{
   if(!d.pos || !d.B){ $('bErr').textContent=t('needPosB'); $('bErr').classList.remove('hidden'); return; }
   let f, t0new;
   if(bDraftIdx<0){
-    d.res=null; bTIs.push(d); bNext=Math.max(bNext,d.no+1); bSel=bTIs.length-1;
+    d.res=null; d.shift=computeShift(d, allSlots()); bTIs.push(d); bNext=Math.max(bNext,d.no+1); bSel=bTIs.length-1;
     t0new=!!d.t0; recomputeOne(bSel); f=repairStale(d.no);
   } else {
     const ti=bTIs[bDraftIdx]; t0new=ti.t0!==d.t0;
-    B_FIELDS.forEach(k=>ti[k]=d[k]);
+    B_FIELDS.forEach(k=>ti[k]=d[k]); ti.shift=computeShift(ti, allSlots());
     bSel=bDraftIdx; recomputeOne(bSel); f=repairStale(ti.no);
   }
   if(t0new){ bOffset=0; requestWake(); }
@@ -1245,7 +1298,7 @@ function renderBoulder(){
   const isoTxt = r.scen1 ? t('isoSc1') : (iso>0 ? t('isoN',iso,lastTxt) : t('isoNone'));
   const gTime=r.G!==null?at(r.G):null, climb=at(r.R);
   const posTxt = r.reuse ? '' : (r.P ? t('beforePos',vorPos(ti,S)) : t('beforeKth',r.k));
-  const notes = r.notes.map(noteText).filter(Boolean).map(n=>`<div class="note warn">${esc(n)}</div>`).join('') + (multi && !r.P ? `<div class="note warn">${t('noPos')}</div>` : '') + (remainOk||remainEmpty?'':`<div class="note warn">${t('remainFmt')}</div>`);
+  const notes = r.notes.map(noteText).filter(Boolean).map(n=>`<div class="note warn">${esc(n)}</div>`).join('') + (ti.shift ? `<div class="note warn">${esc(t('shiftNote',ti.shift))}</div>` : '') + (()=>{ const c=orderConflict(ti, r.P, bTIs.filter(o=>onAxis(o,ti,S))); return c?`<div class="note warn">${esc(t('orderNote',tiName(c),c.pos,ti.pos))}</div>`:''; })() + (multi && !r.P ? `<div class="note warn">${t('noPos')}</div>` : '') + (remainOk||remainEmpty?'':`<div class="note warn">${t('remainFmt')}</div>`);
   $('bResult').innerHTML=`<div class="sub">${t('returnAt',B)}${(multi||ti.bib)?' · '+esc(tiName(ti)):''}</div>
     <div class="big">${r.scen1?t('nextInt'):t('plusK',r.k)}</div>
     ${climb&&remainOk?`<div class="sub">${t('wallStart',secToClock(timeOf(r.R,ti,S)+rest),award)}</div>`:''}
