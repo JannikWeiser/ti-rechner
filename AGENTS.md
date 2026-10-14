@@ -171,12 +171,12 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **CSP** per Meta-Tag in allen drei Seiten: nur eigene Quellen, keine externen Skripte, `object-src 'none'`, `base-uri 'none'`, `form-action 'none'`. Dazu `referrer: no-referrer`.
 - `b1Start` läuft ohne feste Obergrenze und endet nach spätestens P + (Anzahl Lücken) Schritten. Früher brach die Schleife nach 5000 Schritten ab und lieferte falsch 0.
 - **Takt:** Der 500-ms-Takt aktualisiert nur den sichtbaren Reiter und pausiert bei verstecktem Browser-Tab. Eingaben aktualisieren die Anzeige **immer sofort** (`tickLead()`/`bTick()` direkt, ohne Sichtbarkeitsprüfung).
-- **Service Worker:** network first mit **3 s Zeitlimit**. Bei schlechtem Hallen-WLAN kommt dann die gespeicherte Version. Gespeichert werden nur eigene, vollständige Antworten (`res.type === 'basic'`). Cache-Name derzeit `ti-rechner-v25`.
+- **Service Worker:** network first mit **3 s Zeitlimit**. Bei schlechtem Hallen-WLAN kommt dann die gespeicherte Version. Gespeichert werden nur eigene, vollständige Antworten (`res.type === 'basic'`). Cache-Name derzeit `ti-rechner-v26`.
 
 ## Impressum / Datenschutz
 
 - Daten wie in den anderen Projekten (EYCH-Plakatgenerator): Jannik Weiser, Ilsungstraße 15b, 86161 Augsburg, info@comptools.cloud. Rechtsgrundlagen: § 5 DDG und § 18 Abs. 2 MStV.
-- Datenschutz nach dem Aufbau von comptools.cloud: Hosting über GitHub Pages, keine Cookies und kein Tracking, localStorage nur lokal auf dem Gerät.
+- Datenschutz nach dem Aufbau von comptools.cloud: Hosting über GitHub Pages (mit Hinweis auf USA-Übermittlung und EU-US Data Privacy Framework, Art. 45 DSGVO), keine Cookies und kein Tracking, localStorage nur lokal auf dem Gerät, Offline-Cache des Service Workers ohne personenbezogene Daten; beide Speicherungen nach § 25 Abs. 2 Nr. 2 TDDDG ohne Einwilligung. „Stand: Oktober 2026“. Keine externen Schriften/Skripte (nur Systemschrift).
 
 ## Arbeitsweise
 
