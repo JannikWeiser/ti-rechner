@@ -158,9 +158,11 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 ## Uhrzeit-Eingabe
 
 - **Kein `<input type="time">`.** iOS-Safari bietet dort keine Sekunden an (`step` wird ignoriert), das wäre für die Startzeit zu ungenau. Stattdessen gibt es Textfelder `.timefield` mit Ziffernblock (`inputmode="numeric"`, Platzhalter `hh:mm:ss`).
-- Beim Tippen setzt der Rechner die Doppelpunkte automatisch (102330 → 10:23:30). „10:23“ wird beim Verlassen des Felds zu „10:23:00“. Ungültige Zeiten wie 25:61:00 werden rot umrandet und nicht verwendet (`timeStr` prüft 0–23 / 0–59 / 0–59).
-- Der Formatierungs-Listener wird vor den Berechnungs-Listenern registriert.
-- Betroffen sind die Felder „Uhrzeit des Sturzes“ (Lead) und „Startzeit des TI-Intervalls“ (Boulder).
+- **Alle Zeitfelder funktionieren gleich** (Wunsch des Projektinhabers, 15.10.2026): nur Ziffern tippen, die Doppelpunkte kommen automatisch. Getippte Trenner (`:` `.` `,`) werden auch verstanden. Beim Verlassen des Felds werden fehlende Teile mit 00 ergänzt.
+  - Uhrzeit `hh:mm:ss` („Uhrzeit des Sturzes“, „Startzeit des TI-Intervalls“): 102330 → 10:23:30, 1023 → 10:23:00, 9:05 → 09:05:00, 7 → 07:00:00 (`fmtClockTyping`, `clockDone`).
+  - Restzeit `m:ss`: 230 → 2:30, 1000 → 10:00, 3 → 3:00, 2:3 → 2:03 (`fmtMSTyping`, `msDone`; 1–2 Ziffern = Minuten, auch in `parseMS`). Die ±15-s-Stepper bleiben.
+- Ungültige Werte werden rot umrandet und nicht verwendet: Uhrzeit wie 25:61:00 (`timeStr` prüft 0–23 / 0–59 / 0–59), Restzeit mit Sekunden ≥ 60 oder über 10 min (`msBad`).
+- Der Formatierungs-Listener wird vor den Berechnungs-Listenern registriert. Zeitfelder haben `class="timefield"`, die Restzeit zusätzlich `data-kind="ms"`.
 
 ## Sicherheit & Robustheit
 
@@ -171,7 +173,7 @@ k = max( p·(N−B) + p ,  2 + p·(B−1) )    p = 2 (Kletter- und Pause-Interva
 - **CSP** per Meta-Tag in allen drei Seiten: nur eigene Quellen, keine externen Skripte, `object-src 'none'`, `base-uri 'none'`, `form-action 'none'`. Dazu `referrer: no-referrer`.
 - `b1Start` läuft ohne feste Obergrenze und endet nach spätestens P + (Anzahl Lücken) Schritten. Früher brach die Schleife nach 5000 Schritten ab und lieferte falsch 0.
 - **Takt:** Der 500-ms-Takt aktualisiert nur den sichtbaren Reiter und pausiert bei verstecktem Browser-Tab. Eingaben aktualisieren die Anzeige **immer sofort** (`tickLead()`/`bTick()` direkt, ohne Sichtbarkeitsprüfung).
-- **Service Worker:** network first mit **3 s Zeitlimit**. Bei schlechtem Hallen-WLAN kommt dann die gespeicherte Version. Gespeichert werden nur eigene, vollständige Antworten (`res.type === 'basic'`). Cache-Name derzeit `ti-rechner-v26`.
+- **Service Worker:** network first mit **3 s Zeitlimit**. Bei schlechtem Hallen-WLAN kommt dann die gespeicherte Version. Gespeichert werden nur eigene, vollständige Antworten (`res.type === 'basic'`). Cache-Name derzeit `ti-rechner-v27`.
 
 ## Impressum / Datenschutz
 
